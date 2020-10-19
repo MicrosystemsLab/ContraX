@@ -526,7 +526,10 @@ if strcmp(type, '.tif') == 1
     if N_frames > 1
         set(h_celoc(1).button_contract,'Enable','on');
     end
-   
+    
+    MM_im_pos_list = javaObject('org.micromanager.api.PositionList');
+    setappdata(0,'MM_im_pos_list',MM_im_pos_list);
+
 elseif strcmp(type, '.czi') == 1
     seriesCount = size(ims, 1);
     totalCount = 1;
@@ -552,7 +555,6 @@ elseif strcmp(type, '.czi') == 1
     end
     
     % also load position list
-    MM_im_pos_list = javaObject('org.micromanager.api.PositionList');
     celoc_pos_list_pathname = pathname;
     posXYZ = getPositions(pathname, filename{1,1}, type);
 
@@ -587,7 +589,6 @@ elseif strcmp(type, '.czi') == 1
     end
     
     % save stuff
-    setappdata(0,'MM_im_pos_list',MM_im_pos_list);
     setappdata(0,'celoc_im_pos_list',celoc_im_pos_list);
     setappdata(0,'celoc_pos_list_pathname',celoc_pos_list_pathname);
     setappdata(0,'image_pos_loaded',image_pos_loaded);
@@ -687,7 +688,7 @@ images_loaded = getappdata(0,'images_loaded');
 image_pos_loaded = getappdata(0,'image_pos_loaded');
 
 % get pos list object
-MM_im_pos_list = javaObject('org.micromanager.api.PositionList');
+%MM_im_pos_list = javaObject('org.micromanager.api.PositionList');
 
 % get pos list filepath
 [filename,pathname] = uigetfile('*.pos');
