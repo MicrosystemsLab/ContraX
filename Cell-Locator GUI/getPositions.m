@@ -11,6 +11,8 @@ if strcmp(ext, '.czi') == 1
     numTiles = count(positions, '</SingleTileRegion>');
     posList = zeros(numTiles, 3);
     prevZPos = str2double(getPos(positions, '<Z>','</Z>'));
+    interp_z = false;
+
     %Extract positions
     for i=1:numTiles
         xPos = getPos(positions,'<X>','</X>');
@@ -42,12 +44,12 @@ if strcmp(ext, '.czi') == 1
             %If z-position was not update during acquisition, check if support
             %points were used, and if yes, interpolated the z-position of the
             %tile from the support point z-positions
-            interp_z = 'false';
+            interp_z = false;
         else
             %Get the tile z-position
             posList(i,3) = prevZPos;
             prevZPos = str2double(getPos(positions, '<Z>','</Z>'));
-            interp_z = 'true';
+            interp_z = true;
         end
         positions = extractAfter(positions, '</SingleTileRegion>');
     end
