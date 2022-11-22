@@ -29,8 +29,11 @@
 % version 1.0 written by O. Schwab: oschwab@stanford.edu
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function tfm_para(h_main)
 %main function for the parameter window of lifeact gui
+function tfm_para(h_main)
+fprintf(1,'\n');
+fprintf(1,'CXS-TFM: Results Module\n');
+
 
 %userTiming= getappdata(0,'userTiming');
 %userTiming.tfm2para{2} = toc(userTiming.tfm2para{1});
@@ -44,13 +47,13 @@ screensize = get(0,'ScreenSize');
 xpos = ceil((screensize(3)-figsize(2))/2);
 ypos = ceil((screensize(4)-figsize(1))/2);
 %create fig; invisible at first
-h_para(1).fig=figure(...
+h_para.fig=figure(...
     'position',[xpos, ypos, figsize(2), figsize(1)],...
     'units','pixels',...
     'renderer','OpenGL',...
     'MenuBar','none',...
     'PaperPositionMode','auto',...
-    'Name','Beads Parameters',...
+    'Name','ContraX Results',...
     'NumberTitle','off',...
     'Resize','off',...
     'Color',[.2,.2,.2],...
@@ -60,440 +63,441 @@ pcolor = [.2 .2 .2];
 ptcolor = [1 1 1];
 bcolor = [.3 .3 .3];
 btcolor = [1 1 1];
-h_para(1).ForegroundColor = ptcolor;
-h_para(1).BackgroundColor = pcolor;
+h_para.ForegroundColor = ptcolor;
+h_para.BackgroundColor = pcolor;
+fontsizeA = 10;
 
 %create uipanel for guess
-h_para(1).panel_guess = uipanel('Parent',h_para(1).fig,'Title','Determine parameters','units','pixels','Position',[20,590,145,50],'visible','off');
-h_para(1).panel_guess.ForegroundColor = ptcolor;
-h_para(1).panel_guess.BackgroundColor = pcolor;
+h_para.panel_guess = uipanel('Parent',h_para.fig,'Title','Determine parameters','units','pixels','Position',[20,590,145,50],'visible','off');
+h_para.panel_guess.ForegroundColor = ptcolor;
+h_para.panel_guess.BackgroundColor = pcolor;
 %button
-h_para(1).button_guess = uicontrol('Parent',h_para(1).panel_guess,'style','pushbutton','position',[5,5,132,25],'string','Guess all');
+h_para.button_guess = uicontrol('Parent',h_para.panel_guess,'style','pushbutton','position',[5,5,132,25],'string','Guess all');
 
 % %uipanel for pattern ratio
-h_para(1).panel_ratio = uipanel('Parent',h_para(1).fig,'Title','Ratio of the patterns','units','pixels','Position',[175,590,145,50],'visible','off');
-h_para(1).panel_ratio.ForegroundColor = ptcolor;
-h_para(1).panel_ratio.BackgroundColor = pcolor;
+h_para.panel_ratio = uipanel('Parent',h_para.fig,'Title','Ratio of the patterns','units','pixels','Position',[175,590,145,50],'visible','off');
+h_para.panel_ratio.ForegroundColor = ptcolor;
+h_para.panel_ratio.BackgroundColor = pcolor;
 % %edit
-h_para(1).edit_ratio = uicontrol('Parent',h_para(1).panel_ratio,'style','edit','position',[5,5,132,25]);
+h_para.edit_ratio = uicontrol('Parent',h_para.panel_ratio,'style','edit','position',[5,5,132,25]);
 
 %uipanel for displacements
-h_para(1).panel_disp = uipanel('Parent',h_para(1).fig,'Title','Displacements','units','pixels','Position',[20,485,300,180],'BorderType','none');
-h_para(1).panel_disp.ForegroundColor = ptcolor;
-h_para(1).panel_disp.BackgroundColor = pcolor;
+h_para.panel_disp = uipanel('Parent',h_para.fig,'Title','Displacements','units','pixels','Position',[20,485,300,180],'BorderType','none');
+h_para.panel_disp.ForegroundColor = ptcolor;
+h_para.panel_disp.BackgroundColor = pcolor;
 %axes
-h_para(1).axes_disp = axes('Parent',h_para(1).panel_disp,'Units', 'pixels','Position',[5,50,287,115],'box','on');
+h_para.axes_disp = axes('Parent',h_para.panel_disp,'Units', 'pixels','Position',[5,50,287,115],'box','on');
 %button: addmax
-h_para(1).button_disp_addmax = uicontrol('Parent',h_para(1).panel_disp,'style','pushbutton','position',[5,25,70,20],'string','Add max');
+h_para.button_disp_addmax = uicontrol('Parent',h_para.panel_disp,'style','pushbutton','position',[5,25,70,20],'string','Add max');
 %button: removemax
-h_para(1).button_disp_removemax = uicontrol('Parent',h_para(1).panel_disp,'style','pushbutton','position',[5,5,70,20],'string','Remove max');
+h_para.button_disp_removemax = uicontrol('Parent',h_para.panel_disp,'style','pushbutton','position',[5,5,70,20],'string','Remove max');
 %button: addmin
-h_para(1).button_disp_addmin = uicontrol('Parent',h_para(1).panel_disp,'style','pushbutton','position',[75,25,70,20],'string','Add min');
+h_para.button_disp_addmin = uicontrol('Parent',h_para.panel_disp,'style','pushbutton','position',[75,25,70,20],'string','Add min');
 %button: removemin
-h_para(1).button_disp_removemin = uicontrol('Parent',h_para(1).panel_disp,'style','pushbutton','position',[75,5,70,20],'string','Remove min');
+h_para.button_disp_removemin = uicontrol('Parent',h_para.panel_disp,'style','pushbutton','position',[75,5,70,20],'string','Remove min');
 %button: clearall
-h_para(1).button_disp_clearall = uicontrol('Parent',h_para(1).panel_disp,'style','pushbutton','position',[145,5,35,40],'string','Clear');
+h_para.button_disp_clearall = uicontrol('Parent',h_para.panel_disp,'style','pushbutton','position',[145,5,35,40],'string','Clear');
 %text: deltad
-h_para(1).text_disp = uicontrol('Parent',h_para(1).panel_disp,'style','text','position',[185,30,110,15],'HorizontalAlignment','left','string','dcontr= ');
-h_para(1).text_disp.ForegroundColor = ptcolor;
-h_para(1).text_disp.BackgroundColor = pcolor;
+h_para.text_disp = uicontrol('Parent',h_para.panel_disp,'style','text','position',[185,30,110,15],'HorizontalAlignment','left','string','dcontr= ');
+h_para.text_disp.ForegroundColor = ptcolor;
+h_para.text_disp.BackgroundColor = pcolor;
 %button: double peaks
-h_para(1).button_double = uicontrol('Parent',h_para(1).panel_disp,'style','pushbutton','position',[185,3,100,25],'string','Double Peaks');
+h_para.button_double = uicontrol('Parent',h_para.panel_disp,'style','pushbutton','position',[185,3,100,25],'string','Double Peaks');
 
 %uipanel for velocities and contraction time
-h_para(1).panel_vel = uipanel('Parent',h_para(1).fig,'Title','Velocities and Contraction Time','units','pixels','Position',[20,270,300,210],'BorderType','none');
-h_para(1).panel_vel.ForegroundColor = ptcolor;
-h_para(1).panel_vel.BackgroundColor = pcolor;
+h_para.panel_vel = uipanel('Parent',h_para.fig,'Title','Velocities and Contraction Time','units','pixels','Position',[20,270,300,210],'BorderType','none');
+h_para.panel_vel.ForegroundColor = ptcolor;
+h_para.panel_vel.BackgroundColor = pcolor;
 %axes
-h_para(1).axes_vel = axes('Parent',h_para(1).panel_vel,'Units', 'pixels','Position',[5,80,287,115],'box','on');
+h_para.axes_vel = axes('Parent',h_para.panel_vel,'Units', 'pixels','Position',[5,80,287,115],'box','on');
 %button: addmax
-h_para(1).button_vel_addmax = uicontrol('Parent',h_para(1).panel_vel,'style','pushbutton','position',[5,55,70,20],'string','Add max');
+h_para.button_vel_addmax = uicontrol('Parent',h_para.panel_vel,'style','pushbutton','position',[5,55,70,20],'string','Add max');
 %button: removemax
-h_para(1).button_vel_removemax = uicontrol('Parent',h_para(1).panel_vel,'style','pushbutton','position',[5,35,70,20],'string','Remove max');
+h_para.button_vel_removemax = uicontrol('Parent',h_para.panel_vel,'style','pushbutton','position',[5,35,70,20],'string','Remove max');
 %button: addmin
-h_para(1).button_vel_addmin = uicontrol('Parent',h_para(1).panel_vel,'style','pushbutton','position',[75,55,70,20],'string','Add min');
+h_para.button_vel_addmin = uicontrol('Parent',h_para.panel_vel,'style','pushbutton','position',[75,55,70,20],'string','Add min');
 %button: removemin
-h_para(1).button_vel_removemin = uicontrol('Parent',h_para(1).panel_vel,'style','pushbutton','position',[75,35,70,20],'string','Remove min');
+h_para.button_vel_removemin = uicontrol('Parent',h_para.panel_vel,'style','pushbutton','position',[75,35,70,20],'string','Remove min');
 %button: clearall
-h_para(1).button_vel_clearall = uicontrol('Parent',h_para(1).panel_vel,'style','pushbutton','position',[145,35,35,40],'string','Clear');
+h_para.button_vel_clearall = uicontrol('Parent',h_para.panel_vel,'style','pushbutton','position',[145,35,35,40],'string','Clear');
 %button: calculate contraction times
-h_para(1).button_contr_calc = uicontrol('Parent',h_para(1).panel_vel,'style','pushbutton','position',[5,5,140,25],'string','Calculate contraction times');
+h_para.button_contr_calc = uicontrol('Parent',h_para.panel_vel,'style','pushbutton','position',[5,5,140,25],'string','Calculate contraction times');
 %text: vcontr
-h_para(1).text_vel1 = uicontrol('Parent',h_para(1).panel_vel,'style','text','position',[185,55,110,15],'HorizontalAlignment','left','string','vcontr = ');
-h_para(1).text_vel1.ForegroundColor = ptcolor;
-h_para(1).text_vel1.BackgroundColor = pcolor;
+h_para.text_vel1 = uicontrol('Parent',h_para.panel_vel,'style','text','position',[185,55,110,15],'HorizontalAlignment','left','string','vcontr = ');
+h_para.text_vel1.ForegroundColor = ptcolor;
+h_para.text_vel1.BackgroundColor = pcolor;
 %text: vrelax
-h_para(1).text_vel2 = uicontrol('Parent',h_para(1).panel_vel,'style','text','position',[185,35,110,15],'HorizontalAlignment','left','string','vrelax = ');
-h_para(1).text_vel2.ForegroundColor = ptcolor;
-h_para(1).text_vel2.BackgroundColor = pcolor;
+h_para.text_vel2 = uicontrol('Parent',h_para.panel_vel,'style','text','position',[185,35,110,15],'HorizontalAlignment','left','string','vrelax = ');
+h_para.text_vel2.ForegroundColor = ptcolor;
+h_para.text_vel2.BackgroundColor = pcolor;
 %text: tcontr
-h_para(1).text_contr = uicontrol('Parent',h_para(1).panel_vel,'style','text','position',[185,15,110,15],'HorizontalAlignment','left','string','tcontr = ');
-h_para(1).text_contr.ForegroundColor = ptcolor;
-h_para(1).text_contr.BackgroundColor = pcolor;
+h_para.text_contr = uicontrol('Parent',h_para.panel_vel,'style','text','position',[185,15,110,15],'HorizontalAlignment','left','string','tcontr = ');
+h_para.text_contr.ForegroundColor = ptcolor;
+h_para.text_contr.BackgroundColor = pcolor;
 
 
 %uipanel for autocorrelation
-h_para(1).panel_autocor = uipanel('Parent',h_para(1).fig,'Title','Auto Peak Averaging','units','pixels','Position',[20,85,300,180],'BorderType','none');
-h_para(1).panel_autocor.ForegroundColor = ptcolor;
-h_para(1).panel_autocor.BackgroundColor = pcolor;
+h_para.panel_autocor = uipanel('Parent',h_para.fig,'Title','Auto Peak Averaging','units','pixels','Position',[20,85,300,180],'BorderType','none');
+h_para.panel_autocor.ForegroundColor = ptcolor;
+h_para.panel_autocor.BackgroundColor = pcolor;
 %displacement axes
-h_para(1).axes_disp_autocor = axes('Parent',h_para(1).panel_autocor,'Units','pixels','Position',[5,50,143,115],'box','on');
+h_para.axes_disp_autocor = axes('Parent',h_para.panel_autocor,'Units','pixels','Position',[5,50,143,115],'box','on');
 %force axes
-h_para(1).axes_force_autocor = axes('Parent',h_para(1).panel_autocor,'Units','pixels','Position',[150,50,143,115],'box','on');
+h_para.axes_force_autocor = axes('Parent',h_para.panel_autocor,'Units','pixels','Position',[150,50,143,115],'box','on');
 %text: displacement
-h_para(1).text_disp_autocor = uicontrol('Parent',h_para(1).panel_autocor,'style','text','position',[5,30,130,15],'HorizontalAlignment','left','string','dcontr= ');
-h_para(1).text_disp_autocor.ForegroundColor = ptcolor;
-h_para(1).text_disp_autocor.BackgroundColor = pcolor;
+h_para.text_disp_autocor = uicontrol('Parent',h_para.panel_autocor,'style','text','position',[5,30,130,15],'HorizontalAlignment','left','string','dcontr= ');
+h_para.text_disp_autocor.ForegroundColor = ptcolor;
+h_para.text_disp_autocor.BackgroundColor = pcolor;
 %text: velocity contraction
-h_para(1).text_vcontr_autocor = uicontrol('Parent',h_para(1).panel_autocor,'style','text','position',[5,16,130,15],'HorizontalAlignment','left','string','vcontr= ');
-h_para(1).text_vcontr_autocor.ForegroundColor = ptcolor;
-h_para(1).text_vcontr_autocor.BackgroundColor = pcolor;
+h_para.text_vcontr_autocor = uicontrol('Parent',h_para.panel_autocor,'style','text','position',[5,16,130,15],'HorizontalAlignment','left','string','vcontr= ');
+h_para.text_vcontr_autocor.ForegroundColor = ptcolor;
+h_para.text_vcontr_autocor.BackgroundColor = pcolor;
 %text: velocity relax
-h_para(1).text_vrelax_autocor = uicontrol('Parent',h_para(1).panel_autocor,'style','text','position',[150,16,130,15],'HorizontalAlignment','left','string','vrelax= ');
-h_para(1).text_vrelax_autocor.ForegroundColor = ptcolor;
-h_para(1).text_vrelax_autocor.BackgroundColor = pcolor;
+h_para.text_vrelax_autocor = uicontrol('Parent',h_para.panel_autocor,'style','text','position',[150,16,130,15],'HorizontalAlignment','left','string','vrelax= ');
+h_para.text_vrelax_autocor.ForegroundColor = ptcolor;
+h_para.text_vrelax_autocor.BackgroundColor = pcolor;
 %text: force
-h_para(1).text_force_autocor = uicontrol('Parent',h_para(1).panel_autocor,'style','text','position',[150,30,130,15],'HorizontalAlignment','left','string','F= ');
-h_para(1).text_force_autocor.ForegroundColor = ptcolor;
-h_para(1).text_force_autocor.BackgroundColor = pcolor;
+h_para.text_force_autocor = uicontrol('Parent',h_para.panel_autocor,'style','text','position',[150,30,130,15],'HorizontalAlignment','left','string','F= ');
+h_para.text_force_autocor.ForegroundColor = ptcolor;
+h_para.text_force_autocor.BackgroundColor = pcolor;
 %text: Comment
-h_para(1).text_note_autocor = uicontrol('Parent',h_para(1).panel_autocor,'style','text','position',[5,2,260,15],'HorizontalAlignment','left','string','Note: ');
-h_para(1).text_note_autocor.ForegroundColor = ptcolor;
-h_para(1).text_note_autocor.BackgroundColor = pcolor;
+h_para.text_note_autocor = uicontrol('Parent',h_para.panel_autocor,'style','text','position',[5,2,260,15],'HorizontalAlignment','left','string','Note: ');
+h_para.text_note_autocor.ForegroundColor = ptcolor;
+h_para.text_note_autocor.BackgroundColor = pcolor;
 %checkbox
 
 %uipanel for forces
-h_para(1).panel_forces = uipanel('Parent',h_para(1).fig,'Title','Forces','units','pixels','Position',[330,485,300,180],'BorderType','none');
-h_para(1).panel_forces.ForegroundColor = ptcolor;
-h_para(1).panel_forces.BackgroundColor = pcolor;
+h_para.panel_forces = uipanel('Parent',h_para.fig,'Title','Forces','units','pixels','Position',[330,485,300,180],'BorderType','none');
+h_para.panel_forces.ForegroundColor = ptcolor;
+h_para.panel_forces.BackgroundColor = pcolor;
 %axes
-h_para(1).axes_forces = axes('Parent',h_para(1).panel_forces,'Units', 'pixels','Position',[5,50,287,115],'box','on');
+h_para.axes_forces = axes('Parent',h_para.panel_forces,'Units', 'pixels','Position',[5,50,287,115],'box','on');
 %button: addmax
-h_para(1).button_forces_addmax = uicontrol('Parent',h_para(1).panel_forces,'style','pushbutton','position',[50,25,70,20],'string','Add max');
+h_para.button_forces_addmax = uicontrol('Parent',h_para.panel_forces,'style','pushbutton','position',[50,25,70,20],'string','Add max');
 %button: removemax
-h_para(1).button_forces_removemax = uicontrol('Parent',h_para(1).panel_forces,'style','pushbutton','position',[50,5,70,20],'string','Remove max');
+h_para.button_forces_removemax = uicontrol('Parent',h_para.panel_forces,'style','pushbutton','position',[50,5,70,20],'string','Remove max');
 %button: addmin
-h_para(1).button_forces_addmin = uicontrol('Parent',h_para(1).panel_forces,'style','pushbutton','position',[120,25,70,20],'string','Add min');
+h_para.button_forces_addmin = uicontrol('Parent',h_para.panel_forces,'style','pushbutton','position',[120,25,70,20],'string','Add min');
 %button: removemin
-h_para(1).button_forces_removemin = uicontrol('Parent',h_para(1).panel_forces,'style','pushbutton','position',[120,5,70,20],'string','Remove min');
+h_para.button_forces_removemin = uicontrol('Parent',h_para.panel_forces,'style','pushbutton','position',[120,5,70,20],'string','Remove min');
 %button: clearall
-h_para(1).button_forces_clearall = uicontrol('Parent',h_para(1).panel_forces,'style','pushbutton','position',[190,25,35,20],'string','Clear');
+h_para.button_forces_clearall = uicontrol('Parent',h_para.panel_forces,'style','pushbutton','position',[190,25,35,20],'string','Clear');
 %text: deltaf
-h_para(1).text_forces = uicontrol('Parent',h_para(1).panel_forces,'style','text','position',[195,5,100,15],'HorizontalAlignment','left','string','F = ');
-h_para(1).text_forces.ForegroundColor = ptcolor;
-h_para(1).text_forces.BackgroundColor = pcolor;
+h_para.text_forces = uicontrol('Parent',h_para.panel_forces,'style','text','position',[195,5,100,15],'HorizontalAlignment','left','string','F = ');
+h_para.text_forces.ForegroundColor = ptcolor;
+h_para.text_forces.BackgroundColor = pcolor;
 %radiobutton group for user eval
-h_para(1).buttongroup_forces = uibuttongroup('Parent',h_para(1).panel_forces,'Units', 'pixels','Position',[5,5,43,40]);
-h_para(1).buttongroup_forces.ForegroundColor = ptcolor;
-h_para(1).buttongroup_forces.BackgroundColor = pcolor;
+h_para.buttongroup_forces = uibuttongroup('Parent',h_para.panel_forces,'Units', 'pixels','Position',[5,5,43,40]);
+h_para.buttongroup_forces.ForegroundColor = ptcolor;
+h_para.buttongroup_forces.BackgroundColor = pcolor;
 %radiobutton 1: tot
-h_para(1).radiobutton_forcetot = uicontrol('Parent',h_para(1).buttongroup_forces,'style','radiobutton','position',[1,26,35,10],'string','|F|','tag','radiobutton_ftot');
-h_para(1).radiobutton_forcetot.ForegroundColor = ptcolor;
-h_para(1).radiobutton_forcetot.BackgroundColor = pcolor;
+h_para.radiobutton_forcetot = uicontrol('Parent',h_para.buttongroup_forces,'style','radiobutton','position',[1,26,35,10],'string','|F|','tag','radiobutton_ftot');
+h_para.radiobutton_forcetot.ForegroundColor = ptcolor;
+h_para.radiobutton_forcetot.BackgroundColor = pcolor;
 %radiobutton 2: x
-h_para(1).radiobutton_forcex = uicontrol('Parent',h_para(1).buttongroup_forces,'style','radiobutton','position',[1,14,37,10],'string','|Fx|','tag','radiobutton_fx');
-h_para(1).radiobutton_forcex.ForegroundColor = ptcolor;
-h_para(1).radiobutton_forcex.BackgroundColor = pcolor;
+h_para.radiobutton_forcex = uicontrol('Parent',h_para.buttongroup_forces,'style','radiobutton','position',[1,14,37,10],'string','|Fx|','tag','radiobutton_fx');
+h_para.radiobutton_forcex.ForegroundColor = ptcolor;
+h_para.radiobutton_forcex.BackgroundColor = pcolor;
 %radiobutton 2: x
-h_para(1).radiobutton_forcey = uicontrol('Parent',h_para(1).buttongroup_forces,'style','radiobutton','position',[1,2,37,10],'string','|Fy|','tag','radiobutton_fy');
-h_para(1).radiobutton_forcey.ForegroundColor = ptcolor;
-h_para(1).radiobutton_forcey.BackgroundColor = pcolor;
+h_para.radiobutton_forcey = uicontrol('Parent',h_para.buttongroup_forces,'style','radiobutton','position',[1,2,37,10],'string','|Fy|','tag','radiobutton_fy');
+h_para.radiobutton_forcey.ForegroundColor = ptcolor;
+h_para.radiobutton_forcey.BackgroundColor = pcolor;
 
 %uipanel for power
-h_para(1).panel_power = uipanel('Parent',h_para(1).fig,'Title','Power','units','pixels','Position',[330,300,300,180],'BorderType','none');
-h_para(1).panel_power.ForegroundColor = ptcolor;
-h_para(1).panel_power.BackgroundColor = pcolor;
+h_para.panel_power = uipanel('Parent',h_para.fig,'Title','Power','units','pixels','Position',[330,300,300,180],'BorderType','none');
+h_para.panel_power.ForegroundColor = ptcolor;
+h_para.panel_power.BackgroundColor = pcolor;
 %axes
-h_para(1).axes_power = axes('Parent',h_para(1).panel_power,'Units', 'pixels','Position',[5,50,287,115],'box','on');
+h_para.axes_power = axes('Parent',h_para.panel_power,'Units', 'pixels','Position',[5,50,287,115],'box','on');
 %button: addmax
-h_para(1).button_power_addmax = uicontrol('Parent',h_para(1).panel_power,'style','pushbutton','position',[5,25,70,20],'string','Add max');
+h_para.button_power_addmax = uicontrol('Parent',h_para.panel_power,'style','pushbutton','position',[5,25,70,20],'string','Add max');
 %button: removemax
-h_para(1).button_power_removemax = uicontrol('Parent',h_para(1).panel_power,'style','pushbutton','position',[5,5,70,20],'string','Remove max');
+h_para.button_power_removemax = uicontrol('Parent',h_para.panel_power,'style','pushbutton','position',[5,5,70,20],'string','Remove max');
 %button: addmin
-h_para(1).button_power_addmin = uicontrol('Parent',h_para(1).panel_power,'style','pushbutton','position',[75,25,70,20],'string','Add min');
+h_para.button_power_addmin = uicontrol('Parent',h_para.panel_power,'style','pushbutton','position',[75,25,70,20],'string','Add min');
 %button: removemin
-h_para(1).button_power_removemin = uicontrol('Parent',h_para(1).panel_power,'style','pushbutton','position',[75,5,70,20],'string','Remove min');
+h_para.button_power_removemin = uicontrol('Parent',h_para.panel_power,'style','pushbutton','position',[75,5,70,20],'string','Remove min');
 %button: clearall
-h_para(1).button_power_clearall = uicontrol('Parent',h_para(1).panel_power,'style','pushbutton','position',[145,5,35,40],'string','Clear');
+h_para.button_power_clearall = uicontrol('Parent',h_para.panel_power,'style','pushbutton','position',[145,5,35,40],'string','Clear');
 %text: Pcontr
-h_para(1).text_power1 = uicontrol('Parent',h_para(1).panel_power,'style','text','position',[185,25,110,15],'HorizontalAlignment','left','string','Pcontr = ');
-h_para(1).text_power1.ForegroundColor = ptcolor;
-h_para(1).text_power1.BackgroundColor = pcolor;
+h_para.text_power1 = uicontrol('Parent',h_para.panel_power,'style','text','position',[185,25,110,15],'HorizontalAlignment','left','string','Pcontr = ');
+h_para.text_power1.ForegroundColor = ptcolor;
+h_para.text_power1.BackgroundColor = pcolor;
 %text: Prelax
-h_para(1).text_power2 = uicontrol('Parent',h_para(1).panel_power,'style','text','position',[185,5,110,15],'HorizontalAlignment','left','string','Prelax = ');
-h_para(1).text_power2.ForegroundColor = ptcolor;
-h_para(1).text_power2.BackgroundColor = pcolor;
+h_para.text_power2 = uicontrol('Parent',h_para.panel_power,'style','text','position',[185,5,110,15],'HorizontalAlignment','left','string','Prelax = ');
+h_para.text_power2.ForegroundColor = ptcolor;
+h_para.text_power2.BackgroundColor = pcolor;
 
 %uipanel for contraction time
-h_para(1).panel_contr = uipanel('Parent',h_para(1).fig,'Title','Contraction time equivalent','units','pixels','Position',[330,30,300,180]);
-h_para(1).panel_contr.ForegroundColor = ptcolor;
-h_para(1).panel_contr.BackgroundColor = pcolor;
+h_para.panel_contr = uipanel('Parent',h_para.fig,'Title','Contraction time equivalent','units','pixels','Position',[330,30,300,180]);
+h_para.panel_contr.ForegroundColor = ptcolor;
+h_para.panel_contr.BackgroundColor = pcolor;
 %axes
-h_para(1).axes_contr = axes('Parent',h_para(1).panel_contr,'Units', 'pixels','Position',[5,50,287,115],'box','on');
+h_para.axes_contr = axes('Parent',h_para.panel_contr,'Units', 'pixels','Position',[5,50,287,115],'box','on');
 %button: get
-h_para(1).button_contr_get = uicontrol('Parent',h_para(1).panel_contr,'style','pushbutton','position',[5,5,35,40],'string','Get');
+h_para.button_contr_get = uicontrol('Parent',h_para.panel_contr,'style','pushbutton','position',[5,5,35,40],'string','Get');
 %button: add
-h_para(1).button_contr_add = uicontrol('Parent',h_para(1).panel_contr,'style','pushbutton','position',[40,25,70,20],'string','Add');
+h_para.button_contr_add = uicontrol('Parent',h_para.panel_contr,'style','pushbutton','position',[40,25,70,20],'string','Add');
 %button: remove
-h_para(1).button_contr_remove = uicontrol('Parent',h_para(1).panel_contr,'style','pushbutton','position',[40,5,70,20],'string','Remove');
+h_para.button_contr_remove = uicontrol('Parent',h_para.panel_contr,'style','pushbutton','position',[40,5,70,20],'string','Remove');
 %button: clearall
-h_para(1).button_contr_clearall = uicontrol('Parent',h_para(1).panel_contr,'style','pushbutton','position',[110,5,35,40],'string','Clear');
+h_para.button_contr_clearall = uicontrol('Parent',h_para.panel_contr,'style','pushbutton','position',[110,5,35,40],'string','Clear');
 %text: tcontr
-%h_para(1).text_contr = uicontrol('Parent',h_para(1).panel_contr,'style','text','position',[150,25,110,15],'HorizontalAlignment','left','string','t = ');
+%h_para.text_contr = uicontrol('Parent',h_para.panel_contr,'style','text','position',[150,25,110,15],'HorizontalAlignment','left','string','t = ');
 
 %uipanel for strain energy
-h_para(1).panel_strain = uipanel('Parent',h_para(1).fig,'Title','Strain Energy','units','pixels','position',[640,485,300,180],'BorderType','none');
-h_para(1).panel_strain.ForegroundColor = ptcolor;
-h_para(1).panel_strain.BackgroundColor = pcolor;
+h_para.panel_strain = uipanel('Parent',h_para.fig,'Title','Strain Energy','units','pixels','position',[640,485,300,180],'BorderType','none');
+h_para.panel_strain.ForegroundColor = ptcolor;
+h_para.panel_strain.BackgroundColor = pcolor;
 %axes
-h_para(1).axes_strain = axes('Parent',h_para(1).panel_strain,'units','pixels','position',[5,50,287,115],'box','on');
+h_para.axes_strain = axes('Parent',h_para.panel_strain,'units','pixels','position',[5,50,287,115],'box','on');
 %button: addmax
-h_para(1).button_strain_addmax = uicontrol('Parent',h_para(1).panel_strain,'style','pushbutton','position',[5,25,70,20],'string','Add max');
+h_para.button_strain_addmax = uicontrol('Parent',h_para.panel_strain,'style','pushbutton','position',[5,25,70,20],'string','Add max');
 %button: removemax
-h_para(1).button_strain_removemax = uicontrol('Parent',h_para(1).panel_strain,'style','pushbutton','position',[5,5,70,20],'string','Remove max');
+h_para.button_strain_removemax = uicontrol('Parent',h_para.panel_strain,'style','pushbutton','position',[5,5,70,20],'string','Remove max');
 %button: addmin
-h_para(1).button_strain_addmin = uicontrol('Parent',h_para(1).panel_strain,'style','pushbutton','position',[75,25,70,20],'string','Add min');
+h_para.button_strain_addmin = uicontrol('Parent',h_para.panel_strain,'style','pushbutton','position',[75,25,70,20],'string','Add min');
 %button: removemin
-h_para(1).button_strain_removemin = uicontrol('Parent',h_para(1).panel_strain,'style','pushbutton','position',[75,5,70,20],'string','Remove min');
+h_para.button_strain_removemin = uicontrol('Parent',h_para.panel_strain,'style','pushbutton','position',[75,5,70,20],'string','Remove min');
 %button: clearall
-h_para(1).button_strain_clearall = uicontrol('Parent',h_para(1).panel_strain,'style','pushbutton','position',[145,5,35,40],'string','Clear');
+h_para.button_strain_clearall = uicontrol('Parent',h_para.panel_strain,'style','pushbutton','position',[145,5,35,40],'string','Clear');
 %text: strain
-h_para(1).text_strain = uicontrol('Parent',h_para(1).panel_strain,'style','text','position',[185,25,110,15],'HorizontalAlignment','left','string','U = ');
-h_para(1).text_strain.ForegroundColor = ptcolor;
-h_para(1).text_strain.BackgroundColor = pcolor;
+h_para.text_strain = uicontrol('Parent',h_para.panel_strain,'style','text','position',[185,25,110,15],'HorizontalAlignment','left','string','U = ');
+h_para.text_strain.ForegroundColor = ptcolor;
+h_para.text_strain.BackgroundColor = pcolor;
 
 %uipanel for contractile moment
-h_para(1).panel_moment = uipanel('Parent',h_para(1).fig,'Title','Contractile Moment','units','pixels','position',[640,300,300,180],'BorderType','none');
-h_para(1).panel_moment.ForegroundColor = ptcolor;
-h_para(1).panel_moment.BackgroundColor = pcolor;
+h_para.panel_moment = uipanel('Parent',h_para.fig,'Title','Contractile Moment','units','pixels','position',[640,300,300,180],'BorderType','none');
+h_para.panel_moment.ForegroundColor = ptcolor;
+h_para.panel_moment.BackgroundColor = pcolor;
 %axes
-h_para(1).axes_moment = axes('Parent',h_para(1).panel_moment,'units','pixels','position',[5,50,287,115],'box','on');
+h_para.axes_moment = axes('Parent',h_para.panel_moment,'units','pixels','position',[5,50,287,115],'box','on');
 %button: addmax
-h_para(1).button_moment_addmax = uicontrol('Parent',h_para(1).panel_moment,'style','pushbutton','position',[50,25,70,20],'string','Add max');
+h_para.button_moment_addmax = uicontrol('Parent',h_para.panel_moment,'style','pushbutton','position',[50,25,70,20],'string','Add max');
 %button: removemax
-h_para(1).button_moment_removemax = uicontrol('Parent',h_para(1).panel_moment,'style','pushbutton','position',[50,5,70,20],'string','Remove max');
+h_para.button_moment_removemax = uicontrol('Parent',h_para.panel_moment,'style','pushbutton','position',[50,5,70,20],'string','Remove max');
 %button: addmin
-h_para(1).button_moment_addmin = uicontrol('Parent',h_para(1).panel_moment,'style','pushbutton','position',[120,25,70,20],'string','Add min');
+h_para.button_moment_addmin = uicontrol('Parent',h_para.panel_moment,'style','pushbutton','position',[120,25,70,20],'string','Add min');
 %button: removemin
-h_para(1).button_moment_removemin = uicontrol('Parent',h_para(1).panel_moment,'style','pushbutton','position',[120,5,70,20],'string','Remove min');
+h_para.button_moment_removemin = uicontrol('Parent',h_para.panel_moment,'style','pushbutton','position',[120,5,70,20],'string','Remove min');
 %button: clearall
-h_para(1).button_moment_clearall = uicontrol('Parent',h_para(1).panel_moment,'style','pushbutton','position',[190,25,35,20],'string','Clear');
+h_para.button_moment_clearall = uicontrol('Parent',h_para.panel_moment,'style','pushbutton','position',[190,25,35,20],'string','Clear');
 %text: moment
-h_para(1).text_moment = uicontrol('Parent',h_para(1).panel_moment,'style','text','position',[195,5,100,15],'HorizontalAlignment','left','string','mu=');
-h_para(1).text_moment.ForegroundColor = ptcolor;
-h_para(1).text_moment.BackgroundColor = pcolor;
+h_para.text_moment = uicontrol('Parent',h_para.panel_moment,'style','text','position',[195,5,100,15],'HorizontalAlignment','left','string','mu=');
+h_para.text_moment.ForegroundColor = ptcolor;
+h_para.text_moment.BackgroundColor = pcolor;
 %radiobutton group for user eval
-h_para(1).buttongroup_moments = uibuttongroup('Parent',h_para(1).panel_moment,'Units', 'pixels','Position',[5,5,43,40]);
-h_para(1).buttongroup_moments.ForegroundColor = ptcolor;
-h_para(1).buttongroup_moments.BackgroundColor = pcolor;
+h_para.buttongroup_moments = uibuttongroup('Parent',h_para.panel_moment,'Units', 'pixels','Position',[5,5,43,40]);
+h_para.buttongroup_moments.ForegroundColor = ptcolor;
+h_para.buttongroup_moments.BackgroundColor = pcolor;
 %radiobutton 1: Mxx
-h_para(1).radiobutton_Mxx = uicontrol('Parent',h_para(1).buttongroup_moments,'style','radiobutton','position',[1,26,40,10],'string','Mxx','tag','radiobutton_Mxx');
-h_para(1).radiobutton_Mxx.ForegroundColor = ptcolor;
-h_para(1).radiobutton_Mxx.BackgroundColor = pcolor;
+h_para.radiobutton_Mxx = uicontrol('Parent',h_para.buttongroup_moments,'style','radiobutton','position',[1,26,40,10],'string','Mxx','tag','radiobutton_Mxx');
+h_para.radiobutton_Mxx.ForegroundColor = ptcolor;
+h_para.radiobutton_Mxx.BackgroundColor = pcolor;
 %radiobutton 2: Myy
-h_para(1).radiobutton_Myy = uicontrol('Parent',h_para(1).buttongroup_moments,'style','radiobutton','position',[1,14,40,10],'string','Myy','tag','radiobutton_Myy');
-h_para(1).radiobutton_Myy.ForegroundColor = ptcolor;
-h_para(1).radiobutton_Myy.BackgroundColor = pcolor;
+h_para.radiobutton_Myy = uicontrol('Parent',h_para.buttongroup_moments,'style','radiobutton','position',[1,14,40,10],'string','Myy','tag','radiobutton_Myy');
+h_para.radiobutton_Myy.ForegroundColor = ptcolor;
+h_para.radiobutton_Myy.BackgroundColor = pcolor;
 %radiobutton 3: mu
-h_para(1).radiobutton_mu = uicontrol('Parent',h_para(1).buttongroup_moments,'style','radiobutton','position',[1,2,40,10],'string','mu','tag','radiobutton_mu','Value',1);
-h_para(1).radiobutton_mu.ForegroundColor = ptcolor;
-h_para(1).radiobutton_mu.BackgroundColor = pcolor;
+h_para.radiobutton_mu = uicontrol('Parent',h_para.buttongroup_moments,'style','radiobutton','position',[1,2,40,10],'string','mu','tag','radiobutton_mu','Value',1);
+h_para.radiobutton_mu.ForegroundColor = ptcolor;
+h_para.radiobutton_mu.BackgroundColor = pcolor;
 
 
 %uipanel for frequency / traction orientation
-h_para(1).panel_freq_orient = uipanel('Parent',h_para(1).fig,'Title','Frequency and Traction Orientation','units','pixels','position',[640,85,300,210],'BorderType','none');
-h_para(1).panel_freq_orient.ForegroundColor = ptcolor;
-h_para(1).panel_freq_orient.BackgroundColor = pcolor;
+h_para.panel_freq_orient = uipanel('Parent',h_para.fig,'Title','Frequency and Traction Orientation','units','pixels','position',[640,85,300,210],'BorderType','none');
+h_para.panel_freq_orient.ForegroundColor = ptcolor;
+h_para.panel_freq_orient.BackgroundColor = pcolor;
 %axes orientation
-h_para(1).axes_orient = polaraxes('Parent',h_para(1).panel_freq_orient,'units','pixels','position',[178,40,115,155],'box','on');
+h_para.axes_orient = polaraxes('Parent',h_para.panel_freq_orient,'units','pixels','position',[178,40,115,155],'box','on');
 %axes center
-h_para(1).axes_freq = axes('Parent',h_para(1).panel_freq_orient,'units','pixels','position',[5,80,168,115],'box','on');
+h_para.axes_freq = axes('Parent',h_para.panel_freq_orient,'units','pixels','position',[5,80,168,115],'box','on');
 %text: colorbar
-h_para(1).text_colorbar = uicontrol('Parent',h_para(1).panel_freq_orient,'style','text','position',[180,50,200,15],'string','Relaxed        Contracted','HorizontalAlignment','left');
-h_para(1).text_colorbar.ForegroundColor = ptcolor;
-h_para(1).text_colorbar.BackgroundColor = pcolor;
+h_para.text_colorbar = uicontrol('Parent',h_para.panel_freq_orient,'style','text','position',[180,50,200,15],'string','Relaxed        Contracted','HorizontalAlignment','left');
+h_para.text_colorbar.ForegroundColor = ptcolor;
+h_para.text_colorbar.BackgroundColor = pcolor;
 %radiobutton group for user eval
-h_para(1).buttongroup_freq = uibuttongroup('Parent',h_para(1).panel_freq_orient,'Units', 'pixels','Position',[5,20,70,55]);
-h_para(1).buttongroup_freq.ForegroundColor = ptcolor;
-h_para(1).buttongroup_freq.BackgroundColor = pcolor;
+h_para.buttongroup_freq = uibuttongroup('Parent',h_para.panel_freq_orient,'Units', 'pixels','Position',[5,20,70,55]);
+h_para.buttongroup_freq.ForegroundColor = ptcolor;
+h_para.buttongroup_freq.BackgroundColor = pcolor;
 %radiobutton 1: fft
-h_para(1).radiobutton_fft = uicontrol('Parent',h_para(1).buttongroup_freq,'style','radiobutton','position',[0,35,60,15],'string','FFT','tag','radiobutton_fft');
-h_para(1).radiobutton_fft.ForegroundColor = ptcolor;
-h_para(1).radiobutton_fft.BackgroundColor = pcolor;
+h_para.radiobutton_fft = uicontrol('Parent',h_para.buttongroup_freq,'style','radiobutton','position',[0,35,60,15],'string','FFT','tag','radiobutton_fft');
+h_para.radiobutton_fft.ForegroundColor = ptcolor;
+h_para.radiobutton_fft.BackgroundColor = pcolor;
 %radiobutton 1: pick
-h_para(1).radiobutton_pick = uicontrol('Parent',h_para(1).buttongroup_freq,'style','radiobutton','position',[0,20,60,15],'string','Pick','tag','radiobutton_pick');
-h_para(1).radiobutton_pick.ForegroundColor = ptcolor;
-h_para(1).radiobutton_pick.BackgroundColor = pcolor;
+h_para.radiobutton_pick = uicontrol('Parent',h_para.buttongroup_freq,'style','radiobutton','position',[0,20,60,15],'string','Pick','tag','radiobutton_pick');
+h_para.radiobutton_pick.ForegroundColor = ptcolor;
+h_para.radiobutton_pick.BackgroundColor = pcolor;
 %radiobutton 1: autocorr
-h_para(1).radiobutton_autocorr = uicontrol('Parent',h_para(1).buttongroup_freq,'style','radiobutton','position',[0,5,60,15],'string','Autocorr','tag','radiobutton_autocorr');
-h_para(1).radiobutton_autocorr.ForegroundColor = ptcolor;
-h_para(1).radiobutton_autocorr.BackgroundColor = pcolor;
+h_para.radiobutton_autocorr = uicontrol('Parent',h_para.buttongroup_freq,'style','radiobutton','position',[0,5,60,15],'string','Autocorr','tag','radiobutton_autocorr');
+h_para.radiobutton_autocorr.ForegroundColor = ptcolor;
+h_para.radiobutton_autocorr.BackgroundColor = pcolor;
 %radiobutton group for center / orientation
-h_para(1).buttongroup_orient = uibuttongroup('Parent',h_para(1).panel_freq_orient,'units','pixels','position',[190,5,100,40]);
-h_para(1).buttongroup_orient.ForegroundColor = ptcolor;
-h_para(1).buttongroup_orient.BackgroundColor = pcolor;
+h_para.buttongroup_orient = uibuttongroup('Parent',h_para.panel_freq_orient,'units','pixels','position',[190,5,100,40]);
+h_para.buttongroup_orient.ForegroundColor = ptcolor;
+h_para.buttongroup_orient.BackgroundColor = pcolor;
 %radiobutton 2: center
-h_para(1).radiobutton_center = uicontrol('Parent',h_para(1).buttongroup_orient,'style','radiobutton','position',[5,20,80,15],'string','Center','tag','radiobutton_center');
-h_para(1).radiobutton_center.ForegroundColor = ptcolor;
-h_para(1).radiobutton_center.BackgroundColor = pcolor;
+h_para.radiobutton_center = uicontrol('Parent',h_para.buttongroup_orient,'style','radiobutton','position',[5,20,80,15],'string','Center','tag','radiobutton_center');
+h_para.radiobutton_center.ForegroundColor = ptcolor;
+h_para.radiobutton_center.BackgroundColor = pcolor;
 %radiobutton 2: orient
-h_para(1).radiobutton_orient = uicontrol('Parent',h_para(1).buttongroup_orient,'style','radiobutton','position',[5,5,80,15],'string','Orientation','tag','radiobutton_orient');
-h_para(1).radiobutton_orient.ForegroundColor = ptcolor;
-h_para(1).radiobutton_orient.BackgroundColor = pcolor;
+h_para.radiobutton_orient = uicontrol('Parent',h_para.buttongroup_orient,'style','radiobutton','position',[5,5,80,15],'string','Orientation','tag','radiobutton_orient');
+h_para.radiobutton_orient.ForegroundColor = ptcolor;
+h_para.radiobutton_orient.BackgroundColor = pcolor;
 %button: add
-h_para(1).button_freq_add = uicontrol('Parent',h_para(1).panel_freq_orient,'style','pushbutton','position',[75,55,60,20],'string','Add');
+h_para.button_freq_add = uicontrol('Parent',h_para.panel_freq_orient,'style','pushbutton','position',[75,55,60,20],'string','Add');
 %button: add fft
-h_para(1).button_freq_addfft = uicontrol('Parent',h_para(1).panel_freq_orient,'style','pushbutton','position',[75,55,60,20],'string','Pick');
+h_para.button_freq_addfft = uicontrol('Parent',h_para.panel_freq_orient,'style','pushbutton','position',[75,55,60,20],'string','Pick');
 %button: remove
-h_para(1).button_freq_remove = uicontrol('Parent',h_para(1).panel_freq_orient,'style','pushbutton','position',[75,35,60,20],'string','Remove');
+h_para.button_freq_remove = uicontrol('Parent',h_para.panel_freq_orient,'style','pushbutton','position',[75,35,60,20],'string','Remove');
 %button: clearall
-h_para(1).button_freq_clearall = uicontrol('Parent',h_para(1).panel_freq_orient,'style','pushbutton','position',[135,35,40,40],'string','Clear');
+h_para.button_freq_clearall = uicontrol('Parent',h_para.panel_freq_orient,'style','pushbutton','position',[135,35,40,40],'string','Clear');
 %text: f
-h_para(1).text_freq1 = uicontrol('Parent',h_para(1).panel_freq_orient,'style','text','position',[75,20,80,15],'HorizontalAlignment','left','string','f = ');
-h_para(1).text_freq1.ForegroundColor = ptcolor;
-h_para(1).text_freq1.BackgroundColor = pcolor;
+h_para.text_freq1 = uicontrol('Parent',h_para.panel_freq_orient,'style','text','position',[75,20,80,15],'HorizontalAlignment','left','string','f = ');
+h_para.text_freq1.ForegroundColor = ptcolor;
+h_para.text_freq1.BackgroundColor = pcolor;
 %text: T
-h_para(1).text_freq2 = uicontrol('Parent',h_para(1).panel_freq_orient,'style','text','position',[75,5,80,15],'HorizontalAlignment','left','string','T = ');
-h_para(1).text_freq2.ForegroundColor = ptcolor;
-h_para(1).text_freq2.BackgroundColor = pcolor;
+h_para.text_freq2 = uicontrol('Parent',h_para.panel_freq_orient,'style','text','position',[75,5,80,15],'HorizontalAlignment','left','string','T = ');
+h_para.text_freq2.ForegroundColor = ptcolor;
+h_para.text_freq2.BackgroundColor = pcolor;
 
 %uipanel for preview
-h_para(1).panel_preview = uipanel('Parent',h_para(1).fig,'Title','Preview of traction','units','pixels','Position',[330,115,300,180],'BorderType','none');
-h_para(1).panel_preview.ForegroundColor = ptcolor;
-h_para(1).panel_preview.BackgroundColor = pcolor;
+h_para.panel_preview = uipanel('Parent',h_para.fig,'Title','Preview of traction','units','pixels','Position',[330,115,300,180],'BorderType','none');
+h_para.panel_preview.ForegroundColor = ptcolor;
+h_para.panel_preview.BackgroundColor = pcolor;
 % button for traction gif
-h_para(1).button_traction_anim = uicontrol('Parent',h_para(1).panel_preview,'style','pushbutton','position',[5,5,287,160]);
+h_para.button_traction_anim = uicontrol('Parent',h_para.panel_preview,'style','pushbutton','position',[5,5,287,160]);
 
 %uipanel for tags
-h_para(1).panel_tag = uipanel('Parent',h_para(1).fig,'Title','Tags','units','pixels','Position',[20,30,700,50]);
-h_para(1).panel_tag.ForegroundColor = ptcolor;
-h_para(1).panel_tag.BackgroundColor = pcolor;
+h_para.panel_tag = uipanel('Parent',h_para.fig,'Title','Tags','units','pixels','Position',[20,30,700,50]);
+h_para.panel_tag.ForegroundColor = ptcolor;
+h_para.panel_tag.BackgroundColor = pcolor;
 %arrhythmia
-h_para(1).checkbox_disc = uicontrol('Parent',h_para(1).panel_tag,'style','checkbox','position',[5,8,80,25],'string','Discard','HorizontalAlignment','left');
-h_para(1).checkbox_disc.ForegroundColor = ptcolor;
-h_para(1).checkbox_disc.BackgroundColor = pcolor;
+h_para.checkbox_disc = uicontrol('Parent',h_para.panel_tag,'style','checkbox','position',[5,8,80,25],'string','Discard','HorizontalAlignment','left');
+h_para.checkbox_disc.ForegroundColor = ptcolor;
+h_para.checkbox_disc.BackgroundColor = pcolor;
 % double cells
-h_para(1).checkbox_dbl = uicontrol('Parent',h_para(1).panel_tag,'style','checkbox','position',[85,8,90,25],'string','2+ cells','HorizontalAlignment','left');
-h_para(1).checkbox_dbl.ForegroundColor = ptcolor;
-h_para(1).checkbox_dbl.BackgroundColor = pcolor;
+h_para.checkbox_dbl = uicontrol('Parent',h_para.panel_tag,'style','checkbox','position',[85,8,90,25],'string','2+ cells','HorizontalAlignment','left');
+h_para.checkbox_dbl.ForegroundColor = ptcolor;
+h_para.checkbox_dbl.BackgroundColor = pcolor;
 % drifting particles
-h_para(1).checkbox_drift = uicontrol('Parent',h_para(1).panel_tag,'style','checkbox','position',[175,8,100,25],'string','Image artifact','HorizontalAlignment','left');
-h_para(1).checkbox_drift.ForegroundColor = ptcolor;
-h_para(1).checkbox_drift.BackgroundColor = pcolor;
+h_para.checkbox_drift = uicontrol('Parent',h_para.panel_tag,'style','checkbox','position',[175,8,100,25],'string','Image artifact','HorizontalAlignment','left');
+h_para.checkbox_drift.ForegroundColor = ptcolor;
+h_para.checkbox_drift.BackgroundColor = pcolor;
 % other
-h_para(1).checkbox_other = uicontrol('Parent',h_para(1).panel_tag,'style','checkbox','position',[270,8,60,25],'string','Other -> Notes:','HorizontalAlignment','left');
-h_para(1).checkbox_other.ForegroundColor = ptcolor;
-h_para(1).checkbox_other.BackgroundColor = pcolor;
-h_para(1).edit_other = uicontrol('Parent',h_para(1).panel_tag,'style','edit','position',[360,10,330,20],'HorizontalAlignment','left');
+h_para.checkbox_other = uicontrol('Parent',h_para.panel_tag,'style','checkbox','position',[270,8,60,25],'string','Other -> Notes:','HorizontalAlignment','left');
+h_para.checkbox_other.ForegroundColor = ptcolor;
+h_para.checkbox_other.BackgroundColor = pcolor;
+h_para.edit_other = uicontrol('Parent',h_para.panel_tag,'style','edit','position',[360,10,330,20],'HorizontalAlignment','left');
 
 %button: forwards
-h_para(1).button_forwards = uicontrol('Parent',h_para(1).fig,'style','pushbutton','position',[605,85,25,25],'string','>');
+h_para.button_forwards = uicontrol('Parent',h_para.fig,'style','pushbutton','position',[605,85,25,25],'string','>');
 %button: backwards
-h_para(1).button_backwards = uicontrol('Parent',h_para(1).fig,'style','pushbutton','position',[580,85,25,25],'string','<');
+h_para.button_backwards = uicontrol('Parent',h_para.fig,'style','pushbutton','position',[580,85,25,25],'string','<');
 %text: show which video (i/n)
-h_para(1).text_whichvid = uicontrol('Parent',h_para(1).fig,'style','text','position',[530,90,50,15],'string','(1/1)','HorizontalAlignment','left');
-h_para(1).text_whichvid.ForegroundColor = ptcolor;
-h_para(1).text_whichvid.BackgroundColor = pcolor;
+h_para.text_whichvid = uicontrol('Parent',h_para.fig,'style','text','position',[530,90,50,15],'string','(1/1)','HorizontalAlignment','left');
+h_para.text_whichvid.ForegroundColor = ptcolor;
+h_para.text_whichvid.BackgroundColor = pcolor;
 %text: show which video (name)
-h_para(1).text_whichvidname = uicontrol('Parent',h_para(1).fig,'style','text','position',[330,90,150,15],'string','Experiment','HorizontalAlignment','left');
-h_para(1).text_whichvidname.ForegroundColor = ptcolor;
-h_para(1).text_whichvidname.BackgroundColor = pcolor;
+h_para.text_whichvidname = uicontrol('Parent',h_para.fig,'style','text','position',[330,90,150,15],'string','Experiment','HorizontalAlignment','left');
+h_para.text_whichvidname.ForegroundColor = ptcolor;
+h_para.text_whichvidname.BackgroundColor = pcolor;
 
 %create ok button
-h_para(1).button_ok = uicontrol('Parent',h_para(1).fig,'style','pushbutton','position',[870,37,70,30],'string','OK','visible','on');
+h_para.button_ok = uicontrol('Parent',h_para.fig,'style','pushbutton','position',[870,37,70,30],'string','OK','visible','on');
 %create save checkbox
-h_para(1).checkbox_save = uicontrol('Parent',h_para(1).fig,'style','checkbox','position',[740,60,120,15],'string','Save plots {.fig,.png}','HorizontalAlignment','left');
-h_para(1).checkbox_save.ForegroundColor = ptcolor;
-h_para(1).checkbox_save.BackgroundColor = pcolor;
+h_para.checkbox_save = uicontrol('Parent',h_para.fig,'style','checkbox','position',[740,60,120,15],'string','Save plots {.fig,.png}','HorizontalAlignment','left');
+h_para.checkbox_save.ForegroundColor = ptcolor;
+h_para.checkbox_save.BackgroundColor = pcolor;
 %create save traction checkbox
-h_para(1).checkbox_save_traction = uicontrol('Parent',h_para(1).fig,'style','checkbox','position',[740,30,120,15],'string','Save traction data','HorizontalAlignment','left');
-h_para(1).checkbox_save_traction.ForegroundColor = ptcolor;
-h_para(1).checkbox_save_traction.BackgroundColor = pcolor;
+h_para.checkbox_save_traction = uicontrol('Parent',h_para.fig,'style','checkbox','position',[740,30,120,15],'string','Save traction data','HorizontalAlignment','left');
+h_para.checkbox_save_traction.ForegroundColor = ptcolor;
+h_para.checkbox_save_traction.BackgroundColor = pcolor;
 
 
 %callbacks for buttons and buttongroup
-set(h_para(1).button_guess,'callback',{@para_push_guess,h_para})
-set(h_para(1).button_disp_addmax,'callback',{@para_push_disp_addmax,h_para})
-set(h_para(1).button_disp_addmin,'callback',{@para_push_disp_addmin,h_para})
-set(h_para(1).button_disp_removemax,'callback',{@para_push_disp_removemax,h_para})
-set(h_para(1).button_disp_removemin,'callback',{@para_push_disp_removemin,h_para})
-set(h_para(1).button_disp_clearall,'callback',{@para_push_disp_clearall,h_para})
-set(h_para(1).button_vel_addmax,'callback',{@para_push_vel_addmax,h_para})
-set(h_para(1).button_vel_addmin,'callback',{@para_push_vel_addmin,h_para})
-set(h_para(1).button_vel_removemax,'callback',{@para_push_vel_removemax,h_para})
-set(h_para(1).button_vel_removemin,'callback',{@para_push_vel_removemin,h_para})
-set(h_para(1).button_vel_clearall,'callback',{@para_push_vel_clearall,h_para})
-set(h_para(1).button_contr_calc,'callback',{@para_push_contr_calc,h_para})
-set(h_para(1).button_freq_add,'callback',{@para_push_freq_add,h_para})
-set(h_para(1).button_freq_addfft,'callback',{@para_push_freq_addfft,h_para})
-set(h_para(1).button_freq_remove,'callback',{@para_push_freq_remove,h_para})
-set(h_para(1).button_freq_clearall,'callback',{@para_push_freq_clearall,h_para})
-set(h_para(1).button_forces_addmax,'callback',{@para_push_forces_addmax,h_para})
-set(h_para(1).button_forces_addmin,'callback',{@para_push_forces_addmin,h_para})
-set(h_para(1).button_forces_removemax,'callback',{@para_push_forces_removemax,h_para})
-set(h_para(1).button_forces_removemin,'callback',{@para_push_forces_removemin,h_para})
-set(h_para(1).button_forces_clearall,'callback',{@para_push_forces_clearall,h_para})
-set(h_para(1).button_power_addmax,'callback',{@para_push_power_addmax,h_para})
-set(h_para(1).button_power_addmin,'callback',{@para_push_power_addmin,h_para})
-set(h_para(1).button_power_removemax,'callback',{@para_push_power_removemax,h_para})
-set(h_para(1).button_power_removemin,'callback',{@para_push_power_removemin,h_para})
-set(h_para(1).button_power_clearall,'callback',{@para_push_power_clearall,h_para})
-set(h_para(1).button_contr_get,'callback',{@para_push_contr_get,h_para})
-set(h_para(1).button_contr_add,'callback',{@para_push_contr_add,h_para})
-set(h_para(1).button_contr_remove,'callback',{@para_push_contr_remove,h_para})
-set(h_para(1).button_contr_clearall,'callback',{@para_push_contr_clearall,h_para})
-set(h_para(1).button_strain_addmax,'callback',{@para_push_strain_addmax,h_para})
-set(h_para(1).button_strain_addmin,'callback',{@para_push_strain_addmin,h_para})
-set(h_para(1).button_strain_removemax,'callback',{@para_push_strain_removemax,h_para})
-set(h_para(1).button_strain_removemin,'callback',{@para_push_strain_removemin,h_para})
-set(h_para(1).button_strain_clearall,'callback',{@para_push_strain_clearall,h_para})
-set(h_para(1).button_moment_addmax,'callback',{@para_push_moment_addmax,h_para})
-set(h_para(1).button_moment_addmin,'callback',{@para_push_moment_addmin,h_para})
-set(h_para(1).button_moment_removemax,'callback',{@para_push_moment_removemax,h_para})
-set(h_para(1).button_moment_removemin,'callback',{@para_push_moment_removemin,h_para})
-set(h_para(1).button_moment_clearall,'callback',{@para_push_moment_clearall,h_para})
-set(h_para(1).button_double,'callback',{@para_push_double,h_para})
-% set(h_para(1).button_dp2_add,'callback',{@para_push_dp2_add,h_para})
-% set(h_para(1).button_dp2_remove,'callback',{@para_push_dp2_remove,h_para})
-% set(h_para(1).button_dp2_clearall,'callback',{@para_push_dp2_clearall,h_para})
-set(h_para(1).button_forwards,'callback',{@para_push_forwards,h_para})
-set(h_para(1).button_backwards,'callback',{@para_push_backwards,h_para})
-set(h_para(1).button_ok,'callback',{@para_push_ok,h_para,h_main})
-set(h_para(1).buttongroup_freq,'SelectionChangeFcn',{@para_buttongroup_freq,h_para})
-set(h_para(1).buttongroup_forces,'SelectionChangeFcn',{@para_buttongroup_forces,h_para})
-set(h_para(1).buttongroup_moments,'SelectionChangeFcn',{@para_buttongroup_moments,h_para})
-set(h_para(1).buttongroup_orient,'SelectionChangeFcn',{@para_buttongroup_orient,h_para})
-% set(h_para(1).checkbox_dpyes,'callback',{@para_checkbox_dpyes,h_para})
-% set(h_para(1).checkbox_dpno,'callback',{@para_checkbox_dpno,h_para})
-set(h_para(1).checkbox_disc,'callback',{@para_checkbox_disc,h_para})
-set(h_para(1).checkbox_dbl,'callback',{@para_checkbox_dbl,h_para})
-set(h_para(1).checkbox_drift,'callback',{@para_checkbox_drift,h_para})
-set(h_para(1).checkbox_other,'callback',{@para_checkbox_other,h_para})
+set(h_para.button_guess,'callback',{@para_push_guess,h_para})
+set(h_para.button_disp_addmax,'callback',{@para_push_disp_addmax,h_para})
+set(h_para.button_disp_addmin,'callback',{@para_push_disp_addmin,h_para})
+set(h_para.button_disp_removemax,'callback',{@para_push_disp_removemax,h_para})
+set(h_para.button_disp_removemin,'callback',{@para_push_disp_removemin,h_para})
+set(h_para.button_disp_clearall,'callback',{@para_push_disp_clearall,h_para})
+set(h_para.button_vel_addmax,'callback',{@para_push_vel_addmax,h_para})
+set(h_para.button_vel_addmin,'callback',{@para_push_vel_addmin,h_para})
+set(h_para.button_vel_removemax,'callback',{@para_push_vel_removemax,h_para})
+set(h_para.button_vel_removemin,'callback',{@para_push_vel_removemin,h_para})
+set(h_para.button_vel_clearall,'callback',{@para_push_vel_clearall,h_para})
+set(h_para.button_contr_calc,'callback',{@para_push_contr_calc,h_para})
+set(h_para.button_freq_add,'callback',{@para_push_freq_add,h_para})
+set(h_para.button_freq_addfft,'callback',{@para_push_freq_addfft,h_para})
+set(h_para.button_freq_remove,'callback',{@para_push_freq_remove,h_para})
+set(h_para.button_freq_clearall,'callback',{@para_push_freq_clearall,h_para})
+set(h_para.button_forces_addmax,'callback',{@para_push_forces_addmax,h_para})
+set(h_para.button_forces_addmin,'callback',{@para_push_forces_addmin,h_para})
+set(h_para.button_forces_removemax,'callback',{@para_push_forces_removemax,h_para})
+set(h_para.button_forces_removemin,'callback',{@para_push_forces_removemin,h_para})
+set(h_para.button_forces_clearall,'callback',{@para_push_forces_clearall,h_para})
+set(h_para.button_power_addmax,'callback',{@para_push_power_addmax,h_para})
+set(h_para.button_power_addmin,'callback',{@para_push_power_addmin,h_para})
+set(h_para.button_power_removemax,'callback',{@para_push_power_removemax,h_para})
+set(h_para.button_power_removemin,'callback',{@para_push_power_removemin,h_para})
+set(h_para.button_power_clearall,'callback',{@para_push_power_clearall,h_para})
+set(h_para.button_contr_get,'callback',{@para_push_contr_get,h_para})
+set(h_para.button_contr_add,'callback',{@para_push_contr_add,h_para})
+set(h_para.button_contr_remove,'callback',{@para_push_contr_remove,h_para})
+set(h_para.button_contr_clearall,'callback',{@para_push_contr_clearall,h_para})
+set(h_para.button_strain_addmax,'callback',{@para_push_strain_addmax,h_para})
+set(h_para.button_strain_addmin,'callback',{@para_push_strain_addmin,h_para})
+set(h_para.button_strain_removemax,'callback',{@para_push_strain_removemax,h_para})
+set(h_para.button_strain_removemin,'callback',{@para_push_strain_removemin,h_para})
+set(h_para.button_strain_clearall,'callback',{@para_push_strain_clearall,h_para})
+set(h_para.button_moment_addmax,'callback',{@para_push_moment_addmax,h_para})
+set(h_para.button_moment_addmin,'callback',{@para_push_moment_addmin,h_para})
+set(h_para.button_moment_removemax,'callback',{@para_push_moment_removemax,h_para})
+set(h_para.button_moment_removemin,'callback',{@para_push_moment_removemin,h_para})
+set(h_para.button_moment_clearall,'callback',{@para_push_moment_clearall,h_para})
+set(h_para.button_double,'callback',{@para_push_double,h_para})
+% set(h_para.button_dp2_add,'callback',{@para_push_dp2_add,h_para})
+% set(h_para.button_dp2_remove,'callback',{@para_push_dp2_remove,h_para})
+% set(h_para.button_dp2_clearall,'callback',{@para_push_dp2_clearall,h_para})
+set(h_para.button_forwards,'callback',{@para_push_forwards,h_para})
+set(h_para.button_backwards,'callback',{@para_push_backwards,h_para})
+set(h_para.button_ok,'callback',{@para_push_ok,h_para,h_main})
+set(h_para.buttongroup_freq,'SelectionChangeFcn',{@para_buttongroup_freq,h_para})
+set(h_para.buttongroup_forces,'SelectionChangeFcn',{@para_buttongroup_forces,h_para})
+set(h_para.buttongroup_moments,'SelectionChangeFcn',{@para_buttongroup_moments,h_para})
+set(h_para.buttongroup_orient,'SelectionChangeFcn',{@para_buttongroup_orient,h_para})
+% set(h_para.checkbox_dpyes,'callback',{@para_checkbox_dpyes,h_para})
+% set(h_para.checkbox_dpno,'callback',{@para_checkbox_dpno,h_para})
+set(h_para.checkbox_disc,'callback',{@para_checkbox_disc,h_para})
+set(h_para.checkbox_dbl,'callback',{@para_checkbox_dbl,h_para})
+set(h_para.checkbox_drift,'callback',{@para_checkbox_drift,h_para})
+set(h_para.checkbox_other,'callback',{@para_checkbox_other,h_para})
 %
 
 %prelimiary stuff
 %hide and disable buttons and panels
-set(h_para(1).panel_disp,'Visible','off');
-set(h_para(1).panel_ratio,'Visible','off');
-set(h_para(1).panel_vel,'Visible','off');
-set(h_para(1).panel_autocor,'Visible','off');
-set(h_para(1).panel_forces,'Visible','off');
-set(h_para(1).panel_power,'Visible','off');
-set(h_para(1).panel_contr,'Visible','off');
-set(h_para(1).panel_strain,'Visible','off');
-set(h_para(1).panel_moment,'Visible','off');
-set(h_para(1).panel_freq_orient,'Visible','off');
-% set(h_para(1).panel_dp,'Visible','off');
-set(h_para(1).panel_tag,'Visible','off');
-set(h_para(1).text_whichvidname,'Visible','off');
-set(h_para(1).text_whichvid,'Visible','off');
-set(h_para(1).button_ok,'Visible','off');
-set(h_para(1).button_backwards,'Visible','off');
-set(h_para(1).button_forwards,'Visible','off');
-set(h_para(1).button_double,'Visible','off');
-set(h_para(1).panel_preview,'Visible','off');
-set(h_para(1).checkbox_save,'Visible','off');
-set(h_para(1).checkbox_save_traction,'Visible','off');
+set(h_para.panel_disp,'Visible','off');
+set(h_para.panel_ratio,'Visible','off');
+set(h_para.panel_vel,'Visible','off');
+set(h_para.panel_autocor,'Visible','off');
+set(h_para.panel_forces,'Visible','off');
+set(h_para.panel_power,'Visible','off');
+set(h_para.panel_contr,'Visible','off');
+set(h_para.panel_strain,'Visible','off');
+set(h_para.panel_moment,'Visible','off');
+set(h_para.panel_freq_orient,'Visible','off');
+% set(h_para.panel_dp,'Visible','off');
+set(h_para.panel_tag,'Visible','off');
+set(h_para.text_whichvidname,'Visible','off');
+set(h_para.text_whichvid,'Visible','off');
+set(h_para.button_ok,'Visible','off');
+set(h_para.button_backwards,'Visible','off');
+set(h_para.button_forwards,'Visible','off');
+set(h_para.button_double,'Visible','off');
+set(h_para.panel_preview,'Visible','off');
+set(h_para.checkbox_save,'Visible','off');
+set(h_para.checkbox_save_traction,'Visible','off');
 
 
 %initiate counter
@@ -507,13 +511,22 @@ tfm_para_user_counter=1;
 setappdata(0,'tfm_para_user_counter',tfm_para_user_counter)
 
 %make fig visible
-set(h_para(1).fig,'visible','on');
+set(h_para.fig,'visible','on');
+%movegui(h_para.fig,'north');
 
 %move main window to the side
-movegui(h_main(1).fig,'west')
+% movegui(h_main.fig,'west')
+% MH put the panel to the left of the main window
+%  [left bottom width height]
+fp = get(h_para.fig,'Position');
+set(h_main.fig,'Units','pixels');
+ap = get(h_main.fig,'Position');
+set(h_main.fig,'Position',[fp(1)-ap(3) fp(2)+fp(4)-ap(4) ap(3) ap(4)]);
+
+drawnow;
 
 %trigger guess all
-para_push_guess(h_para(1).button_guess, h_para, h_para)
+para_push_guess(h_para.button_guess, h_para, h_para)
 
 
 
@@ -521,17 +534,17 @@ function para_push_guess(~, ~, h_para)
 %profile on
 
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 try
-    sb=statusbar(h_para(1).fig,'Calculating... ');
+    sb=statusbar(h_para.fig,'Calculating... ');
     sb.getComponent(0).setForeground(java.awt.Color.red);
     
     %grey out button, do not turn it back on
-    set(h_para(1).button_guess,'Enable','off')
+    set(h_para.button_guess,'Enable','off')
     
     %load shared needed para
     tfm_init_user_framerate=getappdata(0,'tfm_init_user_framerate');
@@ -915,17 +928,17 @@ try
             end
 
             %calculate the average curve for the center of force
-            mu_pav{current_vid}.av_cent(:,1) = nanmean(mu_pav{current_vid}.cent_peaks(:,:,1),2);
-            mu_pav{current_vid}.av_cent_std(:,1) = nanstd(mu_pav{current_vid}.cent_peaks(:,:,1),0,2);
-            mu_pav{current_vid}.av_cent(:,2) = nanmean(mu_pav{current_vid}.cent_peaks(:,:,2),2);
-            mu_pav{current_vid}.av_cent_std(:,2) = nanstd(mu_pav{current_vid}.cent_peaks(:,:,2),0,2);
+            mu_pav{current_vid}.av_cent(:,1) = mean(mu_pav{current_vid}.cent_peaks(:,:,1),2,'omitnan');
+            mu_pav{current_vid}.av_cent_std(:,1) = std(mu_pav{current_vid}.cent_peaks(:,:,1),0,2,'omitnan');
+            mu_pav{current_vid}.av_cent(:,2) = mean(mu_pav{current_vid}.cent_peaks(:,:,2),2,'omitnan');
+            mu_pav{current_vid}.av_cent_std(:,2) = std(mu_pav{current_vid}.cent_peaks(:,:,2),0,2,'omitnan');
 
             %calculate the average position of center of force as the averagae
             %of the average for each peak
-            mu_pav{current_vid}.av_loc_cent(1) = nanmean(nanmean(mu_pav{current_vid}.cent_peaks(:,:,1),1));
-            mu_pav{current_vid}.av_loc_cent_std(1) = sqrt(sum(nanstd(mu_pav{current_vid}.cent_peaks(:,:,1)).^2));
-            mu_pav{current_vid}.av_loc_cent(2) = nanmean(nanmean(mu_pav{current_vid}.cent_peaks(:,:,2),1));
-            mu_pav{current_vid}.av_loc_cent_std(2) = sqrt(sum(nanstd(mu_pav{current_vid}.cent_peaks(:,:,2)).^2));
+            mu_pav{current_vid}.av_loc_cent(1) = mean(mean(mu_pav{current_vid}.cent_peaks(:,:,1),1,'omitnan'),'omitnan');
+            mu_pav{current_vid}.av_loc_cent_std(1) = sqrt(sum(std(mu_pav{current_vid}.cent_peaks(:,:,1),'omitnan').^2));
+            mu_pav{current_vid}.av_loc_cent(2) = mean(mean(mu_pav{current_vid}.cent_peaks(:,:,2),1,'omitnan'),'omitnan');
+            mu_pav{current_vid}.av_loc_cent_std(2) = sqrt(sum(std(mu_pav{current_vid}.cent_peaks(:,:,2),'omitnan').^2));
 
             %calculate the curve when 25% above average mu contraction
             cent_peaks_75 = nan(size(mu_pav{current_vid}.cent_peaks));
@@ -935,19 +948,19 @@ try
 
             %calculate the average position of center of force as the averagae
             %of the average for each peak when 25% above average mu contraction
-            mu_pav{current_vid}.av_loc_cent_75(1) = nanmean(nanmean(cent_peaks_75(:,:,1),1));
-            mu_pav{current_vid}.av_loc_cent_75_std(1) = sqrt(sum(nanstd(cent_peaks_75(:,:,1),0,1).^2));
-            mu_pav{current_vid}.av_loc_cent_75(2) = nanmean(nanmean(cent_peaks_75(:,:,1),2));
-            mu_pav{current_vid}.av_loc_cent_75_std(2) = sqrt(sum(nanstd(cent_peaks_75(:,:,2),0,1).^2));
+            mu_pav{current_vid}.av_loc_cent_75(1) = mean(mean(cent_peaks_75(:,:,1),1,'omitnan'),'omitnan');
+            mu_pav{current_vid}.av_loc_cent_75_std(1) = sqrt(sum(std(cent_peaks_75(:,:,1),0,1,'omitnan').^2));
+            mu_pav{current_vid}.av_loc_cent_75(2) = mean(mean(cent_peaks_75(:,:,1),2,'omitnan'),'omitnan');
+            mu_pav{current_vid}.av_loc_cent_75_std(2) = sqrt(sum(std(cent_peaks_75(:,:,2),0,1,'omitnan').^2));
 
             %calculate the average curve for the contraction angle
-            mu_pav{current_vid}.av_theta(:,1) = nanmean(mu_pav{current_vid}.theta_peaks(:,:,1),2);
-            mu_pav{current_vid}.av_theta_std(:,1) = nanstd(mu_pav{current_vid}.theta_peaks(:,:,1),0,2);
+            mu_pav{current_vid}.av_theta(:,1) = mean(mu_pav{current_vid}.theta_peaks(:,:,1),2,'omitnan');
+            mu_pav{current_vid}.av_theta_std(:,1) = std(mu_pav{current_vid}.theta_peaks(:,:,1),0,2,'omitnan');
 
             %calculate the average position of contraction angle as the averagae
             %of the average for each peak
-            mu_pav{current_vid}.av_loc_theta(1) = nanmean(nanmean(mu_pav{current_vid}.theta_peaks(:,:,1),1));
-            mu_pav{current_vid}.av_loc_theta_std(1) = sqrt(sum(nanstd(mu_pav{current_vid}.theta_peaks(:,:,1)).^2));
+            mu_pav{current_vid}.av_loc_theta(1) = mean(mean(mu_pav{current_vid}.theta_peaks(:,:,1),1,'omitnan'),'omitnan');
+            mu_pav{current_vid}.av_loc_theta_std(1) = sqrt(sum(std(mu_pav{current_vid}.theta_peaks(:,:,1),'omitnan').^2));
 
             %calculate the contraction angle curve when 25% above average mu contraction
             theta_peaks_75 = nan(size(mu_pav{current_vid}.theta_peaks));
@@ -956,8 +969,8 @@ try
 
             %calculate the average position of contraction angle as the averagae
             %of the average for each peak when 25% above average mu contraction
-            mu_pav{current_vid}.av_loc_theta_75(1) = nanmean(nanmean(theta_peaks_75(:,:,1),1));
-            mu_pav{current_vid}.av_loc_theta_75_std(1) = sqrt(sum(nanstd(theta_peaks_75(:,:,1),0,1).^2));
+            mu_pav{current_vid}.av_loc_theta_75(1) = mean(mean(theta_peaks_75(:,:,1),1,'omitnan'),'omitnan');
+            mu_pav{current_vid}.av_loc_theta_75_std(1) = sqrt(sum(std(theta_peaks_75(:,:,1),0,1,'omitnan').^2));
         
         else
             mu_pav{current_vid}.av_cent = [NaN NaN];
@@ -1185,14 +1198,14 @@ try
         
         %save new pt vector
         tfm_para_user_tcontr{current_vid}=tcontr;
-        tfm_para_user_para_tcontr{current_vid}=nanmean(dtcontr);
+        tfm_para_user_para_tcontr{current_vid}=mean(dtcontr,'omitnan');
         
     end
     
     
     %plot 1st displ. in axes
-    reset(h_para(1).axes_disp)
-    axes(h_para(1).axes_disp)
+    reset(h_para.axes_disp)
+    axes(h_para.axes_disp)
     plot(dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
     plot(dt{tfm_para_user_counter},tfm_para_user_disp_l*ones(size(dt{tfm_para_user_counter},2),1)',':m'), hold on;
     text(dt{tfm_para_user_counter}(1),tfm_para_user_disp_l,[num2str(tfm_para_user_disp_l) '[m]'],'FontSize',10);
@@ -1204,15 +1217,15 @@ try
     ylim([0 5e-8]);
     
     %     %displ. in double peak
-    %     reset(h_para(1).axes_dp2)
-    %     axes(h_para(1).axes_dp2)
+    %     reset(h_para.axes_dp2)
+    %     axes(h_para.axes_dp2)
     %     plot(dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
     %     set(gca, 'XTick', []);
     %     set(gca, 'YTick', []);
     
     %plot 1st velocity and contraction times in axes
-    reset(h_para(1).axes_vel)
-    axes(h_para(1).axes_vel)
+    reset(h_para.axes_vel)
+    axes(h_para.axes_vel)
     plot(dt{tfm_para_user_counter},zeros(1,length(dt{tfm_para_user_counter})),'--k'), hold on;
     plot(dt{tfm_para_user_counter},Velocity{tfm_para_user_counter},'-b'), hold on;
     plot(vmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},vmin{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
@@ -1223,28 +1236,28 @@ try
     set(gca, 'XTick', []);
     set(gca, 'YTick', []);
     
-    if get(h_para(1).radiobutton_forcex,'Value')
+    if get(h_para.radiobutton_forcex,'Value')
         %plot 1st forcex. in axes
-        reset(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        reset(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(dt{tfm_para_user_counter},Fx_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(Fxmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},Fxmin{tfm_para_user_counter}(:,2)*1e9,'.r','MarkerSize',10), hold on;
         plot(Fxmax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},Fxmax{tfm_para_user_counter}(:,2)*1e9,'.g','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
-    elseif get(h_para(1).radiobutton_forcey,'Value')
+    elseif get(h_para.radiobutton_forcey,'Value')
         %plot 1st forcey. in axes
-        reset(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        reset(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(dt{tfm_para_user_counter},Fy_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(Fymin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},Fymin{tfm_para_user_counter}(:,2)*1e9,'.r','MarkerSize',10), hold on;
         plot(Fymax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},Fymax{tfm_para_user_counter}(:,2)*1e9,'.g','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
-    elseif get(h_para(1).radiobutton_forcetot,'Value')
+    elseif get(h_para.radiobutton_forcetot,'Value')
         %plot 1st force. in axes
-        reset(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        reset(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(dt{tfm_para_user_counter},F_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(Fmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},Fmin{tfm_para_user_counter}(:,2)*1e9,'.r','MarkerSize',10), hold on;
         plot(Fmax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},Fmax{tfm_para_user_counter}(:,2)*1e9,'.g','MarkerSize',10), hold on;
@@ -1253,8 +1266,8 @@ try
     end
     
     %plot 1st power. in axes
-    reset(h_para(1).axes_power)
-    axes(h_para(1).axes_power)
+    reset(h_para.axes_power)
+    axes(h_para.axes_power)
     plot(dt{tfm_para_user_counter},zeros(1,length(dt{tfm_para_user_counter})),'--k'), hold on;
     plot(dt{tfm_para_user_counter},Power{tfm_para_user_counter}*1e12,'-b'), hold on;
     plot(Pmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},Pmin{tfm_para_user_counter}(:,2)*1e12,'.r','MarkerSize',10), hold on;
@@ -1263,8 +1276,8 @@ try
     set(gca, 'YTick', []);
     
     %     %plot contraction times in axes
-    %     reset(h_para(1).axes_contr)
-    %     axes(h_para(1).axes_contr)
+    %     reset(h_para.axes_contr)
+    %     axes(h_para.axes_contr)
     %     plot(dt{tfm_para_user_counter},Velocity{tfm_para_user_counter},'-b'), hold on;
     %     for i = 1:length(tfm_para_user_tcontr{tfm_para_user_counter}(:,1))
     %         plot(linspace(tfm_para_user_tcontr{tfm_para_user_counter}(i,1),tfm_para_user_tcontr{tfm_para_user_counter}(i,2),2),linspace(0,0,2),'r','LineWidth',5);
@@ -1273,45 +1286,45 @@ try
     %     set(gca, 'YTick', []);
     
     %freq.
-    if get(h_para(1).radiobutton_fft,'Value')
+    if get(h_para.radiobutton_fft,'Value')
         %make unwanted buttons invisible
-        set(h_para(1).button_freq_add,'Visible','off');
-        set(h_para(1).button_freq_remove,'Visible','off');
-        set(h_para(1).button_freq_clearall,'Visible','off');
+        set(h_para.button_freq_add,'Visible','off');
+        set(h_para.button_freq_remove,'Visible','off');
+        set(h_para.button_freq_clearall,'Visible','off');
         %enable wanted button
-        set(h_para(1).button_freq_addfft,'Visible','on');
+        set(h_para.button_freq_addfft,'Visible','on');
         %plot frequency. in axes
-        reset(h_para(1).axes_freq)
-        axes(h_para(1).axes_freq)
+        reset(h_para.axes_freq)
+        axes(h_para.axes_freq)
         plot(freq{tfm_para_user_counter},y_fft{tfm_para_user_counter},'-b'), hold on;
         plot(freq{tfm_para_user_counter}(loc{tfm_para_user_counter}),freq_pk{tfm_para_user_counter},'.g','MarkerSize',10);
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
         set(gca, 'XLim', [0 5]);% freq{tfm_para_user_counter}(end)]);
         %set(gca, 'YLim', [0 max(y_fft{tfm_para_user_counter})]);
-    elseif get(h_para(1).radiobutton_pick,'Value')
+    elseif get(h_para.radiobutton_pick,'Value')
         %make  buttons visible
-        set(h_para(1).button_freq_add,'Visible','on');
-        set(h_para(1).button_freq_remove,'Visible','on');
-        set(h_para(1).button_freq_clearall,'Visible','on');
+        set(h_para.button_freq_add,'Visible','on');
+        set(h_para.button_freq_remove,'Visible','on');
+        set(h_para.button_freq_clearall,'Visible','on');
         %disable unwanted button
-        set(h_para(1).button_freq_addfft,'Visible','off');
+        set(h_para.button_freq_addfft,'Visible','off');
         %plot displ. in axes
-        reset(h_para(1).axes_freq)
-        axes(h_para(1).axes_freq)
+        reset(h_para.axes_freq)
+        axes(h_para.axes_freq)
         plot(dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
-    elseif get(h_para(1).radiobutton_autocorr,'Value')
+    elseif get(h_para.radiobutton_autocorr,'Value')
         %make unwanted buttons invisible
-        set(h_para(1).button_freq_add,'Visible','off');
-        set(h_para(1).button_freq_remove,'Visible','off');
-        set(h_para(1).button_freq_clearall,'Visible','off');
+        set(h_para.button_freq_add,'Visible','off');
+        set(h_para.button_freq_remove,'Visible','off');
+        set(h_para.button_freq_clearall,'Visible','off');
         %disable unwanted button
-        set(h_para(1).button_freq_addfft,'Visible','off');
+        set(h_para.button_freq_addfft,'Visible','off');
         %plot displ. in axes
-        reset(h_para(1).axes_freq)
-        axes(h_para(1).axes_freq)
+        reset(h_para.axes_freq)
+        axes(h_para.axes_freq)
         plot(d_s{tfm_para_user_counter}.signal_t,d_s{tfm_para_user_counter}.autocorr_signal,'-m'), hold on;
         plot(tfm_para_user_d_s{tfm_para_user_counter}.autocorr_peaks_lags/tfm_para_user_d_s{tfm_para_user_counter}.framerate,tfm_para_user_d_s{tfm_para_user_counter}.autocorr_peaks,'ob','MarkerSize',3); hold on;
         set(gca, 'XTick', []);
@@ -1319,8 +1332,8 @@ try
     end
     
     %plot strain energy
-    reset(h_para(1).axes_strain)
-    axes(h_para(1).axes_strain)
+    reset(h_para.axes_strain)
+    axes(h_para.axes_strain)
     plot(dt{tfm_para_user_counter},U{tfm_para_user_counter},'-b'); hold on;
     plot(Umin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},Umin{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
     plot(Umax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},Umax{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
@@ -1328,27 +1341,27 @@ try
     set(gca, 'YTick', []);
     
     %plot contractile moment
-    if get(h_para(1).radiobutton_Mxx,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    if get(h_para.radiobutton_Mxx,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(dt{tfm_para_user_counter},zeros(1,length(dt{tfm_para_user_counter})),'--k'), hold on;
         plot(dt{tfm_para_user_counter},Mxx{tfm_para_user_counter},'-b')
         plot(Mxx_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},Mxx_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
         plot(Mxx_max{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},Mxx_max{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
-    elseif get(h_para(1).radiobutton_Myy,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    elseif get(h_para.radiobutton_Myy,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(dt{tfm_para_user_counter},zeros(1,length(dt{tfm_para_user_counter})),'--k'), hold on;
         plot(dt{tfm_para_user_counter},Myy{tfm_para_user_counter},'-b')
         plot(Myy_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},Myy_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
         plot(Myy_max{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},Myy_max{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
-    elseif get(h_para(1).radiobutton_mu,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    elseif get(h_para.radiobutton_mu,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(dt{tfm_para_user_counter},zeros(1,length(dt{tfm_para_user_counter})),'--k'), hold on;
         plot(dt{tfm_para_user_counter},mu{tfm_para_user_counter},'-b')
         plot(mu_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},mu_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
@@ -1364,10 +1377,10 @@ try
     theta_sort = theta{tfm_para_user_counter}(di);
     Mxx_sort = Mxx{tfm_para_user_counter}(di);
     
-    if get(h_para(1).radiobutton_center,'Value')
+    if get(h_para.radiobutton_center,'Value')
         %plot center of contraction
-        reset(h_para(1).axes_orient)
-        axes(h_para(1).axes_orient)
+        reset(h_para.axes_orient)
+        axes(h_para.axes_orient)
         [theta_center,r_center] = cart2pol(center_sort(:,1),center_sort(:,2));
         polarscatter(theta_center,r_center,10,d_sort,'filled');
         %set(gca, 'RTickLabel', []);
@@ -1386,10 +1399,10 @@ try
         %         set(gca, 'XTickLabel', []);
         %         set(gca, 'YTickLabel', []);
         
-    elseif get(h_para(1).radiobutton_orient,'Value')
+    elseif get(h_para.radiobutton_orient,'Value')
         %plot traction orientation
-        reset(h_para(1).axes_orient)
-        axes(h_para(1).axes_orient)
+        reset(h_para.axes_orient)
+        axes(h_para.axes_orient)
         polarscatter(theta_sort.*(pi/180),Mxx_sort,10,d_sort,'filled');
         set(gca, 'RTickLabel', []);
         set(gca, 'ThetaTickLabel', []);
@@ -1398,8 +1411,8 @@ try
     
     %plot peak averaging results
     %displacement
-    reset(h_para(1).axes_disp_autocor)
-    axes(h_para(1).axes_disp_autocor)
+    reset(h_para.axes_disp_autocor)
+    axes(h_para.axes_disp_autocor)
     if ~isnan(d_pav{tfm_para_user_counter}.n_peaks)
         plot(d_pav{tfm_para_user_counter}.peak_wins_t,d_pav{tfm_para_user_counter}.av_peak), hold on;
         area(d_pav{tfm_para_user_counter}.t_peak,d_pav{tfm_para_user_counter}.av_peak+d_pav{tfm_para_user_counter}.av_peak_std,min(d_pav{tfm_para_user_counter}.av_peak-d_pav{tfm_para_user_counter}.av_peak_std),'FaceColor',[0.8 0.8 0.8],'FaceAlpha',0.5,'EdgeColor','none');
@@ -1430,8 +1443,8 @@ try
     
     
     %force
-    reset(h_para(1).axes_force_autocor)
-    axes(h_para(1).axes_force_autocor)
+    reset(h_para.axes_force_autocor)
+    axes(h_para.axes_force_autocor)
     if ~isnan(F_pav{tfm_para_user_counter}.n_peaks)
         plot(F_pav{tfm_para_user_counter}.peak_wins_t,F_pav{tfm_para_user_counter}.av_peak), hold on;
         area(F_pav{tfm_para_user_counter}.t_peak,F_pav{tfm_para_user_counter}.av_peak+F_pav{tfm_para_user_counter}.av_peak_std,min(F_pav{tfm_para_user_counter}.av_peak-F_pav{tfm_para_user_counter}.av_peak_std),'FaceColor',[0.8 0.8 0.8],'FaceAlpha',0.5,'EdgeColor','none');
@@ -1457,7 +1470,7 @@ try
     
     
     %preview traction animation
-    set(h_para(1).button_traction_anim,'string',['<html><img src="file:',tfm_init_user_pathnamestack{1,tfm_para_user_counter},tfm_init_user_filenamestack{1,tfm_para_user_counter},filesep,'heatmap_anim.gif"/></html>']);
+    set(h_para.button_traction_anim,'string',['<html><img src="file:',tfm_init_user_pathnamestack{1,tfm_para_user_counter},tfm_init_user_filenamestack{1,tfm_para_user_counter},filesep,'heatmap_anim.gif"/></html>']);
     
     
     %calculate para and display them.
@@ -1507,23 +1520,23 @@ try
     
     %para
     for current_vid=1:tfm_init_user_Nfiles
-        tfm_para_user_para_Deltad{current_vid}=nanmean(dmax{current_vid}(:,2))-nanmean(dmin{current_vid}(:,2));
-        tfm_para_user_para_DeltaFx{current_vid}=nanmean(Fxmax{current_vid}(:,2))-nanmean(Fxmin{current_vid}(:,2));
-        tfm_para_user_para_DeltaFy{current_vid}=nanmean(Fymax{current_vid}(:,2))-nanmean(Fymin{current_vid}(:,2));
-        tfm_para_user_para_DeltaF{current_vid}=nanmean(Fmax{current_vid}(:,2))-nanmean(Fmin{current_vid}(:,2));
-        tfm_para_user_para_vcontr{current_vid}=nanmean(vmax{current_vid}(:,2));
-        tfm_para_user_para_vrelax{current_vid}=nanmean(vmin{current_vid}(:,2));
-        tfm_para_user_para_Pcontr{current_vid}=nanmean(Pmax{current_vid}(:,2));
-        tfm_para_user_para_Prelax{current_vid}=nanmean(Pmin{current_vid}(:,2));
-        tfm_para_user_para_U{current_vid}=nanmean(Umax{current_vid}(:,2))-nanmean(Umin{current_vid}(:,2));
-        sign_Mxx_para = sign(abs(nanmean(Mxx_max{current_vid}(:,2)))-abs(nanmean(Mxx_min{current_vid}(:,2))));
-        tfm_para_user_para_Mxx{current_vid}=(nanmean(Mxx_max{current_vid}(:,2))-nanmean(Mxx_min{current_vid}(:,2)))*sign_Mxx_para;
-        sign_Myy_para = sign(abs(nanmean(Myy_max{current_vid}(:,2)))-abs(nanmean(Myy_min{current_vid}(:,2))));
-        tfm_para_user_para_Myy{current_vid}=(nanmean(Myy_max{current_vid}(:,2))-nanmean(Myy_min{current_vid}(:,2)))*sign_Myy_para;
-        sign_Mxy_para = sign(abs(nanmean(Mxy_max{current_vid}(:,2)))-abs(nanmean(Mxy_min{current_vid}(:,2))));
-        tfm_para_user_para_Mxy{current_vid}=(nanmean(Mxy_max{current_vid}(:,2))-nanmean(Mxy_min{current_vid}(:,2)))*sign_Mxy_para;
-        sign_mu_para = sign(abs(nanmean(mu_max{current_vid}(:,2)))-abs(nanmean(mu_min{current_vid}(:,2))));
-        tfm_para_user_para_mu{current_vid}=(nanmean(mu_max{current_vid}(:,2))-nanmean(mu_min{current_vid}(:,2)))*sign_mu_para;
+        tfm_para_user_para_Deltad{current_vid}=mean(dmax{current_vid}(:,2),'omitnan')-mean(dmin{current_vid}(:,2),'omitnan');
+        tfm_para_user_para_DeltaFx{current_vid}=mean(Fxmax{current_vid}(:,2),'omitnan')-mean(Fxmin{current_vid}(:,2),'omitnan');
+        tfm_para_user_para_DeltaFy{current_vid}=mean(Fymax{current_vid}(:,2),'omitnan')-mean(Fymin{current_vid}(:,2),'omitnan');
+        tfm_para_user_para_DeltaF{current_vid}=mean(Fmax{current_vid}(:,2),'omitnan')-mean(Fmin{current_vid}(:,2),'omitnan');
+        tfm_para_user_para_vcontr{current_vid}=mean(vmax{current_vid}(:,2),'omitnan');
+        tfm_para_user_para_vrelax{current_vid}=mean(vmin{current_vid}(:,2),'omitnan');
+        tfm_para_user_para_Pcontr{current_vid}=mean(Pmax{current_vid}(:,2),'omitnan');
+        tfm_para_user_para_Prelax{current_vid}=mean(Pmin{current_vid}(:,2),'omitnan');
+        tfm_para_user_para_U{current_vid}=mean(Umax{current_vid}(:,2),'omitnan')-mean(Umin{current_vid}(:,2),'omitnan');
+        sign_Mxx_para = sign(abs(mean(Mxx_max{current_vid}(:,2),'omitnan'))-abs(mean(Mxx_min{current_vid}(:,2),'omitnan')));
+        tfm_para_user_para_Mxx{current_vid}=(mean(Mxx_max{current_vid}(:,2),'omitnan')-mean(Mxx_min{current_vid}(:,2),'omitnan'))*sign_Mxx_para;
+        sign_Myy_para = sign(abs(mean(Myy_max{current_vid}(:,2),'omitnan'))-abs(mean(Myy_min{current_vid}(:,2),'omitnan')));
+        tfm_para_user_para_Myy{current_vid}=(mean(Myy_max{current_vid}(:,2),'omitnan')-mean(Myy_min{current_vid}(:,2)))*sign_Myy_para;
+        sign_Mxy_para = sign(abs(mean(Mxy_max{current_vid}(:,2),'omitnan'))-abs(mean(Mxy_min{current_vid}(:,2),'omitnan')));
+        tfm_para_user_para_Mxy{current_vid}=(mean(Mxy_max{current_vid}(:,2),'omitnan')-mean(Mxy_min{current_vid}(:,2),'omitnan'))*sign_Mxy_para;
+        sign_mu_para = sign(abs(mean(mu_max{current_vid}(:,2),'omitnan'))-abs(mean(mu_min{current_vid}(:,2),'omitnan')));
+        tfm_para_user_para_mu{current_vid}=(mean(mu_max{current_vid}(:,2),'omitnan')-mean(mu_min{current_vid}(:,2),'omitnan'))*sign_mu_para;
         %         tfm_para_user_para_tcontr{current_vid}=NaN;
         %         tfm_para_user_tcontr{current_vid}=t_init;
         tfm_para_user_para_tdp{current_vid}=NaN;
@@ -1543,64 +1556,64 @@ try
     
     
     %display
-    set(h_para(1).text_disp,'String',['dcontr=',num2str(tfm_para_user_para_Deltad{tfm_para_user_counter},'%.2e'),'[m]']);
-    set(h_para(1).text_vel1,'String',['vcontr=',num2str(tfm_para_user_para_vcontr{tfm_para_user_counter},'%.2e'),'[m/s]']);
-    set(h_para(1).text_vel2,'String',['vrelax=',num2str(tfm_para_user_para_vrelax{tfm_para_user_counter},'%.2e'),'[m/s]']);
-    set(h_para(1).text_forces,'String',['F=',num2str(tfm_para_user_para_DeltaF{tfm_para_user_counter},'%.2e'),'[N]']);
-    set(h_para(1).text_power1,'String',['Pcontr=',num2str(tfm_para_user_para_Pcontr{tfm_para_user_counter},'%.2e'),'[W]']);
-    set(h_para(1).text_power2,'String',['Prelax=',num2str(tfm_para_user_para_Prelax{tfm_para_user_counter},'%.2e'),'[W]']);
-    %     set(h_para(1).text_dp2_2,'String',['t=',num2str(NaN,'%.2e'),'[s]']);
-    set(h_para(1).text_contr,'String',['tcontr=',num2str(tfm_para_user_para_tcontr{tfm_para_user_counter},'%.2e'),'[s]']);
-    set(h_para(1).text_freq1,'String',['f=',num2str(tfm_para_user_para_freq{tfm_para_user_counter},'%.2e'),'[Hz]']);
-    set(h_para(1).text_freq2,'String',['T=',num2str(1./tfm_para_user_para_freq{tfm_para_user_counter},'%.2e'),'[s]']);
-    set(h_para(1).edit_ratio,'String',[num2str(NaN,'%.2e')]);
-    %     set(h_para(1).edit_dp2,'String',[num2str(NaN,'%.2e')]);
-    set(h_para(1).text_strain,'String',['U=',num2str(tfm_para_user_para_U{tfm_para_user_counter},'%.2e'),'[J]']);
-    set(h_para(1).text_moment,'String',['mu=',num2str(tfm_para_user_para_mu{tfm_para_user_counter},'%.2e'),'[Nm]']);
-    set(h_para(1).text_disp_autocor,'String',['dcontr=',num2str(d_pav{tfm_para_user_counter}.peak_amp,'%.2e'),'[m]',',n=',num2str(d_pav{tfm_para_user_counter}.n_peaks)]);
-    set(h_para(1).text_force_autocor,'String',['F=',num2str(F_pav{tfm_para_user_counter}.peak_amp,'%.2e'),'[N]',',n=',num2str(F_pav{tfm_para_user_counter}.n_peaks)]);
-    set(h_para(1).text_vcontr_autocor,'String',['vcontr=',num2str(d_pav{tfm_para_user_counter}.d_peak_max,'%.2e'),'[m/s]']);
-    set(h_para(1).text_vrelax_autocor,'String',['vrelax=',num2str(d_pav{tfm_para_user_counter}.d_peak_min,'%.2e'),'[m/s]']);
-    set(h_para(1).text_note_autocor,'String',['Comment: ',d_s{tfm_para_user_counter}.comment]);
+    set(h_para.text_disp,'String',['dcontr=',num2str(tfm_para_user_para_Deltad{tfm_para_user_counter},'%.2e'),'[m]']);
+    set(h_para.text_vel1,'String',['vcontr=',num2str(tfm_para_user_para_vcontr{tfm_para_user_counter},'%.2e'),'[m/s]']);
+    set(h_para.text_vel2,'String',['vrelax=',num2str(tfm_para_user_para_vrelax{tfm_para_user_counter},'%.2e'),'[m/s]']);
+    set(h_para.text_forces,'String',['F=',num2str(tfm_para_user_para_DeltaF{tfm_para_user_counter},'%.2e'),'[N]']);
+    set(h_para.text_power1,'String',['Pcontr=',num2str(tfm_para_user_para_Pcontr{tfm_para_user_counter},'%.2e'),'[W]']);
+    set(h_para.text_power2,'String',['Prelax=',num2str(tfm_para_user_para_Prelax{tfm_para_user_counter},'%.2e'),'[W]']);
+    %     set(h_para.text_dp2_2,'String',['t=',num2str(NaN,'%.2e'),'[s]']);
+    set(h_para.text_contr,'String',['tcontr=',num2str(tfm_para_user_para_tcontr{tfm_para_user_counter},'%.2e'),'[s]']);
+    set(h_para.text_freq1,'String',['f=',num2str(tfm_para_user_para_freq{tfm_para_user_counter},'%.2e'),'[Hz]']);
+    set(h_para.text_freq2,'String',['T=',num2str(1./tfm_para_user_para_freq{tfm_para_user_counter},'%.2e'),'[s]']);
+    set(h_para.edit_ratio,'String',[num2str(NaN,'%.2e')]);
+    %     set(h_para.edit_dp2,'String',[num2str(NaN,'%.2e')]);
+    set(h_para.text_strain,'String',['U=',num2str(tfm_para_user_para_U{tfm_para_user_counter},'%.2e'),'[J]']);
+    set(h_para.text_moment,'String',['mu=',num2str(tfm_para_user_para_mu{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    set(h_para.text_disp_autocor,'String',['dcontr=',num2str(d_pav{tfm_para_user_counter}.peak_amp,'%.2e'),'[m]',',n=',num2str(d_pav{tfm_para_user_counter}.n_peaks)]);
+    set(h_para.text_force_autocor,'String',['F=',num2str(F_pav{tfm_para_user_counter}.peak_amp,'%.2e'),'[N]',',n=',num2str(F_pav{tfm_para_user_counter}.n_peaks)]);
+    set(h_para.text_vcontr_autocor,'String',['vcontr=',num2str(d_pav{tfm_para_user_counter}.d_peak_max,'%.2e'),'[m/s]']);
+    set(h_para.text_vrelax_autocor,'String',['vrelax=',num2str(d_pav{tfm_para_user_counter}.d_peak_min,'%.2e'),'[m/s]']);
+    set(h_para.text_note_autocor,'String',['Comment: ',d_s{tfm_para_user_counter}.comment]);
     
     %set texts to 1st vid
-    set(h_para(1).text_whichvidname,'String',tfm_init_user_filenamestack{1,1});
-    set(h_para(1).text_whichvid,'String',[num2str(1),'/',num2str(tfm_init_user_Nfiles)]);
+    set(h_para.text_whichvidname,'String',tfm_init_user_filenamestack{1,1});
+    set(h_para.text_whichvid,'String',[num2str(1),'/',num2str(tfm_init_user_Nfiles)]);
     
     %display and enable/disable buttons and panels
-    set(h_para(1).panel_ratio,'Visible','off');
-    set(h_para(1).panel_disp,'Visible','on');
-    set(h_para(1).panel_vel,'Visible','on');
-    set(h_para(1).panel_autocor,'Visible','on');
-    set(h_para(1).panel_forces,'Visible','on');
-    set(h_para(1).panel_power,'Visible','on');
-    set(h_para(1).panel_contr,'Visible','off');
-    set(h_para(1).panel_strain,'Visible','on');
-    set(h_para(1).panel_moment,'Visible','on');
-    set(h_para(1).panel_freq_orient,'Visible','on');
-    %     set(h_para(1).panel_dp,'Visible','off');
-    %     set(h_para(1).panel_dp2,'Visible','off');
-    set(h_para(1).panel_tag,'Visible','on');
-    set(h_para(1).button_backwards,'Visible','on');
-    set(h_para(1).button_forwards,'Visible','on');
-    set(h_para(1).button_double,'Visible','on');
-    set(h_para(1).button_ok,'Visible','on');
-    set(h_para(1).panel_preview,'Visible','on');
-    set(h_para(1).text_whichvidname,'Visible','on');
-    set(h_para(1).text_whichvid,'Visible','on');
-    set(h_para(1).checkbox_save,'Visible','on');
-    set(h_para(1).checkbox_save_traction,'Visible','on');
+    set(h_para.panel_ratio,'Visible','off');
+    set(h_para.panel_disp,'Visible','on');
+    set(h_para.panel_vel,'Visible','on');
+    set(h_para.panel_autocor,'Visible','on');
+    set(h_para.panel_forces,'Visible','on');
+    set(h_para.panel_power,'Visible','on');
+    set(h_para.panel_contr,'Visible','off');
+    set(h_para.panel_strain,'Visible','on');
+    set(h_para.panel_moment,'Visible','on');
+    set(h_para.panel_freq_orient,'Visible','on');
+    %     set(h_para.panel_dp,'Visible','off');
+    %     set(h_para.panel_dp2,'Visible','off');
+    set(h_para.panel_tag,'Visible','on');
+    set(h_para.button_backwards,'Visible','on');
+    set(h_para.button_forwards,'Visible','on');
+    set(h_para.button_double,'Visible','on');
+    set(h_para.button_ok,'Visible','on');
+    set(h_para.panel_preview,'Visible','on');
+    set(h_para.text_whichvidname,'Visible','on');
+    set(h_para.text_whichvid,'Visible','on');
+    set(h_para.checkbox_save,'Visible','on');
+    set(h_para.checkbox_save_traction,'Visible','on');
     
     %forward /backbutton
     if tfm_para_user_counter==1
-        set(h_para(1).button_backwards,'Enable','off');
+        set(h_para.button_backwards,'Enable','off');
     else
-        set(h_para(1).button_backwards,'Enable','on');
+        set(h_para.button_backwards,'Enable','on');
     end
     if tfm_para_user_counter==tfm_init_user_Nfiles
-        set(h_para(1).button_forwards,'Enable','off');
+        set(h_para.button_forwards,'Enable','off');
     else
-        set(h_para(1).button_forwards,'Enable','on');
+        set(h_para.button_forwards,'Enable','on');
     end
     
     
@@ -1696,7 +1709,7 @@ try
     setappdata(0,'tfm_para_user_disp_l',tfm_para_user_disp_l);
     
     %statusbar
-    sb=statusbar(h_para(1).fig,'Calculation - Done !');
+    sb=statusbar(h_para.fig,'Calculation - Done !');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     
     
@@ -1720,10 +1733,10 @@ end
 
 function para_push_disp_addmax(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -1771,8 +1784,8 @@ try
     d_new(:,1)=[d_init(:,1);d_add(:,1)];
     d_new(:,2)=[d_init(:,2);d_add(:,2)];
     %plot new in axes
-    cla(h_para(1).axes_disp)
-    axes(h_para(1).axes_disp)
+    cla(h_para.axes_disp)
+    axes(h_para.axes_disp)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
     plot(tfm_para_user_dmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_dmin{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
     plot(d_new(:,1)/tfm_init_user_framerate{tfm_para_user_counter},d_new(:,2),'.g','MarkerSize',10), hold on;
@@ -1784,8 +1797,8 @@ try
     tfm_para_user_dmax{tfm_para_user_counter}=d_new;
     
     %update para
-    tfm_para_user_para_Deltad{tfm_para_user_counter}=nanmean(tfm_para_user_dmax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_dmin{tfm_para_user_counter}(:,2));
-    set(h_para(1).text_disp,'String',['dcontr=',num2str(tfm_para_user_para_Deltad{tfm_para_user_counter},'%.2e'),'[m]']);
+    tfm_para_user_para_Deltad{tfm_para_user_counter}=mean(tfm_para_user_dmax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_dmin{tfm_para_user_counter}(:,2),'omitnan');
+    set(h_para.text_disp,'String',['dcontr=',num2str(tfm_para_user_para_Deltad{tfm_para_user_counter},'%.2e'),'[m]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_dmax',tfm_para_user_dmax);
@@ -1799,10 +1812,10 @@ end
 
 function para_push_disp_addmin(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -1850,8 +1863,8 @@ try
     d_new(:,1)=[d_init(:,1);d_add(:,1)];
     d_new(:,2)=[d_init(:,2);d_add(:,2)];
     %plot new in axes
-    cla(h_para(1).axes_disp)
-    axes(h_para(1).axes_disp)
+    cla(h_para.axes_disp)
+    axes(h_para.axes_disp)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
     plot(tfm_para_user_dmax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_dmax{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
     plot(d_new(:,1)/tfm_init_user_framerate{tfm_para_user_counter},d_new(:,2),'.r','MarkerSize',10), hold on;
@@ -1863,8 +1876,8 @@ try
     tfm_para_user_dmin{tfm_para_user_counter}=d_new;
     
     %update para
-    tfm_para_user_para_Deltad{tfm_para_user_counter}=nanmean(tfm_para_user_dmax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_dmin{tfm_para_user_counter}(:,2));
-    set(h_para(1).text_disp,'String',['dcontr=',num2str(tfm_para_user_para_Deltad{tfm_para_user_counter},'%.2e'),'[m]']);
+    tfm_para_user_para_Deltad{tfm_para_user_counter}=mean(tfm_para_user_dmax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_dmin{tfm_para_user_counter}(:,2),'omitnan');
+    set(h_para.text_disp,'String',['dcontr=',num2str(tfm_para_user_para_Deltad{tfm_para_user_counter},'%.2e'),'[m]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_dmin',tfm_para_user_dmin);
@@ -1880,10 +1893,10 @@ end
 
 function para_push_disp_removemax(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -1931,8 +1944,8 @@ try
     
     
     %plot new in axes
-    cla(h_para(1).axes_disp)
-    axes(h_para(1).axes_disp)
+    cla(h_para.axes_disp)
+    axes(h_para.axes_disp)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
     plot(tfm_para_user_dmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_dmin{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
     plot(d_new(:,1)/tfm_init_user_framerate{tfm_para_user_counter},d_new(:,2),'.g','MarkerSize',10), hold on;
@@ -1945,8 +1958,8 @@ try
     tfm_para_user_dmax{tfm_para_user_counter}=d_new;
     
     %update para
-    tfm_para_user_para_Deltad{tfm_para_user_counter}=nanmean(tfm_para_user_dmax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_dmin{tfm_para_user_counter}(:,2));
-    set(h_para(1).text_disp,'String',['dcontr=',num2str(tfm_para_user_para_Deltad{tfm_para_user_counter},'%.2e'),'[m]']);
+    tfm_para_user_para_Deltad{tfm_para_user_counter}=mean(tfm_para_user_dmax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_dmin{tfm_para_user_counter}(:,2),'omitnan');
+    set(h_para.text_disp,'String',['dcontr=',num2str(tfm_para_user_para_Deltad{tfm_para_user_counter},'%.2e'),'[m]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_dmax',tfm_para_user_dmax);
@@ -1960,10 +1973,10 @@ end
 
 function para_push_disp_removemin(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -2011,8 +2024,8 @@ try
     
     
     %plot new in axes
-    cla(h_para(1).axes_disp)
-    axes(h_para(1).axes_disp)
+    cla(h_para.axes_disp)
+    axes(h_para.axes_disp)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
     plot(tfm_para_user_dmax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_dmax{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
     plot(d_new(:,1)/tfm_init_user_framerate{tfm_para_user_counter},d_new(:,2),'.r','MarkerSize',10), hold on;
@@ -2024,8 +2037,8 @@ try
     tfm_para_user_dmin{tfm_para_user_counter}=d_new;
     
     %update para
-    tfm_para_user_para_Deltad{tfm_para_user_counter}=nanmean(tfm_para_user_dmax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_dmin{tfm_para_user_counter}(:,2));
-    set(h_para(1).text_disp,'String',['dcontr=',num2str(tfm_para_user_para_Deltad{tfm_para_user_counter},'%.2e'),'[m]']);
+    tfm_para_user_para_Deltad{tfm_para_user_counter}=mean(tfm_para_user_dmax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_dmin{tfm_para_user_counter}(:,2),'omitnan');
+    set(h_para.text_disp,'String',['dcontr=',num2str(tfm_para_user_para_Deltad{tfm_para_user_counter},'%.2e'),'[m]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_dmin',tfm_para_user_dmin);
@@ -2039,10 +2052,10 @@ end
 
 function para_push_disp_clearall(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -2055,8 +2068,8 @@ try
     tfm_para_user_para_Deltad=getappdata(0,'tfm_para_user_para_Deltad');
     
     %plot new in axes
-    cla(h_para(1).axes_disp)
-    axes(h_para(1).axes_disp)
+    cla(h_para.axes_disp)
+    axes(h_para.axes_disp)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
     set(gca, 'XTick', []);
     %JFM
@@ -2070,8 +2083,8 @@ try
     tfm_para_user_dmax{tfm_para_user_counter}(:,2)=NaN;
     
     %update para
-    tfm_para_user_para_Deltad{tfm_para_user_counter}=nanmean(tfm_para_user_dmax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_dmin{tfm_para_user_counter}(:,2));
-    set(h_para(1).text_disp,'String',['dcontr=',num2str(tfm_para_user_para_Deltad{tfm_para_user_counter},'%.2e'),'[m]']);
+    tfm_para_user_para_Deltad{tfm_para_user_counter}=mean(tfm_para_user_dmax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_dmin{tfm_para_user_counter}(:,2),'omitnan');
+    set(h_para.text_disp,'String',['dcontr=',num2str(tfm_para_user_para_Deltad{tfm_para_user_counter},'%.2e'),'[m]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_dmin',tfm_para_user_dmin);
@@ -2086,10 +2099,10 @@ end
 
 function para_push_vel_addmax(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -2138,8 +2151,8 @@ try
     v_new(:,1)=[v_init(:,1);v_add(:,1)];
     v_new(:,2)=[v_init(:,2);v_add(:,2)];
     %plot new in axes
-    cla(h_para(1).axes_vel)
-    axes(h_para(1).axes_vel)
+    cla(h_para.axes_vel)
+    axes(h_para.axes_vel)
     plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_velocity{tfm_para_user_counter},'-b'), hold on;
     plot(tfm_para_user_vmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_vmin{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
@@ -2150,10 +2163,10 @@ try
     tfm_para_user_vmax{tfm_para_user_counter}=v_new;
     
     %upate para
-    tfm_para_user_para_vcontr{tfm_para_user_counter}=nanmean(tfm_para_user_vmax{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_vrelax{tfm_para_user_counter}=nanmean(tfm_para_user_vmin{tfm_para_user_counter}(:,2));
-    set(h_para(1).text_vel1,'String',['vcontr=',num2str(tfm_para_user_para_vcontr{tfm_para_user_counter},'%.2e'),'[m/s]']);
-    set(h_para(1).text_vel2,'String',['vrelax=',num2str(tfm_para_user_para_vrelax{tfm_para_user_counter},'%.2e'),'[m/s]']);
+    tfm_para_user_para_vcontr{tfm_para_user_counter}=mean(tfm_para_user_vmax{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_vrelax{tfm_para_user_counter}=mean(tfm_para_user_vmin{tfm_para_user_counter}(:,2),'omitnan');
+    set(h_para.text_vel1,'String',['vcontr=',num2str(tfm_para_user_para_vcontr{tfm_para_user_counter},'%.2e'),'[m/s]']);
+    set(h_para.text_vel2,'String',['vrelax=',num2str(tfm_para_user_para_vrelax{tfm_para_user_counter},'%.2e'),'[m/s]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_vmax',tfm_para_user_vmax);
@@ -2168,10 +2181,10 @@ end
 
 function para_push_vel_addmin(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -2220,8 +2233,8 @@ try
     v_new(:,1)=[v_init(:,1);v_add(:,1)];
     v_new(:,2)=[v_init(:,2);v_add(:,2)];
     %plot new in axes
-    cla(h_para(1).axes_vel)
-    axes(h_para(1).axes_vel)
+    cla(h_para.axes_vel)
+    axes(h_para.axes_vel)
     plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_velocity{tfm_para_user_counter},'-b'), hold on;
     plot(tfm_para_user_vmax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_vmax{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
@@ -2232,10 +2245,10 @@ try
     tfm_para_user_vmin{tfm_para_user_counter}=v_new;
     
     %upate para
-    tfm_para_user_para_vcontr{tfm_para_user_counter}=nanmean(tfm_para_user_vmax{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_vrelax{tfm_para_user_counter}=nanmean(tfm_para_user_vmin{tfm_para_user_counter}(:,2));
-    set(h_para(1).text_vel1,'String',['vcontr=',num2str(tfm_para_user_para_vcontr{tfm_para_user_counter},'%.2e'),'[m/s]']);
-    set(h_para(1).text_vel2,'String',['vrelax=',num2str(tfm_para_user_para_vrelax{tfm_para_user_counter},'%.2e'),'[m/s]']);
+    tfm_para_user_para_vcontr{tfm_para_user_counter}=mean(tfm_para_user_vmax{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_vrelax{tfm_para_user_counter}=mean(tfm_para_user_vmin{tfm_para_user_counter}(:,2),'omitnan');
+    set(h_para.text_vel1,'String',['vcontr=',num2str(tfm_para_user_para_vcontr{tfm_para_user_counter},'%.2e'),'[m/s]']);
+    set(h_para.text_vel2,'String',['vrelax=',num2str(tfm_para_user_para_vrelax{tfm_para_user_counter},'%.2e'),'[m/s]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_vmin',tfm_para_user_vmin);
@@ -2250,10 +2263,10 @@ end
 
 function para_push_vel_removemax(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -2302,8 +2315,8 @@ try
     
     
     %plot new in axes
-    cla(h_para(1).axes_vel)
-    axes(h_para(1).axes_vel)
+    cla(h_para.axes_vel)
+    axes(h_para.axes_vel)
     plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_velocity{tfm_para_user_counter},'-b'), hold on;
     plot(tfm_para_user_vmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_vmin{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
@@ -2315,10 +2328,10 @@ try
     tfm_para_user_vmax{tfm_para_user_counter}=v_new;
     
     %upate para
-    tfm_para_user_para_vcontr{tfm_para_user_counter}=nanmean(tfm_para_user_vmax{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_vrelax{tfm_para_user_counter}=nanmean(tfm_para_user_vmin{tfm_para_user_counter}(:,2));
-    set(h_para(1).text_vel1,'String',['vcontr=',num2str(tfm_para_user_para_vcontr{tfm_para_user_counter},'%.2e'),'[m/s]']);
-    set(h_para(1).text_vel2,'String',['vrelax=',num2str(tfm_para_user_para_vrelax{tfm_para_user_counter},'%.2e'),'[m/s]']);
+    tfm_para_user_para_vcontr{tfm_para_user_counter}=mean(tfm_para_user_vmax{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_vrelax{tfm_para_user_counter}=mean(tfm_para_user_vmin{tfm_para_user_counter}(:,2),'omitnan');
+    set(h_para.text_vel1,'String',['vcontr=',num2str(tfm_para_user_para_vcontr{tfm_para_user_counter},'%.2e'),'[m/s]']);
+    set(h_para.text_vel2,'String',['vrelax=',num2str(tfm_para_user_para_vrelax{tfm_para_user_counter},'%.2e'),'[m/s]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_vmax',tfm_para_user_vmax);
@@ -2333,10 +2346,10 @@ end
 
 function para_push_vel_removemin(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -2385,8 +2398,8 @@ try
     
     
     %plot new in axes
-    cla(h_para(1).axes_vel)
-    axes(h_para(1).axes_vel)
+    cla(h_para.axes_vel)
+    axes(h_para.axes_vel)
     plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_velocity{tfm_para_user_counter},'-b'), hold on;
     plot(tfm_para_user_vmax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_vmax{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
@@ -2397,10 +2410,10 @@ try
     tfm_para_user_vmin{tfm_para_user_counter}=v_new;
     
     %upate para
-    tfm_para_user_para_vcontr{tfm_para_user_counter}=nanmean(tfm_para_user_vmax{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_vrelax{tfm_para_user_counter}=nanmean(tfm_para_user_vmin{tfm_para_user_counter}(:,2));
-    set(h_para(1).text_vel1,'String',['vcontr=',num2str(tfm_para_user_para_vcontr{tfm_para_user_counter},'%.2e'),'[m/s]']);
-    set(h_para(1).text_vel2,'String',['vrelax=',num2str(tfm_para_user_para_vrelax{tfm_para_user_counter},'%.2e'),'[m/s]']);
+    tfm_para_user_para_vcontr{tfm_para_user_counter}=mean(tfm_para_user_vmax{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_vrelax{tfm_para_user_counter}=mean(tfm_para_user_vmin{tfm_para_user_counter}(:,2),'omitnan');
+    set(h_para.text_vel1,'String',['vcontr=',num2str(tfm_para_user_para_vcontr{tfm_para_user_counter},'%.2e'),'[m/s]']);
+    set(h_para.text_vel2,'String',['vrelax=',num2str(tfm_para_user_para_vrelax{tfm_para_user_counter},'%.2e'),'[m/s]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_vmin',tfm_para_user_vmin);
@@ -2415,10 +2428,10 @@ end
 
 function para_push_vel_clearall(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -2432,8 +2445,8 @@ try
     tfm_para_user_para_vrelax=getappdata(0,'tfm_para_user_para_vrelax');
     
     %plot new in axes
-    cla(h_para(1).axes_vel)
-    axes(h_para(1).axes_vel)
+    cla(h_para.axes_vel)
+    axes(h_para.axes_vel)
     plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_velocity{tfm_para_user_counter},'-b'), hold on;
     set(gca, 'XTick', []);
@@ -2446,10 +2459,10 @@ try
     tfm_para_user_vmax{tfm_para_user_counter}(:,2)=NaN;
     
     %upate para
-    tfm_para_user_para_vcontr{tfm_para_user_counter}=nanmean(tfm_para_user_vmax{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_vrelax{tfm_para_user_counter}=nanmean(tfm_para_user_vmin{tfm_para_user_counter}(:,2));
-    set(h_para(1).text_vel1,'String',['vcontr=',num2str(tfm_para_user_para_vcontr{tfm_para_user_counter},'%.2e'),'[m/s]']);
-    set(h_para(1).text_vel2,'String',['vrelax=',num2str(tfm_para_user_para_vrelax{tfm_para_user_counter},'%.2e'),'[m/s]']);
+    tfm_para_user_para_vcontr{tfm_para_user_counter}=mean(tfm_para_user_vmax{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_vrelax{tfm_para_user_counter}=mean(tfm_para_user_vmin{tfm_para_user_counter}(:,2),'omitnan');
+    set(h_para.text_vel1,'String',['vcontr=',num2str(tfm_para_user_para_vcontr{tfm_para_user_counter},'%.2e'),'[m/s]']);
+    set(h_para.text_vel2,'String',['vrelax=',num2str(tfm_para_user_para_vrelax{tfm_para_user_counter},'%.2e'),'[m/s]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_vmin',tfm_para_user_vmin);
@@ -2465,10 +2478,10 @@ end
 
 function para_push_contr_calc(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 try
     tfm_para_user_dt=getappdata(0,'tfm_para_user_dt');
@@ -2496,8 +2509,8 @@ try
     tcontr=zeros(size(tmax,1),4);
     
     %plot min/max points
-    cla(h_para(1).axes_vel)
-    axes(h_para(1).axes_vel)
+    cla(h_para.axes_vel)
+    axes(h_para.axes_vel)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_velocity{tfm_para_user_counter},'-b'), hold on;
     plot(vmax(:,1)/tfm_init_user_framerate{tfm_para_user_counter},vmax(:,2),'.g','MarkerSize',10);
     plot(vmin(:,1)/tfm_init_user_framerate{tfm_para_user_counter},vmin(:,2),'.r','MarkerSize',10);
@@ -2525,8 +2538,8 @@ try
     
     %save new pt vector
     tfm_para_user_tcontr{tfm_para_user_counter}=tcontr;
-    tfm_para_user_para_tcontr{tfm_para_user_counter}=nanmean(dtcontr);
-    set(h_para(1).text_contr,'String',['tcontr=',num2str(tfm_para_user_para_tcontr{tfm_para_user_counter},'%.2e'),'[s]']);
+    tfm_para_user_para_tcontr{tfm_para_user_counter}=mean(dtcontr,'omitnan');
+    set(h_para.text_contr,'String',['tcontr=',num2str(tfm_para_user_para_tcontr{tfm_para_user_counter},'%.2e'),'[s]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_tcontr',tfm_para_user_tcontr);
@@ -2540,10 +2553,10 @@ end
 
 function para_push_freq_add(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -2581,8 +2594,8 @@ try
     t_new(:,4)=[t_init(:,4);t_add(:,4)];
     
     %displ. in double peak
-    cla(h_para(1).axes_freq)
-    axes(h_para(1).axes_freq)
+    cla(h_para.axes_freq)
+    axes(h_para.axes_freq)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
     %plot delta t
     dtcontr=zeros(1,size(t_new,1));
@@ -2598,11 +2611,11 @@ try
     
     %save new pt vector
     tfm_para_user_freq2{tfm_para_user_counter}=t_new;
-    x=nanmean(dtcontr);
+    x=mean(dtcontr,'omitnan');
     
     %display
-    set(h_para(1).text_freq1,'String',['f=',num2str(1/(x+eps),'%.2e'),'[Hz]']);
-    set(h_para(1).text_freq2,'String',['T=',num2str(x,'%.2e'),'[s]']);
+    set(h_para.text_freq1,'String',['f=',num2str(1/(x+eps),'%.2e'),'[Hz]']);
+    set(h_para.text_freq2,'String',['T=',num2str(x,'%.2e'),'[s]']);
     
     tfm_para_user_para_freq2{tfm_para_user_counter}=1/(x+eps);
     
@@ -2618,10 +2631,10 @@ end
 
 function para_push_freq_addfft(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -2643,16 +2656,16 @@ try
     close(hf);
     
     %plot
-    cla(h_para(1).axes_freq)
-    axes(h_para(1).axes_freq)
+    cla(h_para.axes_freq)
+    axes(h_para.axes_freq)
     plot(freq{tfm_para_user_counter},y_fft{tfm_para_user_counter},'-b'), hold on;
     plot(x,y,'.g','MarkerSize',10)
     set(gca, 'XTick', []);
     set(gca, 'YTick', []);
     
     %display
-    set(h_para(1).text_freq1,'String',['f=',num2str(x,'%.2e'),'[Hz]']);
-    set(h_para(1).text_freq2,'String',['T=',num2str(1/x,'%.2e'),'[s]']);
+    set(h_para.text_freq1,'String',['f=',num2str(x,'%.2e'),'[Hz]']);
+    set(h_para.text_freq2,'String',['T=',num2str(1/x,'%.2e'),'[s]']);
     
     tfm_para_user_para_freq{tfm_para_user_counter}=x;
     tfm_para_user_para_freqy{tfm_para_user_counter}=y;
@@ -2671,10 +2684,10 @@ end
 
 function para_push_freq_remove(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -2701,8 +2714,8 @@ try
     t_new(p,:)=[];
     
     %displ. in double peak
-    cla(h_para(1).axes_freq)
-    axes(h_para(1).axes_freq)
+    cla(h_para.axes_freq)
+    axes(h_para.axes_freq)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
     %plot delta t
     dtcontr=zeros(1,size(t_new,1));
@@ -2718,11 +2731,11 @@ try
     
     %save new pt vector
     tfm_para_user_freq2{tfm_para_user_counter}=t_new;
-    x=nanmean(dtcontr);
+    x=mean(dtcontr,'omitnan');
     
     %display
-    set(h_para(1).text_freq1,'String',['f=',num2str(1/(x+eps),'%.2e'),'[Hz]']);
-    set(h_para(1).text_freq2,'String',['T=',num2str(x,'%.2e'),'[s]']);
+    set(h_para.text_freq1,'String',['f=',num2str(1/(x+eps),'%.2e'),'[Hz]']);
+    set(h_para.text_freq2,'String',['T=',num2str(x,'%.2e'),'[s]']);
     
     tfm_para_user_para_freq2{tfm_para_user_counter}=1/(x+eps);
     
@@ -2738,10 +2751,10 @@ end
 
 function para_push_freq_clearall(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -2757,8 +2770,8 @@ try
     t_new(:,3)=NaN;
     t_new(:,4)=NaN;
     
-    cla(h_para(1).axes_freq)
-    axes(h_para(1).axes_freq)
+    cla(h_para.axes_freq)
+    axes(h_para.axes_freq)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
     %plot delta t
     dtcontr=zeros(1,size(t_new,1));
@@ -2773,12 +2786,12 @@ try
     set(gca, 'YTick', []);
     %save new pt vector
     tfm_para_user_freq2{tfm_para_user_counter}=t_new;
-    tfm_para_user_para_freq2{tfm_para_user_counter}=nanmean(dtcontr);
+    tfm_para_user_para_freq2{tfm_para_user_counter}=mean(dtcontr,'omitnan');
     x=tfm_para_user_para_freq2{tfm_para_user_counter};
     
     %display
-    set(h_para(1).text_freq1,'String',['f=',num2str(1/(x+eps),'%.2e'),'[Hz]']);
-    set(h_para(1).text_freq2,'String',['T=',num2str(x,'%.2e'),'[s]']);
+    set(h_para.text_freq1,'String',['f=',num2str(1/(x+eps),'%.2e'),'[Hz]']);
+    set(h_para.text_freq2,'String',['T=',num2str(x,'%.2e'),'[s]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_freq2',tfm_para_user_freq2);
@@ -2792,10 +2805,10 @@ end
 
 function para_push_forces_addmax(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -2818,7 +2831,7 @@ try
     tfm_para_user_para_DeltaFy=getappdata(0,'tfm_para_user_para_DeltaFy');
     
     %check ftot, fx, or fy
-    if get(h_para(1).radiobutton_forcetot,'Value') %ftot
+    if get(h_para.radiobutton_forcetot,'Value') %ftot
         
         F_init=tfm_para_user_Fmax{tfm_para_user_counter};
         Fx_init=tfm_para_user_Fxmax{tfm_para_user_counter};
@@ -2866,8 +2879,8 @@ try
         Fy_new(:,1)=[Fy_init(:,1);Fy_add(:,1)];
         Fy_new(:,2)=[Fy_init(:,2);Fy_add(:,2)];
         %plot new in axes
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_F_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(tfm_para_user_Fmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fmin{tfm_para_user_counter}(:,2)*1e9,'.r','MarkerSize',10), hold on;
         plot(F_new(:,1)/tfm_init_user_framerate{tfm_para_user_counter},F_new(:,2)*1e9,'.g','MarkerSize',10), hold on;
@@ -2879,12 +2892,12 @@ try
         tfm_para_user_Fymax{tfm_para_user_counter}=Fy_new;
         
         %update para
-        tfm_para_user_para_DeltaF{tfm_para_user_counter}=nanmean(tfm_para_user_Fmax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fmin{tfm_para_user_counter}(:,2));
-        tfm_para_user_para_DeltaFx{tfm_para_user_counter}=nanmean(tfm_para_user_Fxmax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fxmin{tfm_para_user_counter}(:,2));
-        tfm_para_user_para_DeltaFy{tfm_para_user_counter}=nanmean(tfm_para_user_Fymax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fymin{tfm_para_user_counter}(:,2));
-        set(h_para(1).text_forces,'String',['F=',num2str(tfm_para_user_para_DeltaF{tfm_para_user_counter},'%.2e'),'[N]']);
+        tfm_para_user_para_DeltaF{tfm_para_user_counter}=mean(tfm_para_user_Fmax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fmin{tfm_para_user_counter}(:,2),'omitnan');
+        tfm_para_user_para_DeltaFx{tfm_para_user_counter}=mean(tfm_para_user_Fxmax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fxmin{tfm_para_user_counter}(:,2),'omitnan');
+        tfm_para_user_para_DeltaFy{tfm_para_user_counter}=mean(tfm_para_user_Fymax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fymin{tfm_para_user_counter}(:,2),'omitnan');
+        set(h_para.text_forces,'String',['F=',num2str(tfm_para_user_para_DeltaF{tfm_para_user_counter},'%.2e'),'[N]']);
         
-    elseif get(h_para(1).radiobutton_forcex,'Value') %fx
+    elseif get(h_para.radiobutton_forcex,'Value') %fx
         
         F_init=tfm_para_user_Fxmax{tfm_para_user_counter};
         hf=figure;
@@ -2921,8 +2934,8 @@ try
         F_new(:,1)=[F_init(:,1);F_add(:,1)];
         F_new(:,2)=[F_init(:,2);F_add(:,2)];
         %plot new in axes
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Fx_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(tfm_para_user_Fxmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fxmin{tfm_para_user_counter}(:,2)*1e9,'.r','MarkerSize',10), hold on;
         plot(F_new(:,1)/tfm_init_user_framerate{tfm_para_user_counter},F_new(:,2)*1e9,'.g','MarkerSize',10), hold on;
@@ -2932,10 +2945,10 @@ try
         tfm_para_user_Fxmax{tfm_para_user_counter}=F_new;
         
         %update para
-        tfm_para_user_para_DeltaFx{tfm_para_user_counter}=nanmean(tfm_para_user_Fxmax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fxmin{tfm_para_user_counter}(:,2));
-        set(h_para(1).text_forces,'String',['Fx=',num2str(tfm_para_user_para_DeltaFx{tfm_para_user_counter},'%.2e'),'[N]']);
+        tfm_para_user_para_DeltaFx{tfm_para_user_counter}=mean(tfm_para_user_Fxmax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fxmin{tfm_para_user_counter}(:,2),'omitnan');
+        set(h_para.text_forces,'String',['Fx=',num2str(tfm_para_user_para_DeltaFx{tfm_para_user_counter},'%.2e'),'[N]']);
         
-    elseif get(h_para(1).radiobutton_forcey,'Value') %fy
+    elseif get(h_para.radiobutton_forcey,'Value') %fy
         
         F_init=tfm_para_user_Fymax{tfm_para_user_counter};
         hf=figure;
@@ -2972,8 +2985,8 @@ try
         F_new(:,1)=[F_init(:,1);F_add(:,1)];
         F_new(:,2)=[F_init(:,2);F_add(:,2)];
         %plot new in axes
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Fy_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(tfm_para_user_Fymin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fymin{tfm_para_user_counter}(:,2)*1e9,'.r','MarkerSize',10), hold on;
         plot(F_new(:,1)/tfm_init_user_framerate{tfm_para_user_counter},F_new(:,2)*1e9,'.g','MarkerSize',10), hold on;
@@ -2983,8 +2996,8 @@ try
         tfm_para_user_Fymax{tfm_para_user_counter}=F_new;
         
         %update para
-        tfm_para_user_para_DeltaFy{tfm_para_user_counter}=nanmean(tfm_para_user_Fymax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fymin{tfm_para_user_counter}(:,2));
-        set(h_para(1).text_forces,'String',['Fy=',num2str(tfm_para_user_para_DeltaFy{tfm_para_user_counter},'%.2e'),'[N]']);
+        tfm_para_user_para_DeltaFy{tfm_para_user_counter}=mean(tfm_para_user_Fymax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fymin{tfm_para_user_counter}(:,2),'omitnan');
+        set(h_para.text_forces,'String',['Fy=',num2str(tfm_para_user_para_DeltaFy{tfm_para_user_counter},'%.2e'),'[N]']);
         
     end
     
@@ -3004,10 +3017,10 @@ end
 
 function para_push_forces_addmin(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 try
     %load shared needed para
@@ -3027,7 +3040,7 @@ try
     tfm_para_user_F_tot=getappdata(0,'tfm_para_user_F_tot');
     tfm_para_user_para_DeltaF=getappdata(0,'tfm_para_user_para_DeltaF');
     
-    if get(h_para(1).radiobutton_forcex,'Value') %Fx
+    if get(h_para.radiobutton_forcex,'Value') %Fx
         
         Fx_init=tfm_para_user_Fxmin{tfm_para_user_counter};
         hf=figure;
@@ -3064,8 +3077,8 @@ try
         Fx_new(:,1)=[Fx_init(:,1);Fx_add(:,1)];
         Fx_new(:,2)=[Fx_init(:,2);Fx_add(:,2)];
         %plot new in axes
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Fx_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(tfm_para_user_Fxmax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fxmax{tfm_para_user_counter}(:,2)*1e9,'.g','MarkerSize',10), hold on;
         plot(Fx_new(:,1)/tfm_init_user_framerate{tfm_para_user_counter},Fx_new(:,2)*1e9,'.r','MarkerSize',10), hold on;
@@ -3075,10 +3088,10 @@ try
         tfm_para_user_Fxmin{tfm_para_user_counter}=Fx_new;
         
         %update para
-        tfm_para_user_para_DeltaFx{tfm_para_user_counter}=nanmean(tfm_para_user_Fxmax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fxmin{tfm_para_user_counter}(:,2));
-        set(h_para(1).text_forces,'String',['Fx=',num2str(tfm_para_user_para_DeltaFx{tfm_para_user_counter},'%.2e'),'[N]']);
+        tfm_para_user_para_DeltaFx{tfm_para_user_counter}=mean(tfm_para_user_Fxmax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fxmin{tfm_para_user_counter}(:,2),'omitnan');
+        set(h_para.text_forces,'String',['Fx=',num2str(tfm_para_user_para_DeltaFx{tfm_para_user_counter},'%.2e'),'[N]']);
         
-    elseif get(h_para(1).radiobutton_forcey,'Value') %Fy
+    elseif get(h_para.radiobutton_forcey,'Value') %Fy
         
         Fy_init=tfm_para_user_Fymin{tfm_para_user_counter};
         hf=figure;
@@ -3115,8 +3128,8 @@ try
         Fy_new(:,1)=[Fy_init(:,1);Fy_add(:,1)];
         Fy_new(:,2)=[Fy_init(:,2);Fy_add(:,2)];
         %plot new in axes
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Fy_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(tfm_para_user_Fymax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fymax{tfm_para_user_counter}(:,2)*1e9,'.g','MarkerSize',10), hold on;
         plot(Fy_new(:,1)/tfm_init_user_framerate{tfm_para_user_counter},Fy_new(:,2)*1e9,'.r','MarkerSize',10), hold on;
@@ -3126,10 +3139,10 @@ try
         tfm_para_user_Fymin{tfm_para_user_counter}=Fy_new;
         
         %update para
-        tfm_para_user_para_DeltaFy{tfm_para_user_counter}=nanmean(tfm_para_user_Fymax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fymin{tfm_para_user_counter}(:,2));
-        set(h_para(1).text_forces,'String',['Fy=',num2str(tfm_para_user_para_DeltaFy{tfm_para_user_counter},'%.2e'),'[N]']);
+        tfm_para_user_para_DeltaFy{tfm_para_user_counter}=mean(tfm_para_user_Fymax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fymin{tfm_para_user_counter}(:,2),'omitnan');
+        set(h_para.text_forces,'String',['Fy=',num2str(tfm_para_user_para_DeltaFy{tfm_para_user_counter},'%.2e'),'[N]']);
         
-    elseif get(h_para(1).radiobutton_forcetot,'Value') %F
+    elseif get(h_para.radiobutton_forcetot,'Value') %F
         
         F_init=tfm_para_user_Fmin{tfm_para_user_counter};
         Fx_init=tfm_para_user_Fxmin{tfm_para_user_counter};
@@ -3177,8 +3190,8 @@ try
         Fy_new(:,1)=[Fy_init(:,1);Fy_add(:,1)];
         Fy_new(:,2)=[Fy_init(:,2);Fy_add(:,2)];
         %plot new in axes
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_F_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(tfm_para_user_Fmax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fmax{tfm_para_user_counter}(:,2)*1e9,'.g','MarkerSize',10), hold on;
         plot(F_new(:,1)/tfm_init_user_framerate{tfm_para_user_counter},F_new(:,2)*1e9,'.r','MarkerSize',10), hold on;
@@ -3190,10 +3203,10 @@ try
         tfm_para_user_Fymin{tfm_para_user_counter}=Fy_new;
         
         %update para
-        tfm_para_user_para_DeltaF{tfm_para_user_counter}=nanmean(tfm_para_user_Fmax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fmin{tfm_para_user_counter}(:,2));
-        tfm_para_user_para_DeltaFx{tfm_para_user_counter}=nanmean(tfm_para_user_Fxmax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fxmin{tfm_para_user_counter}(:,2));
-        tfm_para_user_para_DeltaFy{tfm_para_user_counter}=nanmean(tfm_para_user_Fymax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fymin{tfm_para_user_counter}(:,2));
-        set(h_para(1).text_forces,'String',['F=',num2str(tfm_para_user_para_DeltaF{tfm_para_user_counter},'%.2e'),'[N]']);
+        tfm_para_user_para_DeltaF{tfm_para_user_counter}=mean(tfm_para_user_Fmax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fmin{tfm_para_user_counter}(:,2),'omitnan');
+        tfm_para_user_para_DeltaFx{tfm_para_user_counter}=mean(tfm_para_user_Fxmax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fxmin{tfm_para_user_counter}(:,2),'omitnan');
+        tfm_para_user_para_DeltaFy{tfm_para_user_counter}=mean(tfm_para_user_Fymax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fymin{tfm_para_user_counter}(:,2),'omitnan');
+        set(h_para.text_forces,'String',['F=',num2str(tfm_para_user_para_DeltaF{tfm_para_user_counter},'%.2e'),'[N]']);
         
     end
     
@@ -3214,10 +3227,10 @@ end
 
 function para_push_forces_removemax(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 try
     
@@ -3239,7 +3252,7 @@ try
     tfm_para_user_para_DeltaF=getappdata(0,'tfm_para_user_para_DeltaF');
     
     %remove Fimax pts
-    if get(h_para(1).radiobutton_forcex,'Value') %Fx
+    if get(h_para.radiobutton_forcex,'Value') %Fx
         
         Fx_init=tfm_para_user_Fxmax{tfm_para_user_counter};
         hf=figure;
@@ -3274,8 +3287,8 @@ try
         Fx_new(p,:)=[];
         
         %plot new in axes
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Fx_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(tfm_para_user_Fxmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fxmin{tfm_para_user_counter}(:,2)*1e9,'.r','MarkerSize',10), hold on;
         plot(Fx_new(:,1)/tfm_init_user_framerate{tfm_para_user_counter},Fx_new(:,2)*1e9,'.g','MarkerSize',10), hold on;
@@ -3285,10 +3298,10 @@ try
         tfm_para_user_Fxmax{tfm_para_user_counter}=Fx_new;
         
         %update para
-        tfm_para_user_para_DeltaFx{tfm_para_user_counter}=nanmean(tfm_para_user_Fxmax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fxmin{tfm_para_user_counter}(:,2));
-        set(h_para(1).text_forces,'String',['Fx=',num2str(tfm_para_user_para_DeltaFx{tfm_para_user_counter},'%.2e'),'[N]']);
+        tfm_para_user_para_DeltaFx{tfm_para_user_counter}=mean(tfm_para_user_Fxmax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fxmin{tfm_para_user_counter}(:,2),'omitnan');
+        set(h_para.text_forces,'String',['Fx=',num2str(tfm_para_user_para_DeltaFx{tfm_para_user_counter},'%.2e'),'[N]']);
         
-    elseif get(h_para(1).radiobutton_forcey,'Value') %Fy
+    elseif get(h_para.radiobutton_forcey,'Value') %Fy
         
         Fy_init=tfm_para_user_Fymax{tfm_para_user_counter};
         hf=figure;
@@ -3322,8 +3335,8 @@ try
         Fy_new=Fy_init;
         Fy_new(p,:)=[];
         %plot new in axes
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Fy_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(tfm_para_user_Fymin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fymin{tfm_para_user_counter}(:,2)*1e9,'.r','MarkerSize',10), hold on;
         plot(Fy_new(:,1)/tfm_init_user_framerate{tfm_para_user_counter},Fy_new(:,2)*1e9,'.g','MarkerSize',10), hold on;
@@ -3333,10 +3346,10 @@ try
         tfm_para_user_Fymax{tfm_para_user_counter}=Fy_new;
         
         %update para
-        tfm_para_user_para_DeltaFy{tfm_para_user_counter}=nanmean(tfm_para_user_Fymax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fymin{tfm_para_user_counter}(:,2));
-        set(h_para(1).text_forces,'String',['Fy=',num2str(tfm_para_user_para_DeltaFy{tfm_para_user_counter},'%.2e'),'[N]']);
+        tfm_para_user_para_DeltaFy{tfm_para_user_counter}=mean(tfm_para_user_Fymax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fymin{tfm_para_user_counter}(:,2),'omitnan');
+        set(h_para.text_forces,'String',['Fy=',num2str(tfm_para_user_para_DeltaFy{tfm_para_user_counter},'%.2e'),'[N]']);
         
-    elseif get(h_para(1).radiobutton_forcetot,'Value') %F
+    elseif get(h_para.radiobutton_forcetot,'Value') %F
         
         F_init=tfm_para_user_Fmax{tfm_para_user_counter};
         Fx_init=tfm_para_user_Fxmax{tfm_para_user_counter};
@@ -3378,8 +3391,8 @@ try
         Fy_new(p,:)=[];
         
         %plot new in axes
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_F_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(tfm_para_user_Fmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fmin{tfm_para_user_counter}(:,2)*1e9,'.r','MarkerSize',10), hold on;
         plot(F_new(:,1)/tfm_init_user_framerate{tfm_para_user_counter},F_new(:,2)*1e9,'.g','MarkerSize',10), hold on;
@@ -3391,10 +3404,10 @@ try
         tfm_para_user_Fymax{tfm_para_user_counter}=Fy_new;
         
         %update para
-        tfm_para_user_para_DeltaF{tfm_para_user_counter}=nanmean(tfm_para_user_Fmax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fmin{tfm_para_user_counter}(:,2));
-        tfm_para_user_para_DeltaFx{tfm_para_user_counter}=nanmean(tfm_para_user_Fxmax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fxmin{tfm_para_user_counter}(:,2));
-        tfm_para_user_para_DeltaFy{tfm_para_user_counter}=nanmean(tfm_para_user_Fymax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fymin{tfm_para_user_counter}(:,2));
-        set(h_para(1).text_forces,'String',['F=',num2str(tfm_para_user_para_DeltaF{tfm_para_user_counter},'%.2e'),'[N]']);
+        tfm_para_user_para_DeltaF{tfm_para_user_counter}=mean(tfm_para_user_Fmax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fmin{tfm_para_user_counter}(:,2),'omitnan');
+        tfm_para_user_para_DeltaFx{tfm_para_user_counter}=mean(tfm_para_user_Fxmax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fxmin{tfm_para_user_counter}(:,2),'omitnan');
+        tfm_para_user_para_DeltaFy{tfm_para_user_counter}=mean(tfm_para_user_Fymax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fymin{tfm_para_user_counter}(:,2),'omitnan');
+        set(h_para.text_forces,'String',['F=',num2str(tfm_para_user_para_DeltaF{tfm_para_user_counter},'%.2e'),'[N]']);
         
     end
     
@@ -3414,10 +3427,10 @@ end
 
 function para_push_forces_removemin(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 try
     
@@ -3438,7 +3451,7 @@ try
     tfm_para_user_F_tot=getappdata(0,'tfm_para_user_F_tot');
     tfm_para_user_para_DeltaF=getappdata(0,'tfm_para_user_para_DeltaF');
     
-    if get(h_para(1).radiobutton_forcex,'Value') %Fx
+    if get(h_para.radiobutton_forcex,'Value') %Fx
         
         Fx_init=tfm_para_user_Fxmin{tfm_para_user_counter};
         hf=figure;
@@ -3474,8 +3487,8 @@ try
         Fx_new(p,:)=[];
         
         %plot new in axes
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Fx_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(tfm_para_user_Fxmax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fxmax{tfm_para_user_counter}(:,2)*1e9,'.g','MarkerSize',10), hold on;
         plot(Fx_new(:,1)/tfm_init_user_framerate{tfm_para_user_counter},Fx_new(:,2)*1e9,'.r','MarkerSize',10), hold on;
@@ -3485,10 +3498,10 @@ try
         tfm_para_user_Fxmin{tfm_para_user_counter}=Fx_new;
         
         %update para
-        tfm_para_user_para_DeltaFx{tfm_para_user_counter}=nanmean(tfm_para_user_Fxmax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fxmin{tfm_para_user_counter}(:,2));
-        set(h_para(1).text_forces,'String',['Fx=',num2str(tfm_para_user_para_DeltaFx{tfm_para_user_counter},'%.2e'),'[N]']);
+        tfm_para_user_para_DeltaFx{tfm_para_user_counter}=mean(tfm_para_user_Fxmax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fxmin{tfm_para_user_counter}(:,2),'omitnan');
+        set(h_para.text_forces,'String',['Fx=',num2str(tfm_para_user_para_DeltaFx{tfm_para_user_counter},'%.2e'),'[N]']);
         
-    elseif get(h_para(1).radiobutton_forcey,'Value') %Fy
+    elseif get(h_para.radiobutton_forcey,'Value') %Fy
         
         Fy_init=tfm_para_user_Fymin{tfm_para_user_counter};
         hf=figure;
@@ -3523,8 +3536,8 @@ try
         Fy_new(:,2)=Fy_init(:,2);
         Fy_new(p,:)=[];
         %plot new in axes
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Fy_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(tfm_para_user_Fymax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fymax{tfm_para_user_counter}(:,2)*1e9,'.g','MarkerSize',10), hold on;
         plot(Fy_new(:,1)/tfm_init_user_framerate{tfm_para_user_counter},Fy_new(:,2)*1e9,'.r','MarkerSize',10), hold on;
@@ -3534,10 +3547,10 @@ try
         tfm_para_user_Fymin{tfm_para_user_counter}=Fy_new;
         
         %update para
-        tfm_para_user_para_DeltaFy{tfm_para_user_counter}=nanmean(tfm_para_user_Fymax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fymin{tfm_para_user_counter}(:,2));
-        set(h_para(1).text_forces,'String',['Fy=',num2str(tfm_para_user_para_DeltaFy{tfm_para_user_counter},'%.2e'),'[N]']);
+        tfm_para_user_para_DeltaFy{tfm_para_user_counter}=mean(tfm_para_user_Fymax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fymin{tfm_para_user_counter}(:,2),'omitnan');
+        set(h_para.text_forces,'String',['Fy=',num2str(tfm_para_user_para_DeltaFy{tfm_para_user_counter},'%.2e'),'[N]']);
         
-    elseif get(h_para(1).radiobutton_forcetot,'Value') %F
+    elseif get(h_para.radiobutton_forcetot,'Value') %F
         
         F_init=tfm_para_user_Fmin{tfm_para_user_counter};
         Fx_init=tfm_para_user_Fxmin{tfm_para_user_counter};
@@ -3579,8 +3592,8 @@ try
         Fy_new(p,:)=[];
         
         %plot new in axes
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_F_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(tfm_para_user_Fmax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fmax{tfm_para_user_counter}(:,2)*1e9,'.g','MarkerSize',10), hold on;
         plot(F_new(:,1)/tfm_init_user_framerate{tfm_para_user_counter},F_new(:,2)*1e9,'.r','MarkerSize',10), hold on;
@@ -3592,10 +3605,10 @@ try
         tfm_para_user_Fymin{tfm_para_user_counter}=Fy_new;
         
         %update para
-        tfm_para_user_para_DeltaF{tfm_para_user_counter}=nanmean(tfm_para_user_Fmax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fmin{tfm_para_user_counter}(:,2));
-        tfm_para_user_para_DeltaFx{tfm_para_user_counter}=nanmean(tfm_para_user_Fxmax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fxmin{tfm_para_user_counter}(:,2));
-        tfm_para_user_para_DeltaFy{tfm_para_user_counter}=nanmean(tfm_para_user_Fymax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fymin{tfm_para_user_counter}(:,2));
-        set(h_para(1).text_forces,'String',['F=',num2str(tfm_para_user_para_DeltaF{tfm_para_user_counter},'%.2e'),'[N]']);
+        tfm_para_user_para_DeltaF{tfm_para_user_counter}=mean(tfm_para_user_Fmax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fmin{tfm_para_user_counter}(:,2),'omitnan');
+        tfm_para_user_para_DeltaFx{tfm_para_user_counter}=mean(tfm_para_user_Fxmax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fxmin{tfm_para_user_counter}(:,2),'omitnan');
+        tfm_para_user_para_DeltaFy{tfm_para_user_counter}=mean(tfm_para_user_Fymax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fymin{tfm_para_user_counter}(:,2),'omitnan');
+        set(h_para.text_forces,'String',['F=',num2str(tfm_para_user_para_DeltaF{tfm_para_user_counter},'%.2e'),'[N]']);
         
     end
     
@@ -3616,10 +3629,10 @@ end
 
 function para_push_forces_clearall(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 try
     
@@ -3639,11 +3652,11 @@ try
     tfm_para_user_F_tot=getappdata(0,'tfm_para_user_F_tot');
     tfm_para_user_para_DeltaF=getappdata(0,'tfm_para_user_para_DeltaF');
     
-    if get(h_para(1).radiobutton_forcex,'Value') %Fx
+    if get(h_para.radiobutton_forcex,'Value') %Fx
         
         %plot new in axes
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Fx_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
@@ -3655,14 +3668,14 @@ try
         tfm_para_user_Fxmax{tfm_para_user_counter}(:,2)=NaN;
         
         %update para
-        tfm_para_user_para_DeltaFx{tfm_para_user_counter}=nanmean(tfm_para_user_Fxmax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fxmin{tfm_para_user_counter}(:,2));
-        set(h_para(1).text_forces,'String',['Fx=',num2str(tfm_para_user_para_DeltaFx{tfm_para_user_counter},'%.2e'),'[N]']);
+        tfm_para_user_para_DeltaFx{tfm_para_user_counter}=mean(tfm_para_user_Fxmax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fxmin{tfm_para_user_counter}(:,2),'omitnan');
+        set(h_para.text_forces,'String',['Fx=',num2str(tfm_para_user_para_DeltaFx{tfm_para_user_counter},'%.2e'),'[N]']);
         
-    elseif get(h_para(1).radiobutton_forcey,'Value') %Fy
+    elseif get(h_para.radiobutton_forcey,'Value') %Fy
         
         %plot new in axes
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Fy_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
@@ -3674,14 +3687,14 @@ try
         tfm_para_user_Fymax{tfm_para_user_counter}(:,2)=NaN;
         
         %update para
-        tfm_para_user_para_DeltaFy{tfm_para_user_counter}=nanmean(tfm_para_user_Fymax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fymin{tfm_para_user_counter}(:,2));
-        set(h_para(1).text_forces,'String',['Fy=',num2str(tfm_para_user_para_DeltaFy{tfm_para_user_counter},'%.2e'),'[N]']);
+        tfm_para_user_para_DeltaFy{tfm_para_user_counter}=mean(tfm_para_user_Fymax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fymin{tfm_para_user_counter}(:,2),'omitnan');
+        set(h_para.text_forces,'String',['Fy=',num2str(tfm_para_user_para_DeltaFy{tfm_para_user_counter},'%.2e'),'[N]']);
         
-    elseif get(h_para(1).radiobutton_forcetot,'Value') %F
+    elseif get(h_para.radiobutton_forcetot,'Value') %F
         
         %plot new in axes
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_F_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
@@ -3701,10 +3714,10 @@ try
         tfm_para_user_Fymax{tfm_para_user_counter}(:,2)=NaN;
         
         %update para
-        tfm_para_user_para_DeltaF{tfm_para_user_counter}=nanmean(tfm_para_user_Fmax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fmin{tfm_para_user_counter}(:,2));
-        tfm_para_user_para_DeltaFx{tfm_para_user_counter}=nanmean(tfm_para_user_Fxmax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fxmin{tfm_para_user_counter}(:,2));
-        tfm_para_user_para_DeltaFy{tfm_para_user_counter}=nanmean(tfm_para_user_Fymax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Fymin{tfm_para_user_counter}(:,2));
-        set(h_para(1).text_forces,'String',['Fx=',num2str(tfm_para_user_para_DeltaF{tfm_para_user_counter},'%.2e'),'[N]']);
+        tfm_para_user_para_DeltaF{tfm_para_user_counter}=mean(tfm_para_user_Fmax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fmin{tfm_para_user_counter}(:,2),'omitnan');
+        tfm_para_user_para_DeltaFx{tfm_para_user_counter}=mean(tfm_para_user_Fxmax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fxmin{tfm_para_user_counter}(:,2),'omitnan');
+        tfm_para_user_para_DeltaFy{tfm_para_user_counter}=mean(tfm_para_user_Fymax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Fymin{tfm_para_user_counter}(:,2),'omitnan');
+        set(h_para.text_forces,'String',['Fx=',num2str(tfm_para_user_para_DeltaF{tfm_para_user_counter},'%.2e'),'[N]']);
         
     end
     
@@ -3727,10 +3740,10 @@ end
 
 function para_push_power_addmax(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -3779,8 +3792,8 @@ try
     P_new(:,1)=[P_init(:,1);P_add(:,1)];
     P_new(:,2)=[P_init(:,2);P_add(:,2)];
     %plot new in axes
-    cla(h_para(1).axes_power)
-    axes(h_para(1).axes_power)
+    cla(h_para.axes_power)
+    axes(h_para.axes_power)
     plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_power{tfm_para_user_counter}*1e12,'-b'), hold on;
     plot(tfm_para_user_Pmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Pmin{tfm_para_user_counter}(:,2)*1e12,'.r','MarkerSize',10), hold on;
@@ -3791,10 +3804,10 @@ try
     tfm_para_user_Pmax{tfm_para_user_counter}=P_new;
     
     %upate para
-    tfm_para_user_para_Pcontr{tfm_para_user_counter}=nanmean(tfm_para_user_Pmax{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_Prelax{tfm_para_user_counter}=nanmean(tfm_para_user_Pmin{tfm_para_user_counter}(:,2));
-    set(h_para(1).text_power1,'String',['Pcontr=',num2str(tfm_para_user_para_Pcontr{tfm_para_user_counter},'%.2e'),'[W]']);
-    set(h_para(1).text_power2,'String',['Prelax=',num2str(tfm_para_user_para_Prelax{tfm_para_user_counter},'%.2e'),'[W]']);
+    tfm_para_user_para_Pcontr{tfm_para_user_counter}=mean(tfm_para_user_Pmax{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_Prelax{tfm_para_user_counter}=mean(tfm_para_user_Pmin{tfm_para_user_counter}(:,2),'omitnan');
+    set(h_para.text_power1,'String',['Pcontr=',num2str(tfm_para_user_para_Pcontr{tfm_para_user_counter},'%.2e'),'[W]']);
+    set(h_para.text_power2,'String',['Prelax=',num2str(tfm_para_user_para_Prelax{tfm_para_user_counter},'%.2e'),'[W]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_Pmax',tfm_para_user_Pmax);
@@ -3811,10 +3824,10 @@ end
 
 function para_push_power_addmin(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -3863,8 +3876,8 @@ try
     P_new(:,1)=[P_init(:,1);P_add(:,1)];
     P_new(:,2)=[P_init(:,2);P_add(:,2)];
     %plot new in axes
-    cla(h_para(1).axes_power)
-    axes(h_para(1).axes_power)
+    cla(h_para.axes_power)
+    axes(h_para.axes_power)
     plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_power{tfm_para_user_counter}*1e12,'-b'), hold on;
     plot(tfm_para_user_Pmax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Pmax{tfm_para_user_counter}(:,2)*1e12,'.g','MarkerSize',10), hold on;
@@ -3875,10 +3888,10 @@ try
     tfm_para_user_Pmin{tfm_para_user_counter}=P_new;
     
     %upate para
-    tfm_para_user_para_Pcontr{tfm_para_user_counter}=nanmean(tfm_para_user_Pmax{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_Prelax{tfm_para_user_counter}=nanmean(tfm_para_user_Pmin{tfm_para_user_counter}(:,2));
-    set(h_para(1).text_power1,'String',['Pcontr=',num2str(tfm_para_user_para_Pcontr{tfm_para_user_counter},'%.2e'),'[W]']);
-    set(h_para(1).text_power2,'String',['Prelax=',num2str(tfm_para_user_para_Prelax{tfm_para_user_counter},'%.2e'),'[W]']);
+    tfm_para_user_para_Pcontr{tfm_para_user_counter}=mean(tfm_para_user_Pmax{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_Prelax{tfm_para_user_counter}=mean(tfm_para_user_Pmin{tfm_para_user_counter}(:,2),'omitnan');
+    set(h_para.text_power1,'String',['Pcontr=',num2str(tfm_para_user_para_Pcontr{tfm_para_user_counter},'%.2e'),'[W]']);
+    set(h_para.text_power2,'String',['Prelax=',num2str(tfm_para_user_para_Prelax{tfm_para_user_counter},'%.2e'),'[W]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_Pmin',tfm_para_user_Pmin);
@@ -3893,10 +3906,10 @@ end
 
 function para_push_power_removemax(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -3945,8 +3958,8 @@ try
     
     
     %plot new in axes
-    cla(h_para(1).axes_power)
-    axes(h_para(1).axes_power)
+    cla(h_para.axes_power)
+    axes(h_para.axes_power)
     plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_power{tfm_para_user_counter}*1e12,'-b'), hold on;
     plot(tfm_para_user_Pmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Pmin{tfm_para_user_counter}(:,2)*1e12,'.r','MarkerSize',10), hold on;
@@ -3958,10 +3971,10 @@ try
     tfm_para_user_Pmax{tfm_para_user_counter}=P_new;
     
     %upate para
-    tfm_para_user_para_Pcontr{tfm_para_user_counter}=nanmean(tfm_para_user_Pmax{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_Prelax{tfm_para_user_counter}=nanmean(tfm_para_user_Pmin{tfm_para_user_counter}(:,2));
-    set(h_para(1).text_power1,'String',['Pcontr=',num2str(tfm_para_user_para_Pcontr{tfm_para_user_counter},'%.2e'),'[W]']);
-    set(h_para(1).text_power2,'String',['Prelax=',num2str(tfm_para_user_para_Prelax{tfm_para_user_counter},'%.2e'),'[W]']);
+    tfm_para_user_para_Pcontr{tfm_para_user_counter}=mean(tfm_para_user_Pmax{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_Prelax{tfm_para_user_counter}=mean(tfm_para_user_Pmin{tfm_para_user_counter}(:,2),'omitnan');
+    set(h_para.text_power1,'String',['Pcontr=',num2str(tfm_para_user_para_Pcontr{tfm_para_user_counter},'%.2e'),'[W]']);
+    set(h_para.text_power2,'String',['Prelax=',num2str(tfm_para_user_para_Prelax{tfm_para_user_counter},'%.2e'),'[W]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_Pmax',tfm_para_user_Pmax);
@@ -3977,10 +3990,10 @@ end
 
 function para_push_power_removemin(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -4029,8 +4042,8 @@ try
     
     
     %plot new in axes
-    cla(h_para(1).axes_power)
-    axes(h_para(1).axes_power)
+    cla(h_para.axes_power)
+    axes(h_para.axes_power)
     plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_power{tfm_para_user_counter}*1e12,'-b'), hold on;
     plot(tfm_para_user_Pmax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Pmax{tfm_para_user_counter}(:,2)*1e12,'.g','MarkerSize',10), hold on;
@@ -4041,10 +4054,10 @@ try
     tfm_para_user_Pmin{tfm_para_user_counter}=P_new;
     
     %upate para
-    tfm_para_user_para_Pcontr{tfm_para_user_counter}=nanmean(tfm_para_user_Pmax{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_Prelax{tfm_para_user_counter}=nanmean(tfm_para_user_Pmin{tfm_para_user_counter}(:,2));
-    set(h_para(1).text_power1,'String',['Pcontr=',num2str(tfm_para_user_para_Pcontr{tfm_para_user_counter},'%.2e'),'[W]']);
-    set(h_para(1).text_power2,'String',['Prelax=',num2str(tfm_para_user_para_Prelax{tfm_para_user_counter},'%.2e'),'[W]']);
+    tfm_para_user_para_Pcontr{tfm_para_user_counter}=mean(tfm_para_user_Pmax{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_Prelax{tfm_para_user_counter}=mean(tfm_para_user_Pmin{tfm_para_user_counter}(:,2),'omitnan');
+    set(h_para.text_power1,'String',['Pcontr=',num2str(tfm_para_user_para_Pcontr{tfm_para_user_counter},'%.2e'),'[W]']);
+    set(h_para.text_power2,'String',['Prelax=',num2str(tfm_para_user_para_Prelax{tfm_para_user_counter},'%.2e'),'[W]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_Pmin',tfm_para_user_Pmin);
@@ -4060,10 +4073,10 @@ end
 
 function para_push_power_clearall(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -4077,8 +4090,8 @@ try
     tfm_para_user_para_Prelax=getappdata(0,'tfm_para_user_para_Prelax');
     
     %plot new in axes
-    cla(h_para(1).axes_power)
-    axes(h_para(1).axes_power)
+    cla(h_para.axes_power)
+    axes(h_para.axes_power)
     plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_power{tfm_para_user_counter}*1e12,'-b'), hold on;
     set(gca, 'XTick', []);
@@ -4091,10 +4104,10 @@ try
     tfm_para_user_Pmax{tfm_para_user_counter}(:,2)=NaN;
     
     %upate para
-    tfm_para_user_para_Pcontr{tfm_para_user_counter}=nanmean(tfm_para_user_Pmax{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_Prelax{tfm_para_user_counter}=nanmean(tfm_para_user_Pmin{tfm_para_user_counter}(:,2));
-    set(h_para(1).text_power1,'String',['Pcontr=',num2str(tfm_para_user_para_Pcontr{tfm_para_user_counter},'%.2e'),'[W]']);
-    set(h_para(1).text_power2,'String',['Prelax=',num2str(tfm_para_user_para_Prelax{tfm_para_user_counter},'%.2e'),'[W]']);
+    tfm_para_user_para_Pcontr{tfm_para_user_counter}=mean(tfm_para_user_Pmax{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_Prelax{tfm_para_user_counter}=mean(tfm_para_user_Pmin{tfm_para_user_counter}(:,2),'omitnan');
+    set(h_para.text_power1,'String',['Pcontr=',num2str(tfm_para_user_para_Pcontr{tfm_para_user_counter},'%.2e'),'[W]']);
+    set(h_para.text_power2,'String',['Prelax=',num2str(tfm_para_user_para_Prelax{tfm_para_user_counter},'%.2e'),'[W]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_Pmin',tfm_para_user_Pmin);
@@ -4110,10 +4123,10 @@ end
 
 function para_push_contr_get(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 try
     tfm_para_user_dt=getappdata(0,'tfm_para_user_dt');
@@ -4141,8 +4154,8 @@ try
     tcontr=zeros(size(tmax,1),4);
     
     %plot min/max points
-    cla(h_para(1).axes_contr)
-    axes(h_para(1).axes_contr)
+    cla(h_para.axes_contr)
+    axes(h_para.axes_contr)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_velocity{tfm_para_user_counter},'-b'), hold on;
     plot(vmax(:,1)/tfm_init_user_framerate{tfm_para_user_counter},vmax(:,2),'.r','MarkerSize',10);
     plot(vmin(:,1)/tfm_init_user_framerate{tfm_para_user_counter},vmin(:,2),'.r','MarkerSize',10);
@@ -4170,8 +4183,8 @@ try
     
     %save new pt vector
     tfm_para_user_tcontr{tfm_para_user_counter}=tcontr;
-    tfm_para_user_para_tcontr{tfm_para_user_counter}=nanmean(dtcontr);
-    set(h_para(1).text_contr,'String',['tcontr=',num2str(tfm_para_user_para_tcontr{tfm_para_user_counter},'%.2e'),'[s]']);
+    tfm_para_user_para_tcontr{tfm_para_user_counter}=mean(dtcontr,'omitnan');
+    set(h_para.text_contr,'String',['tcontr=',num2str(tfm_para_user_para_tcontr{tfm_para_user_counter},'%.2e'),'[s]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_tcontr',tfm_para_user_tcontr);
@@ -4185,10 +4198,10 @@ end
 
 function para_push_contr_add(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -4225,8 +4238,8 @@ try
     t_new(:,4)=[t_init(:,4);t_add(:,4)];
     
     %plot new in axes
-    cla(h_para(1).axes_contr)
-    axes(h_para(1).axes_contr)
+    cla(h_para.axes_contr)
+    axes(h_para.axes_contr)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_velocity{tfm_para_user_counter},'-b'), hold on;
     plot(t_new(:,1),t_new(:,3),'.r','MarkerSize',10)
     plot(t_new(:,2),t_new(:,4),'.r','MarkerSize',10)
@@ -4240,8 +4253,8 @@ try
     set(gca, 'YTick', []);
     %save new pt vector
     tfm_para_user_tcontr{tfm_para_user_counter}=t_new;
-    tfm_para_user_para_tcontr{tfm_para_user_counter}=nanmean(dtcontr);
-    set(h_para(1).text_contr,'String',['tcontr=',num2str(tfm_para_user_para_tcontr{tfm_para_user_counter},'%.2e'),'[s]']);
+    tfm_para_user_para_tcontr{tfm_para_user_counter}=mean(dtcontr,'omitnan');
+    set(h_para.text_contr,'String',['tcontr=',num2str(tfm_para_user_para_tcontr{tfm_para_user_counter},'%.2e'),'[s]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_tcontr',tfm_para_user_tcontr);
@@ -4255,10 +4268,10 @@ end
 
 function para_push_contr_remove(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -4285,8 +4298,8 @@ try
     t_new(p,:)=[];
     
     %plot new in axes
-    cla(h_para(1).axes_contr)
-    axes(h_para(1).axes_contr)
+    cla(h_para.axes_contr)
+    axes(h_para.axes_contr)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_velocity{tfm_para_user_counter},'-b'), hold on;
     plot(t_new(:,1),t_new(:,3),'.r','MarkerSize',10)
     plot(t_new(:,2),t_new(:,4),'.r','MarkerSize',10)
@@ -4300,8 +4313,8 @@ try
     set(gca, 'YTick', []);
     %save new pt vector
     tfm_para_user_tcontr{tfm_para_user_counter}=t_new;
-    tfm_para_user_para_tcontr{tfm_para_user_counter}=nanmean(dtcontr);
-    set(h_para(1).text_contr,'String',['tcontr=',num2str(tfm_para_user_para_tcontr{tfm_para_user_counter},'%.2e'),'[s]']);
+    tfm_para_user_para_tcontr{tfm_para_user_counter}=mean(dtcontr,'omitnan');
+    set(h_para.text_contr,'String',['tcontr=',num2str(tfm_para_user_para_tcontr{tfm_para_user_counter},'%.2e'),'[s]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_tcontr',tfm_para_user_tcontr);
@@ -4315,10 +4328,10 @@ end
 
 function para_push_contr_clearall(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -4336,8 +4349,8 @@ try
     t_new(:,4)=NaN;
     
     %plot new in axes
-    cla(h_para(1).axes_contr)
-    axes(h_para(1).axes_contr)
+    cla(h_para.axes_contr)
+    axes(h_para.axes_contr)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_velocity{tfm_para_user_counter},'-b'), hold on;
     
     dtcontr=zeros(1,size(t_new,1));
@@ -4349,8 +4362,8 @@ try
     set(gca, 'YTick', []);
     %save new pt vector
     tfm_para_user_tcontr{tfm_para_user_counter}=t_new;
-    tfm_para_user_para_tcontr{tfm_para_user_counter}=nanmean(dtcontr);
-    set(h_para(1).text_contr,'String',['tcontr=',num2str(tfm_para_user_para_tcontr{tfm_para_user_counter},'%.2e'),'[s]']);
+    tfm_para_user_para_tcontr{tfm_para_user_counter}=mean(dtcontr,'omitnan');
+    set(h_para.text_contr,'String',['tcontr=',num2str(tfm_para_user_para_tcontr{tfm_para_user_counter},'%.2e'),'[s]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_tcontr',tfm_para_user_tcontr);
@@ -4364,10 +4377,10 @@ end
 
 function para_push_strain_addmax(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -4415,8 +4428,8 @@ try
     U_new(:,1)=[U_init(:,1);U_add(:,1)];
     U_new(:,2)=[U_init(:,2);U_add(:,2)];
     %plot new in axes
-    cla(h_para(1).axes_strain)
-    axes(h_para(1).axes_strain)
+    cla(h_para.axes_strain)
+    axes(h_para.axes_strain)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_U{tfm_para_user_counter},'-b'), hold on;
     plot(tfm_para_user_Umin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Umin{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
     plot(U_new(:,1)/tfm_init_user_framerate{tfm_para_user_counter},U_new(:,2),'.g','MarkerSize',10), hold on;
@@ -4426,14 +4439,14 @@ try
     tfm_para_user_Umax{tfm_para_user_counter}=U_new;
     
     %update para
-    tfm_para_user_para_U{tfm_para_user_counter}=nanmean(tfm_para_user_Umax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Umin{tfm_para_user_counter}(:,2));
-    set(h_para(1).text_strain,'String',['U=',num2str(tfm_para_user_para_U{tfm_para_user_counter},'%.2e'),'[J]']);
+    tfm_para_user_para_U{tfm_para_user_counter}=mean(tfm_para_user_Umax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Umin{tfm_para_user_counter}(:,2),'omitnan');
+    set(h_para.text_strain,'String',['U=',num2str(tfm_para_user_para_U{tfm_para_user_counter},'%.2e'),'[J]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_Umax',tfm_para_user_Umax);
     setappdata(0,'tfm_para_user_para_U',tfm_para_user_para_U);
     
-catch
+catch errorObj
     % If there is a problem, we display the error message
     errordlg(getReport(errorObj,'extended','hyperlinks','off'));
 end
@@ -4441,10 +4454,10 @@ end
 
 function para_push_strain_addmin(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -4492,8 +4505,8 @@ try
     U_new(:,1)=[U_init(:,1);U_add(:,1)];
     U_new(:,2)=[U_init(:,2);U_add(:,2)];
     %plot new in axes
-    cla(h_para(1).axes_strain)
-    axes(h_para(1).axes_strain)
+    cla(h_para.axes_strain)
+    axes(h_para.axes_strain)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_U{tfm_para_user_counter},'-b'), hold on;
     plot(tfm_para_user_Umax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Umax{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
     plot(U_new(:,1)/tfm_init_user_framerate{tfm_para_user_counter},U_new(:,2),'.r','MarkerSize',10), hold on;
@@ -4503,8 +4516,8 @@ try
     tfm_para_user_Umin{tfm_para_user_counter}=U_new;
     
     %update para
-    tfm_para_user_para_U{tfm_para_user_counter}=nanmean(tfm_para_user_Umax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Umin{tfm_para_user_counter}(:,2));
-    set(h_para(1).text_strain,'String',['U=',num2str(tfm_para_user_para_U{tfm_para_user_counter},'%.2e'),'[J]']);
+    tfm_para_user_para_U{tfm_para_user_counter}=mean(tfm_para_user_Umax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Umin{tfm_para_user_counter}(:,2),'omitnan');
+    set(h_para.text_strain,'String',['U=',num2str(tfm_para_user_para_U{tfm_para_user_counter},'%.2e'),'[J]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_Umin',tfm_para_user_Umin);
@@ -4518,10 +4531,10 @@ end
 
 function para_push_strain_removemax(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -4568,8 +4581,8 @@ try
     U_new(p,:)=[];
     
     %plot new in axes
-    cla(h_para(1).axes_strain)
-    axes(h_para(1).axes_strain)
+    cla(h_para.axes_strain)
+    axes(h_para.axes_strain)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_U{tfm_para_user_counter},'-b'), hold on;
     plot(tfm_para_user_Umin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Umin{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
     plot(U_new(:,1)/tfm_init_user_framerate{tfm_para_user_counter},U_new(:,2),'.g','MarkerSize',10), hold on;
@@ -4580,8 +4593,8 @@ try
     tfm_para_user_Umax{tfm_para_user_counter}=U_new;
     
     %update para
-    tfm_para_user_para_U{tfm_para_user_counter}=nanmean(tfm_para_user_Umax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Umin{tfm_para_user_counter}(:,2));
-    set(h_para(1).text_strain,'String',['U=',num2str(tfm_para_user_para_U{tfm_para_user_counter},'%.2e'),'[J]']);
+    tfm_para_user_para_U{tfm_para_user_counter}=mean(tfm_para_user_Umax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Umin{tfm_para_user_counter}(:,2),'omitnan');
+    set(h_para.text_strain,'String',['U=',num2str(tfm_para_user_para_U{tfm_para_user_counter},'%.2e'),'[J]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_Umax',tfm_para_user_Umax);
@@ -4595,10 +4608,10 @@ end
 
 function para_push_strain_removemin(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -4645,8 +4658,8 @@ try
     U_new(p,:)=[];
     
     %plot new in axes
-    cla(h_para(1).axes_strain)
-    axes(h_para(1).axes_strain)
+    cla(h_para.axes_strain)
+    axes(h_para.axes_strain)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_U{tfm_para_user_counter},'-b'), hold on;
     plot(tfm_para_user_Umax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Umax{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
     plot(U_new(:,1)/tfm_init_user_framerate{tfm_para_user_counter},U_new(:,2),'.r','MarkerSize',10), hold on;
@@ -4656,8 +4669,8 @@ try
     tfm_para_user_Umin{tfm_para_user_counter}=U_new;
     
     %update para
-    tfm_para_user_para_U{tfm_para_user_counter}=nanmean(tfm_para_user_Umax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Umin{tfm_para_user_counter}(:,2));
-    set(h_para(1).text_strain,'String',['U=',num2str(tfm_para_user_para_U{tfm_para_user_counter},'%.2e'),'[J]']);
+    tfm_para_user_para_U{tfm_para_user_counter}=mean(tfm_para_user_Umax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Umin{tfm_para_user_counter}(:,2),'omitnan');
+    set(h_para.text_strain,'String',['U=',num2str(tfm_para_user_para_U{tfm_para_user_counter},'%.2e'),'[J]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_Umin',tfm_para_user_Umin);
@@ -4671,10 +4684,10 @@ end
 
 function para_push_strain_clearall(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -4687,8 +4700,8 @@ try
     tfm_para_user_para_U=getappdata(0,'tfm_para_user_para_U');
     
     %plot new in axes
-    cla(h_para(1).axes_strain)
-    axes(h_para(1).axes_strain)
+    cla(h_para.axes_strain)
+    axes(h_para.axes_strain)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_U{tfm_para_user_counter},'-b'), hold on;
     set(gca, 'XTick', []);
     set(gca, 'YTick', []);
@@ -4700,8 +4713,8 @@ try
     tfm_para_user_Umax{tfm_para_user_counter}(:,2)=NaN;
     
     %update para
-    tfm_para_user_para_U{tfm_para_user_counter}=nanmean(tfm_para_user_Umax{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Umin{tfm_para_user_counter}(:,2));
-    set(h_para(1).text_strain,'String',['U=',num2str(tfm_para_user_para_U{tfm_para_user_counter},'%.2e'),'[J]']);
+    tfm_para_user_para_U{tfm_para_user_counter}=mean(tfm_para_user_Umax{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Umin{tfm_para_user_counter}(:,2),'omitnan');
+    set(h_para.text_strain,'String',['U=',num2str(tfm_para_user_para_U{tfm_para_user_counter},'%.2e'),'[J]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_Umin',tfm_para_user_Umin);
@@ -4716,10 +4729,10 @@ end
 
 function para_push_moment_addmax(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -4805,27 +4818,27 @@ try
     tfm_para_user_mu_max{tfm_para_user_counter}=mu_new;
     
     %plot contractile moment
-    if get(h_para(1).radiobutton_Mxx,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    if get(h_para.radiobutton_Mxx,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Mxx{tfm_para_user_counter},'-b')
         plot(tfm_para_user_Mxx_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Mxx_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
         plot(tfm_para_user_Mxx_max{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Mxx_max{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
-    elseif get(h_para(1).radiobutton_Myy,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    elseif get(h_para.radiobutton_Myy,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Myy{tfm_para_user_counter},'-b')
         plot(tfm_para_user_Myy_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Myy_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
         plot(tfm_para_user_Myy_max{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Myy_max{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
-    elseif get(h_para(1).radiobutton_mu,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    elseif get(h_para.radiobutton_mu,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_mu{tfm_para_user_counter},'-b')
         plot(tfm_para_user_mu_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_mu_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
@@ -4835,17 +4848,17 @@ try
     end
     
     %update para
-    tfm_para_user_para_Mxx{tfm_para_user_counter}=nanmean(tfm_para_user_Mxx_max{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Mxx_min{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_Mxy{tfm_para_user_counter}=nanmean(tfm_para_user_Mxy_max{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Mxy_min{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_Myy{tfm_para_user_counter}=nanmean(tfm_para_user_Myy_max{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Myy_min{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_mu{tfm_para_user_counter}=nanmean(tfm_para_user_mu_max{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_mu_min{tfm_para_user_counter}(:,2));
+    tfm_para_user_para_Mxx{tfm_para_user_counter}=mean(tfm_para_user_Mxx_max{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Mxx_min{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_Mxy{tfm_para_user_counter}=mean(tfm_para_user_Mxy_max{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Mxy_min{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_Myy{tfm_para_user_counter}=mean(tfm_para_user_Myy_max{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Myy_min{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_mu{tfm_para_user_counter}=mean(tfm_para_user_mu_max{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_mu_min{tfm_para_user_counter}(:,2),'omitnan');
     
-    if get(h_para(1).radiobutton_Mxx,'Value')
-        set(h_para(1).text_moment,'String',['Mxx=',num2str(tfm_para_user_para_Mxx{tfm_para_user_counter},'%.2e'),'[Nm]']);
-    elseif get(h_para(1).radiobutton_Myy,'Value')
-        set(h_para(1).text_moment,'String',['Myy=',num2str(tfm_para_user_para_Myy{tfm_para_user_counter},'%.2e'),'[Nm]']);
-    elseif get(h_para(1).radiobutton_mu,'Value')
-        set(h_para(1).text_moment,'String',['mu=',num2str(tfm_para_user_para_mu{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    if get(h_para.radiobutton_Mxx,'Value')
+        set(h_para.text_moment,'String',['Mxx=',num2str(tfm_para_user_para_Mxx{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    elseif get(h_para.radiobutton_Myy,'Value')
+        set(h_para.text_moment,'String',['Myy=',num2str(tfm_para_user_para_Myy{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    elseif get(h_para.radiobutton_mu,'Value')
+        set(h_para.text_moment,'String',['mu=',num2str(tfm_para_user_para_mu{tfm_para_user_counter},'%.2e'),'[Nm]']);
     end
     
     %save for shared use
@@ -4866,10 +4879,10 @@ end
 
 function para_push_moment_addmin(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -4955,27 +4968,27 @@ try
     tfm_para_user_mu_min{tfm_para_user_counter}=mu_new;
     
     %plot contractile moment
-    if get(h_para(1).radiobutton_Mxx,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    if get(h_para.radiobutton_Mxx,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Mxx{tfm_para_user_counter},'-b')
         plot(tfm_para_user_Mxx_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Mxx_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
         plot(tfm_para_user_Mxx_max{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Mxx_max{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
-    elseif get(h_para(1).radiobutton_Myy,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    elseif get(h_para.radiobutton_Myy,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Myy{tfm_para_user_counter},'-b')
         plot(tfm_para_user_Myy_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Myy_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
         plot(tfm_para_user_Myy_max{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Myy_max{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
-    elseif get(h_para(1).radiobutton_mu,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    elseif get(h_para.radiobutton_mu,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_mu{tfm_para_user_counter},'-b')
         plot(tfm_para_user_mu_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_mu_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
@@ -4985,17 +4998,17 @@ try
     end
     
     %update para
-    tfm_para_user_para_Mxx{tfm_para_user_counter}=nanmean(tfm_para_user_Mxx_max{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Mxx_min{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_Mxy{tfm_para_user_counter}=nanmean(tfm_para_user_Mxy_max{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Mxy_min{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_Myy{tfm_para_user_counter}=nanmean(tfm_para_user_Myy_max{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Myy_min{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_mu{tfm_para_user_counter}=nanmean(tfm_para_user_mu_max{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_mu_min{tfm_para_user_counter}(:,2));
+    tfm_para_user_para_Mxx{tfm_para_user_counter}=mean(tfm_para_user_Mxx_max{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Mxx_min{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_Mxy{tfm_para_user_counter}=mean(tfm_para_user_Mxy_max{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Mxy_min{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_Myy{tfm_para_user_counter}=mean(tfm_para_user_Myy_max{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Myy_min{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_mu{tfm_para_user_counter}=mean(tfm_para_user_mu_max{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_mu_min{tfm_para_user_counter}(:,2),'omitnan');
     
-    if get(h_para(1).radiobutton_Mxx,'Value')
-        set(h_para(1).text_moment,'String',['Mxx=',num2str(tfm_para_user_para_Mxx{tfm_para_user_counter},'%.2e'),'[Nm]']);
-    elseif get(h_para(1).radiobutton_Myy,'Value')
-        set(h_para(1).text_moment,'String',['Myy=',num2str(tfm_para_user_para_Myy{tfm_para_user_counter},'%.2e'),'[Nm]']);
-    elseif get(h_para(1).radiobutton_mu,'Value')
-        set(h_para(1).text_moment,'String',['mu=',num2str(tfm_para_user_para_mu{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    if get(h_para.radiobutton_Mxx,'Value')
+        set(h_para.text_moment,'String',['Mxx=',num2str(tfm_para_user_para_Mxx{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    elseif get(h_para.radiobutton_Myy,'Value')
+        set(h_para.text_moment,'String',['Myy=',num2str(tfm_para_user_para_Myy{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    elseif get(h_para.radiobutton_mu,'Value')
+        set(h_para.text_moment,'String',['mu=',num2str(tfm_para_user_para_mu{tfm_para_user_counter},'%.2e'),'[Nm]']);
     end
     
     %save for shared use
@@ -5016,10 +5029,10 @@ end
 
 function para_push_moment_removemax(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -5097,27 +5110,27 @@ try
     tfm_para_user_mu_max{tfm_para_user_counter}=mu_new;
     
     %plot contractile moment
-    if get(h_para(1).radiobutton_Mxx,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    if get(h_para.radiobutton_Mxx,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Mxx{tfm_para_user_counter},'-b')
         plot(tfm_para_user_Mxx_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Mxx_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
         plot(tfm_para_user_Mxx_max{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Mxx_max{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
-    elseif get(h_para(1).radiobutton_Myy,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    elseif get(h_para.radiobutton_Myy,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Myy{tfm_para_user_counter},'-b')
         plot(tfm_para_user_Myy_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Myy_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
         plot(tfm_para_user_Myy_max{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Myy_max{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
-    elseif get(h_para(1).radiobutton_mu,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    elseif get(h_para.radiobutton_mu,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_mu{tfm_para_user_counter},'-b')
         plot(tfm_para_user_mu_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_mu_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
@@ -5127,17 +5140,17 @@ try
     end
     
     %update para
-    tfm_para_user_para_Mxx{tfm_para_user_counter}=nanmean(tfm_para_user_Mxx_max{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Mxx_min{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_Mxy{tfm_para_user_counter}=nanmean(tfm_para_user_Mxy_max{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Mxy_min{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_Myy{tfm_para_user_counter}=nanmean(tfm_para_user_Myy_max{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Myy_min{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_mu{tfm_para_user_counter}=nanmean(tfm_para_user_mu_max{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_mu_min{tfm_para_user_counter}(:,2));
+    tfm_para_user_para_Mxx{tfm_para_user_counter}=mean(tfm_para_user_Mxx_max{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Mxx_min{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_Mxy{tfm_para_user_counter}=mean(tfm_para_user_Mxy_max{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Mxy_min{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_Myy{tfm_para_user_counter}=mean(tfm_para_user_Myy_max{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Myy_min{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_mu{tfm_para_user_counter}=mean(tfm_para_user_mu_max{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_mu_min{tfm_para_user_counter}(:,2),'omitnan');
     
-    if get(h_para(1).radiobutton_Mxx,'Value')
-        set(h_para(1).text_moment,'String',['Mxx=',num2str(tfm_para_user_para_Mxx{tfm_para_user_counter},'%.2e'),'[Nm]']);
-    elseif get(h_para(1).radiobutton_Myy,'Value')
-        set(h_para(1).text_moment,'String',['Myy=',num2str(tfm_para_user_para_Myy{tfm_para_user_counter},'%.2e'),'[Nm]']);
-    elseif get(h_para(1).radiobutton_mu,'Value')
-        set(h_para(1).text_moment,'String',['mu=',num2str(tfm_para_user_para_mu{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    if get(h_para.radiobutton_Mxx,'Value')
+        set(h_para.text_moment,'String',['Mxx=',num2str(tfm_para_user_para_Mxx{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    elseif get(h_para.radiobutton_Myy,'Value')
+        set(h_para.text_moment,'String',['Myy=',num2str(tfm_para_user_para_Myy{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    elseif get(h_para.radiobutton_mu,'Value')
+        set(h_para.text_moment,'String',['mu=',num2str(tfm_para_user_para_mu{tfm_para_user_counter},'%.2e'),'[Nm]']);
     end
     
     %save for shared use
@@ -5158,10 +5171,10 @@ end
 
 function para_push_moment_removemin(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -5239,27 +5252,27 @@ try
     tfm_para_user_mu_min{tfm_para_user_counter}=mu_new;
     
     %plot contractile moment
-    if get(h_para(1).radiobutton_Mxx,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    if get(h_para.radiobutton_Mxx,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Mxx{tfm_para_user_counter},'-b')
         plot(tfm_para_user_Mxx_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Mxx_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
         plot(tfm_para_user_Mxx_max{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Mxx_max{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
-    elseif get(h_para(1).radiobutton_Myy,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    elseif get(h_para.radiobutton_Myy,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Myy{tfm_para_user_counter},'-b')
         plot(tfm_para_user_Myy_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Myy_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
         plot(tfm_para_user_Myy_max{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Myy_max{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
-    elseif get(h_para(1).radiobutton_mu,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    elseif get(h_para.radiobutton_mu,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_mu{tfm_para_user_counter},'-b')
         plot(tfm_para_user_mu_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_mu_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
@@ -5269,17 +5282,17 @@ try
     end
     
     %update para
-    tfm_para_user_para_Mxx{tfm_para_user_counter}=nanmean(tfm_para_user_Mxx_max{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Mxx_min{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_Mxy{tfm_para_user_counter}=nanmean(tfm_para_user_Mxy_max{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Mxy_min{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_Myy{tfm_para_user_counter}=nanmean(tfm_para_user_Myy_max{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Myy_min{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_mu{tfm_para_user_counter}=nanmean(tfm_para_user_mu_max{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_mu_min{tfm_para_user_counter}(:,2));
+    tfm_para_user_para_Mxx{tfm_para_user_counter}=mean(tfm_para_user_Mxx_max{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Mxx_min{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_Mxy{tfm_para_user_counter}=mean(tfm_para_user_Mxy_max{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Mxy_min{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_Myy{tfm_para_user_counter}=mean(tfm_para_user_Myy_max{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Myy_min{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_mu{tfm_para_user_counter}=mean(tfm_para_user_mu_max{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_mu_min{tfm_para_user_counter}(:,2),'omitnan');
     
-    if get(h_para(1).radiobutton_Mxx,'Value')
-        set(h_para(1).text_moment,'String',['Mxx=',num2str(tfm_para_user_para_Mxx{tfm_para_user_counter},'%.2e'),'[Nm]']);
-    elseif get(h_para(1).radiobutton_Myy,'Value')
-        set(h_para(1).text_moment,'String',['Myy=',num2str(tfm_para_user_para_Myy{tfm_para_user_counter},'%.2e'),'[Nm]']);
-    elseif get(h_para(1).radiobutton_mu,'Value')
-        set(h_para(1).text_moment,'String',['mu=',num2str(tfm_para_user_para_mu{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    if get(h_para.radiobutton_Mxx,'Value')
+        set(h_para.text_moment,'String',['Mxx=',num2str(tfm_para_user_para_Mxx{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    elseif get(h_para.radiobutton_Myy,'Value')
+        set(h_para.text_moment,'String',['Myy=',num2str(tfm_para_user_para_Myy{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    elseif get(h_para.radiobutton_mu,'Value')
+        set(h_para.text_moment,'String',['mu=',num2str(tfm_para_user_para_mu{tfm_para_user_counter},'%.2e'),'[Nm]']);
     end
     
     %save for shared use
@@ -5300,10 +5313,10 @@ end
 
 function para_push_moment_clearall(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -5329,23 +5342,23 @@ try
     tfm_para_user_para_mu=getappdata(0,'tfm_para_user_para_mu');
     
     %plot contractile moment
-    if get(h_para(1).radiobutton_Mxx,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    if get(h_para.radiobutton_Mxx,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Mxx{tfm_para_user_counter},'-b')
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
-    elseif get(h_para(1).radiobutton_Myy,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    elseif get(h_para.radiobutton_Myy,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Myy{tfm_para_user_counter},'-b')
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
-    elseif get(h_para(1).radiobutton_mu,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    elseif get(h_para.radiobutton_mu,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_mu{tfm_para_user_counter},'-b')
         set(gca, 'XTick', []);
@@ -5371,17 +5384,17 @@ try
     tfm_para_user_mu_max{tfm_para_user_counter}(:,2)=NaN;
     
     %update para
-    tfm_para_user_para_Mxx{tfm_para_user_counter}=nanmean(tfm_para_user_Mxx_max{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Mxx_min{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_Mxy{tfm_para_user_counter}=nanmean(tfm_para_user_Mxy_max{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Mxy_min{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_Myy{tfm_para_user_counter}=nanmean(tfm_para_user_Myy_max{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_Myy_min{tfm_para_user_counter}(:,2));
-    tfm_para_user_para_mu{tfm_para_user_counter}=nanmean(tfm_para_user_mu_max{tfm_para_user_counter}(:,2))-nanmean(tfm_para_user_mu_min{tfm_para_user_counter}(:,2));
+    tfm_para_user_para_Mxx{tfm_para_user_counter}=mean(tfm_para_user_Mxx_max{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Mxx_min{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_Mxy{tfm_para_user_counter}=mean(tfm_para_user_Mxy_max{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Mxy_min{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_Myy{tfm_para_user_counter}=mean(tfm_para_user_Myy_max{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_Myy_min{tfm_para_user_counter}(:,2),'omitnan');
+    tfm_para_user_para_mu{tfm_para_user_counter}=mean(tfm_para_user_mu_max{tfm_para_user_counter}(:,2),'omitnan')-mean(tfm_para_user_mu_min{tfm_para_user_counter}(:,2),'omitnan');
     
-    if get(h_para(1).radiobutton_Mxx,'Value')
-        set(h_para(1).text_moment,'String',['Mxx=',num2str(tfm_para_user_para_Mxx{tfm_para_user_counter},'%.2e'),'[Nm]']);
-    elseif get(h_para(1).radiobutton_Myy,'Value')
-        set(h_para(1).text_moment,'String',['Myy=',num2str(tfm_para_user_para_Myy{tfm_para_user_counter},'%.2e'),'[Nm]']);
-    elseif get(h_para(1).radiobutton_mu,'Value')
-        set(h_para(1).text_moment,'String',['mu=',num2str(tfm_para_user_para_mu{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    if get(h_para.radiobutton_Mxx,'Value')
+        set(h_para.text_moment,'String',['Mxx=',num2str(tfm_para_user_para_Mxx{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    elseif get(h_para.radiobutton_Myy,'Value')
+        set(h_para.text_moment,'String',['Myy=',num2str(tfm_para_user_para_Myy{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    elseif get(h_para.radiobutton_mu,'Value')
+        set(h_para.text_moment,'String',['mu=',num2str(tfm_para_user_para_mu{tfm_para_user_counter},'%.2e'),'[Nm]']);
     end
     
     %save for shared use
@@ -5406,10 +5419,10 @@ end
 
 function para_push_double(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 % or after ok?
 
 try
@@ -5538,10 +5551,10 @@ end
 
 function para_push_dp2_add(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -5578,8 +5591,8 @@ try
     t_new(:,4)=[t_init(:,4);t_add(:,4)];
     
     %displ. in double peak
-    cla(h_para(1).axes_dp2)
-    axes(h_para(1).axes_dp2)
+    cla(h_para.axes_dp2)
+    axes(h_para.axes_dp2)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
     plot(t_new(:,1),t_new(:,3),'.r','MarkerSize',10)
     plot(t_new(:,2),t_new(:,4),'.r','MarkerSize',10)
@@ -5593,8 +5606,8 @@ try
     set(gca, 'YTick', []);
     %save new pt vector
     tfm_para_user_tdp{tfm_para_user_counter}=t_new;
-    tfm_para_user_para_tdp{tfm_para_user_counter}=nanmean(dtcontr);
-    set(h_para(1).text_dp2_2,'String',['t=',num2str(tfm_para_user_para_tdp{tfm_para_user_counter},'%.2e'),'[s]']);
+    tfm_para_user_para_tdp{tfm_para_user_counter}=mean(dtcontr,'omitnan');
+    set(h_para.text_dp2_2,'String',['t=',num2str(tfm_para_user_para_tdp{tfm_para_user_counter},'%.2e'),'[s]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_tdp',tfm_para_user_tdp);
@@ -5608,10 +5621,10 @@ end
 
 function para_push_dp2_remove(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -5638,8 +5651,8 @@ try
     t_new(p,:)=[];
     
     %displ. in double peak
-    cla(h_para(1).axes_dp2)
-    axes(h_para(1).axes_dp2)
+    cla(h_para.axes_dp2)
+    axes(h_para.axes_dp2)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
     plot(t_new(:,1),t_new(:,3),'.r','MarkerSize',10)
     plot(t_new(:,2),t_new(:,4),'.r','MarkerSize',10)
@@ -5653,8 +5666,8 @@ try
     set(gca, 'YTick', []);
     %save new pt vector
     tfm_para_user_tdp{tfm_para_user_counter}=t_new;
-    tfm_para_user_para_tdp{tfm_para_user_counter}=nanmean(dtcontr);
-    set(h_para(1).text_dp2_2,'String',['t=',num2str(tfm_para_user_para_tdp{tfm_para_user_counter},'%.2e'),'[s]']);
+    tfm_para_user_para_tdp{tfm_para_user_counter}=mean(dtcontr,'omitnan');
+    set(h_para.text_dp2_2,'String',['t=',num2str(tfm_para_user_para_tdp{tfm_para_user_counter},'%.2e'),'[s]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_tdp',tfm_para_user_tdp);
@@ -5668,10 +5681,10 @@ end
 
 function para_push_dp2_clearall(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -5686,8 +5699,8 @@ try
     t_new(:,3)=NaN;
     t_new(:,4)=NaN;
     
-    cla(h_para(1).axes_dp2)
-    axes(h_para(1).axes_dp2)
+    cla(h_para.axes_dp2)
+    axes(h_para.axes_dp2)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
     
     dtcontr=zeros(1,size(t_new,1));
@@ -5699,8 +5712,8 @@ try
     set(gca, 'YTick', []);
     %save new pt vector
     tfm_para_user_tdp{tfm_para_user_counter}=t_new;
-    tfm_para_user_para_tdp{tfm_para_user_counter}=nanmean(dtcontr);
-    set(h_para(1).text_dp2_2,'String',['t=',num2str(tfm_para_user_para_tdp{tfm_para_user_counter},'%.2e'),'[s]']);
+    tfm_para_user_para_tdp{tfm_para_user_counter}=mean(dtcontr,'omitnan');
+    set(h_para.text_dp2_2,'String',['t=',num2str(tfm_para_user_para_tdp{tfm_para_user_counter},'%.2e'),'[s]']);
     
     %save for shared use
     setappdata(0,'tfm_para_user_tdp',tfm_para_user_tdp);
@@ -5721,10 +5734,10 @@ close(dp_fig)
 
 function para_push_forwards(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -5813,56 +5826,56 @@ try
     tfm_para_user_disp_l = getappdata(0,'tfm_para_user_disp_l');
     
     %save current stuff
-    tfm_para_user_other_comments{tfm_para_user_counter}=get(h_para(1).edit_other,'String');
-    tfm_para_user_para_ratiop{tfm_para_user_counter}=str2double(get(h_para(1).edit_ratio,'String'));
+    tfm_para_user_other_comments{tfm_para_user_counter}=get(h_para.edit_other,'String');
+    tfm_para_user_para_ratiop{tfm_para_user_counter}=str2double(get(h_para.edit_ratio,'String'));
     %     if tfm_para_user_para_tagdp{tfm_para_user_counter}
-    %         tfm_para_user_para_ratiodp{tfm_para_user_counter}=str2double(get(h_para(1).edit_dp2,'String'));
+    %         tfm_para_user_para_ratiodp{tfm_para_user_counter}=str2double(get(h_para.edit_dp2,'String'));
     %     end
     
     %go to video before
     tfm_para_user_counter=tfm_para_user_counter+1;
     
     %set tags
-    set(h_para(1).edit_ratio,'String',num2str(tfm_para_user_para_ratiop{tfm_para_user_counter}));
+    set(h_para.edit_ratio,'String',num2str(tfm_para_user_para_ratiop{tfm_para_user_counter}));
     %     if tfm_para_user_para_tagdp{tfm_para_user_counter}
-    %         set(h_para(1).edit_dp2,'String',num2str(tfm_para_user_para_ratiodp{tfm_para_user_counter}));
+    %         set(h_para.edit_dp2,'String',num2str(tfm_para_user_para_ratiodp{tfm_para_user_counter}));
     %     end
     %checkboxes
     if tfm_para_user_discard_tag{tfm_para_user_counter}
-        set(h_para(1).checkbox_disc,'Value',1)
+        set(h_para.checkbox_disc,'Value',1)
     else
-        set(h_para(1).checkbox_disc,'Value',0)
+        set(h_para.checkbox_disc,'Value',0)
     end
     if tfm_para_user_dbl_tag{tfm_para_user_counter}
-        set(h_para(1).checkbox_dbl,'Value',1)
+        set(h_para.checkbox_dbl,'Value',1)
     else
-        set(h_para(1).checkbox_dbl,'Value',0)
+        set(h_para.checkbox_dbl,'Value',0)
     end
     if tfm_para_user_drift_tag{tfm_para_user_counter}
-        set(h_para(1).checkbox_drift,'Value',1)
+        set(h_para.checkbox_drift,'Value',1)
     else
-        set(h_para(1).checkbox_drift,'Value',0)
+        set(h_para.checkbox_drift,'Value',0)
     end
     if tfm_para_user_other_tag{tfm_para_user_counter}
-        set(h_para(1).checkbox_other,'Value',1)
+        set(h_para.checkbox_other,'Value',1)
     else
-        set(h_para(1).checkbox_other,'Value',0)
+        set(h_para.checkbox_other,'Value',0)
     end
-    set(h_para(1).edit_other,'String',tfm_para_user_other_comments{tfm_para_user_counter})
+    set(h_para.edit_other,'String',tfm_para_user_other_comments{tfm_para_user_counter})
     %     if tfm_para_user_para_tagdp{tfm_para_user_counter}
-    %         set(h_para(1).panel_dp2,'Visible','on')
-    %         set(h_para(1).checkbox_dpyes,'Value',1)
-    %         set(h_para(1).checkbox_dpno,'Value',0)
+    %         set(h_para.panel_dp2,'Visible','on')
+    %         set(h_para.checkbox_dpyes,'Value',1)
+    %         set(h_para.checkbox_dpno,'Value',0)
     %     else
-    %         set(h_para(1).checkbox_dpyes,'Value',0)
-    %         set(h_para(1).checkbox_dpno,'Value',1)
-    %         set(h_para(1).panel_dp2,'Visible','off')
+    %         set(h_para.checkbox_dpyes,'Value',0)
+    %         set(h_para.checkbox_dpno,'Value',1)
+    %         set(h_para.panel_dp2,'Visible','off')
     %     end
     
     %display plots
     %plot 1st displ. in axes
-    cla(h_para(1).axes_disp)
-    axes(h_para(1).axes_disp)
+    cla(h_para.axes_disp)
+    axes(h_para.axes_disp)
     plot(dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
     plot(dt{tfm_para_user_counter},tfm_para_user_disp_l*ones(size(dt{tfm_para_user_counter},2),1)',':m'), hold on;
     text(dt{tfm_para_user_counter}(1),tfm_para_user_disp_l*1e6,[num2str(tfm_para_user_disp_l) '[m]'],'FontSize',10);
@@ -5874,8 +5887,8 @@ try
     ylim([0 5e-8]);
     
     %     %displ. in double peak
-    %     cla(h_para(1).axes_dp2)
-    %     axes(h_para(1).axes_dp2)
+    %     cla(h_para.axes_dp2)
+    %     axes(h_para.axes_dp2)
     %     plot(dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
     %     plot(tfm_para_user_tdp{tfm_para_user_counter}(:,1),tfm_para_user_tdp{tfm_para_user_counter}(:,3),'.r','MarkerSize',10)
     %     plot(tfm_para_user_tdp{tfm_para_user_counter}(:,2),tfm_para_user_tdp{tfm_para_user_counter}(:,4),'.r','MarkerSize',10)
@@ -5889,8 +5902,8 @@ try
     %     set(gca, 'YTick', []);
     
     %plot 1st velocity. in axes
-    cla(h_para(1).axes_vel)
-    axes(h_para(1).axes_vel)
+    cla(h_para.axes_vel)
+    axes(h_para.axes_vel)
     plot(dt{tfm_para_user_counter},zeros(1,length(dt{tfm_para_user_counter})),'--k'), hold on;
     plot(dt{tfm_para_user_counter},Velocity{tfm_para_user_counter},'-b'), hold on;
     plot(vmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},vmin{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
@@ -5902,8 +5915,8 @@ try
     set(gca, 'YTick', []);
     
     %%plot 1st velocity. in axes
-    cla(h_para(1).axes_contr)
-    axes(h_para(1).axes_contr)
+    cla(h_para.axes_contr)
+    axes(h_para.axes_contr)
     plot(dt{tfm_para_user_counter},Velocity{tfm_para_user_counter},'-b'), hold on;
     plot(tfm_para_user_tcontr{tfm_para_user_counter}(:,1),tfm_para_user_tcontr{tfm_para_user_counter}(:,3),'.r','MarkerSize',10)
     plot(tfm_para_user_tcontr{tfm_para_user_counter}(:,2),tfm_para_user_tcontr{tfm_para_user_counter}(:,4),'.r','MarkerSize',10)
@@ -5917,8 +5930,8 @@ try
     set(gca, 'YTick', []);
     
     %plot strain energy
-    reset(h_para(1).axes_strain)
-    axes(h_para(1).axes_strain)
+    reset(h_para.axes_strain)
+    axes(h_para.axes_strain)
     plot(dt{tfm_para_user_counter},tfm_para_user_U{tfm_para_user_counter},'-b'), hold on;
     plot(tfm_para_user_Umin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Umin{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
     plot(tfm_para_user_Umax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Umax{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
@@ -5926,27 +5939,27 @@ try
     set(gca, 'YTick', []);
     
     %plot contractile moment
-    if get(h_para(1).radiobutton_Mxx,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    if get(h_para.radiobutton_Mxx,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Mxx{tfm_para_user_counter},'-b')
         plot(tfm_para_user_Mxx_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Mxx_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
         plot(tfm_para_user_Mxx_max{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Mxx_max{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
-    elseif get(h_para(1).radiobutton_Myy,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    elseif get(h_para.radiobutton_Myy,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Myy{tfm_para_user_counter},'-b')
         plot(tfm_para_user_Myy_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Myy_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
         plot(tfm_para_user_Myy_max{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Myy_max{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
-    elseif get(h_para(1).radiobutton_mu,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    elseif get(h_para.radiobutton_mu,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_mu{tfm_para_user_counter},'-b')
         plot(tfm_para_user_mu_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_mu_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
@@ -5961,10 +5974,10 @@ try
     theta_sort = tfm_para_user_dtheta{tfm_para_user_counter}(di);
     Mxx_sort = tfm_para_user_Mxx{tfm_para_user_counter}(di);
     
-    if get(h_para(1).radiobutton_center,'Value')
+    if get(h_para.radiobutton_center,'Value')
         %plot center of contraction
-        reset(h_para(1).axes_orient)
-        axes(h_para(1).axes_orient)
+        reset(h_para.axes_orient)
+        axes(h_para.axes_orient)
         [theta_center,r_center] = cart2pol(center_sort(:,1),center_sort(:,2));
         polarscatter(theta_center,r_center,10,d_sort,'filled');
         %set(gca, 'RTickLabel', []);
@@ -5973,10 +5986,10 @@ try
         rlim([0 5e-6]);
         rticks([2.5e-6 5e-6]);
         rticklabels({'r = 2.5e-6 [m]',''});
-    elseif get(h_para(1).radiobutton_orient,'Value')
+    elseif get(h_para.radiobutton_orient,'Value')
         %plot traction orientation
-        reset(h_para(1).axes_orient)
-        axes(h_para(1).axes_orient)
+        reset(h_para.axes_orient)
+        axes(h_para.axes_orient)
         polarscatter(theta_sort.*(pi/180),Mxx_sort,10,d_sort,'filled');
         set(gca, 'RTickLabel', []);
         set(gca, 'ThetaTickLabel', []);
@@ -5985,8 +5998,8 @@ try
     
     %plot peak averaging results
     %displacement
-    reset(h_para(1).axes_disp_autocor)
-    axes(h_para(1).axes_disp_autocor)
+    reset(h_para.axes_disp_autocor)
+    axes(h_para.axes_disp_autocor)
     if ~isnan(tfm_para_user_d_pav{tfm_para_user_counter}.n_peaks)
         plot(tfm_para_user_d_pav{tfm_para_user_counter}.peak_wins_t,tfm_para_user_d_pav{tfm_para_user_counter}.av_peak), hold on;
         area(tfm_para_user_d_pav{tfm_para_user_counter}.t_peak,tfm_para_user_d_pav{tfm_para_user_counter}.av_peak+tfm_para_user_d_pav{tfm_para_user_counter}.av_peak_std,min(tfm_para_user_d_pav{tfm_para_user_counter}.av_peak-tfm_para_user_d_pav{tfm_para_user_counter}.av_peak_std),'FaceColor',[0.8 0.8 0.8],'FaceAlpha',0.5,'EdgeColor','none');
@@ -6014,8 +6027,8 @@ try
     set(gca,'YTick',[]);
     
     %force
-    reset(h_para(1).axes_force_autocor)
-    axes(h_para(1).axes_force_autocor)
+    reset(h_para.axes_force_autocor)
+    axes(h_para.axes_force_autocor)
     if ~isnan(tfm_para_user_F_pav{tfm_para_user_counter}.n_peaks)
         plot(tfm_para_user_F_pav{tfm_para_user_counter}.peak_wins_t,tfm_para_user_F_pav{tfm_para_user_counter}.av_peak), hold on;
         area(tfm_para_user_F_pav{tfm_para_user_counter}.t_peak,tfm_para_user_F_pav{tfm_para_user_counter}.av_peak+tfm_para_user_F_pav{tfm_para_user_counter}.av_peak_std,min(tfm_para_user_F_pav{tfm_para_user_counter}.av_peak-tfm_para_user_F_pav{tfm_para_user_counter}.av_peak_std),'FaceColor',[0.8 0.8 0.8],'FaceAlpha',0.5,'EdgeColor','none');
@@ -6033,47 +6046,47 @@ try
     set(gca, 'YTick', []);
     
     %preview traction animation
-    set(h_para(1).button_traction_anim,'string',['<html><img src="file:',tfm_init_user_pathnamestack{1,tfm_para_user_counter},tfm_init_user_filenamestack{1,tfm_para_user_counter},filesep,'heatmap_anim.gif"/></html>']);
+    set(h_para.button_traction_anim,'string',['<html><img src="file:',tfm_init_user_pathnamestack{1,tfm_para_user_counter},tfm_init_user_filenamestack{1,tfm_para_user_counter},filesep,'heatmap_anim.gif"/></html>']);
     
     %forces
-    if get(h_para(1).radiobutton_forcetot,'Value') %ftot
+    if get(h_para.radiobutton_forcetot,'Value') %ftot
         %set correct plot
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_F_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(tfm_para_user_Fmax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fmax{tfm_para_user_counter}(:,2)*1e9,'.g','MarkerSize',10), hold on;
         plot(tfm_para_user_Fmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fmin{tfm_para_user_counter}(:,2)*1e9,'.r','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
         %set correct text
-        set(h_para(1).text_forces,'String',['F=',num2str(tfm_para_user_para_DeltaF{tfm_para_user_counter},'%.2e'),'[N]']);
-    elseif get(h_para(1).radiobutton_forcex,'Value') %fx
+        set(h_para.text_forces,'String',['F=',num2str(tfm_para_user_para_DeltaF{tfm_para_user_counter},'%.2e'),'[N]']);
+    elseif get(h_para.radiobutton_forcex,'Value') %fx
         %set correct plot
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Fx_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(tfm_para_user_Fxmax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fxmax{tfm_para_user_counter}(:,2)*1e9,'.g','MarkerSize',10), hold on;
         plot(tfm_para_user_Fxmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fxmin{tfm_para_user_counter}(:,2)*1e9,'.r','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
         %set correct text
-        set(h_para(1).text_forces,'String',['Fx=',num2str(tfm_para_user_para_DeltaFx{tfm_para_user_counter},'%.2e'),'[N]']);
-    elseif get(h_para(1).radiobutton_forcey,'Value') %fy
+        set(h_para.text_forces,'String',['Fx=',num2str(tfm_para_user_para_DeltaFx{tfm_para_user_counter},'%.2e'),'[N]']);
+    elseif get(h_para.radiobutton_forcey,'Value') %fy
         %set correct plot
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Fy_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(tfm_para_user_Fymax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fymax{tfm_para_user_counter}(:,2)*1e9,'.g','MarkerSize',10), hold on;
         plot(tfm_para_user_Fymin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fymin{tfm_para_user_counter}(:,2)*1e9,'.r','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
         %set correct text
-        set(h_para(1).text_forces,'String',['Fy=',num2str(tfm_para_user_para_DeltaFy{tfm_para_user_counter},'%.2e'),'[N]']);
+        set(h_para.text_forces,'String',['Fy=',num2str(tfm_para_user_para_DeltaFy{tfm_para_user_counter},'%.2e'),'[N]']);
     end
     
     %power
-    cla(h_para(1).axes_power)
-    axes(h_para(1).axes_power)
+    cla(h_para.axes_power)
+    axes(h_para.axes_power)
     plot(dt{tfm_para_user_counter},zeros(1,length(dt{tfm_para_user_counter})),'--k'), hold on;
     plot(dt{tfm_para_user_counter},tfm_para_user_power{tfm_para_user_counter}*1e12,'-b'), hold on;
     plot(tfm_para_user_Pmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Pmin{tfm_para_user_counter}(:,2)*1e12,'.r','MarkerSize',10), hold on;
@@ -6082,18 +6095,18 @@ try
     set(gca, 'YTick', []);
     
     %freq.
-    if get(h_para(1).radiobutton_fft,'Value')
+    if get(h_para.radiobutton_fft,'Value')
         %make unwanted buttons invisible
-        set(h_para(1).button_freq_add,'Visible','off');
-        set(h_para(1).button_freq_remove,'Visible','off');
-        set(h_para(1).button_freq_clearall,'Visible','off');
+        set(h_para.button_freq_add,'Visible','off');
+        set(h_para.button_freq_remove,'Visible','off');
+        set(h_para.button_freq_clearall,'Visible','off');
         %enable wanted button
-        set(h_para(1).button_freq_addfft,'Visible','on');
+        set(h_para.button_freq_addfft,'Visible','on');
         %plot frequency. in axes
         x=tfm_para_user_para_freq{tfm_para_user_counter};
         y=tfm_para_user_para_freqy{tfm_para_user_counter};
-        cla(h_para(1).axes_freq)
-        axes(h_para(1).axes_freq)
+        cla(h_para.axes_freq)
+        axes(h_para.axes_freq)
         plot(freq{tfm_para_user_counter},y_fft{tfm_para_user_counter},'-b'), hold on;
         plot(x,y,'.g','MarkerSize',10)
         set(gca, 'XTick', []);
@@ -6101,20 +6114,20 @@ try
         set(gca, 'XLim', [0 5]);% freq{tfm_para_user_counter}(end)]);
         %set(gca, 'YLim', [0 max(y_fft{tfm_para_user_counter})]);
         %para
-        set(h_para(1).text_freq1,'String',['f=',num2str(x,'%.2e'),'[Hz]']);
-        set(h_para(1).text_freq2,'String',['T=',num2str(1/(x+eps),'%.2e'),'[s]']);
-    elseif get(h_para(1).radiobutton_pick,'Value')
+        set(h_para.text_freq1,'String',['f=',num2str(x,'%.2e'),'[Hz]']);
+        set(h_para.text_freq2,'String',['T=',num2str(1/(x+eps),'%.2e'),'[s]']);
+    elseif get(h_para.radiobutton_pick,'Value')
         %make  buttons visible
-        set(h_para(1).button_freq_add,'Visible','on');
-        set(h_para(1).button_freq_remove,'Visible','on');
-        set(h_para(1).button_freq_clearall,'Visible','on');
+        set(h_para.button_freq_add,'Visible','on');
+        set(h_para.button_freq_remove,'Visible','on');
+        set(h_para.button_freq_clearall,'Visible','on');
         %disable unwanted button
-        set(h_para(1).button_freq_addfft,'Visible','off');
+        set(h_para.button_freq_addfft,'Visible','off');
         %plot displ. in axes
         t_new=tfm_para_user_freq2{tfm_para_user_counter};
         x=1/(tfm_para_user_para_freq2{tfm_para_user_counter}+eps);
-        cla(h_para(1).axes_freq)
-        axes(h_para(1).axes_freq)
+        cla(h_para.axes_freq)
+        axes(h_para.axes_freq)
         plot(dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
         %plot delta t
         dtcontr=zeros(1,size(t_new,1));
@@ -6128,70 +6141,70 @@ try
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
         %para
-        set(h_para(1).text_freq1,'String',['f=',num2str(1/(x+eps),'%.2e'),'[Hz]']);
-        set(h_para(1).text_freq2,'String',['T=',num2str(x,'%.2e'),'[s]']);
+        set(h_para.text_freq1,'String',['f=',num2str(1/(x+eps),'%.2e'),'[Hz]']);
+        set(h_para.text_freq2,'String',['T=',num2str(x,'%.2e'),'[s]']);
         
-    elseif get(h_para(1).radiobutton_autocorr,'Value')
+    elseif get(h_para.radiobutton_autocorr,'Value')
         %make unwanted buttons invisible
-        set(h_para(1).button_freq_add,'Visible','off');
-        set(h_para(1).button_freq_remove,'Visible','off');
-        set(h_para(1).button_freq_clearall,'Visible','off');
+        set(h_para.button_freq_add,'Visible','off');
+        set(h_para.button_freq_remove,'Visible','off');
+        set(h_para.button_freq_clearall,'Visible','off');
         %disable unwanted button
-        set(h_para(1).button_freq_addfft,'Visible','off');
+        set(h_para.button_freq_addfft,'Visible','off');
         
-        cla(h_para(1).axes_freq)
-        axes(h_para(1).axes_freq)
+        cla(h_para.axes_freq)
+        axes(h_para.axes_freq)
         plot(tfm_para_user_d_s{tfm_para_user_counter}.signal_t,tfm_para_user_d_s{tfm_para_user_counter}.autocorr_signal,'-m'), hold on;
         plot(tfm_para_user_d_s{tfm_para_user_counter}.autocorr_peaks_lags/tfm_para_user_d_s{tfm_para_user_counter}.framerate,tfm_para_user_d_s{tfm_para_user_counter}.autocorr_peaks,'ob','MarkerSize',3); hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
         %para
-        set(h_para(1).text_freq1,'String',['f= XX [Hz]']);
-        set(h_para(1).text_freq2,'String',['T= XX [s]']);
+        set(h_para.text_freq1,'String',['f= XX [Hz]']);
+        set(h_para.text_freq2,'String',['T= XX [s]']);
     end
     
     %display para
     %diplay
-    set(h_para(1).text_disp,'String',['dcontr=',num2str(tfm_para_user_para_Deltad{tfm_para_user_counter},'%.2e'),'[m]']);
-    set(h_para(1).text_vel1,'String',['vcontr=',num2str(tfm_para_user_para_vcontr{tfm_para_user_counter},'%.2e'),'[m/s]']);
-    set(h_para(1).text_vel2,'String',['vrelax=',num2str(tfm_para_user_para_vrelax{tfm_para_user_counter},'%.2e'),'[m/s]']);
-    %     set(h_para(1).text_dp2_2,'String',['t=',num2str(tfm_para_user_para_tdp{tfm_para_user_counter},'%.2e'),'[s]']);
-    set(h_para(1).text_contr,'String',['tcontr=',num2str(tfm_para_user_para_tcontr{tfm_para_user_counter},'%.2e'),'[s]']);
-    set(h_para(1).text_power1,'String',['Pcontr=',num2str(tfm_para_user_para_Pcontr{tfm_para_user_counter},'%.2e'),'[W]']);
-    set(h_para(1).text_power2,'String',['Prelax=',num2str(tfm_para_user_para_Prelax{tfm_para_user_counter},'%.2e'),'[W]']);
-    set(h_para(1).text_strain,'String',['U=',num2str(tfm_para_user_para_U{tfm_para_user_counter},'%.2e'),'[J]']);
-    if get(h_para(1).radiobutton_Mxx,'Value')
-        set(h_para(1).text_moment,'String',['Mxx=',num2str(tfm_para_user_para_Mxx{tfm_para_user_counter},'%.2e'),'[Nm]']);
-    elseif get(h_para(1).radiobutton_Myy,'Value')
-        set(h_para(1).text_moment,'String',['Myy=',num2str(tfm_para_user_para_Myy{tfm_para_user_counter},'%.2e'),'[Nm]']);
-    elseif get(h_para(1).radiobutton_mu,'Value')
-        set(h_para(1).text_moment,'String',['mu=',num2str(tfm_para_user_para_mu{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    set(h_para.text_disp,'String',['dcontr=',num2str(tfm_para_user_para_Deltad{tfm_para_user_counter},'%.2e'),'[m]']);
+    set(h_para.text_vel1,'String',['vcontr=',num2str(tfm_para_user_para_vcontr{tfm_para_user_counter},'%.2e'),'[m/s]']);
+    set(h_para.text_vel2,'String',['vrelax=',num2str(tfm_para_user_para_vrelax{tfm_para_user_counter},'%.2e'),'[m/s]']);
+    %     set(h_para.text_dp2_2,'String',['t=',num2str(tfm_para_user_para_tdp{tfm_para_user_counter},'%.2e'),'[s]']);
+    set(h_para.text_contr,'String',['tcontr=',num2str(tfm_para_user_para_tcontr{tfm_para_user_counter},'%.2e'),'[s]']);
+    set(h_para.text_power1,'String',['Pcontr=',num2str(tfm_para_user_para_Pcontr{tfm_para_user_counter},'%.2e'),'[W]']);
+    set(h_para.text_power2,'String',['Prelax=',num2str(tfm_para_user_para_Prelax{tfm_para_user_counter},'%.2e'),'[W]']);
+    set(h_para.text_strain,'String',['U=',num2str(tfm_para_user_para_U{tfm_para_user_counter},'%.2e'),'[J]']);
+    if get(h_para.radiobutton_Mxx,'Value')
+        set(h_para.text_moment,'String',['Mxx=',num2str(tfm_para_user_para_Mxx{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    elseif get(h_para.radiobutton_Myy,'Value')
+        set(h_para.text_moment,'String',['Myy=',num2str(tfm_para_user_para_Myy{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    elseif get(h_para.radiobutton_mu,'Value')
+        set(h_para.text_moment,'String',['mu=',num2str(tfm_para_user_para_mu{tfm_para_user_counter},'%.2e'),'[Nm]']);
     end
-    set(h_para(1).text_disp_autocor,'String',['dcontr=',num2str(tfm_para_user_d_pav{tfm_para_user_counter}.peak_amp,'%.2e'),'[m]',',n=',num2str(tfm_para_user_d_pav{tfm_para_user_counter}.n_peaks)]);
-    set(h_para(1).text_force_autocor,'String',['F=',num2str(tfm_para_user_F_pav{tfm_para_user_counter}.peak_amp,'%.2e'),'[N]',',n=',num2str(tfm_para_user_F_pav{tfm_para_user_counter}.n_peaks)]);
-    set(h_para(1).text_vcontr_autocor,'String',['vcontr=',num2str(tfm_para_user_d_pav{tfm_para_user_counter}.d_peak_max,'%.2e'),'[m/s]']);
-    set(h_para(1).text_vrelax_autocor,'String',['vrelax=',num2str(tfm_para_user_d_pav{tfm_para_user_counter}.d_peak_min,'%.2e'),'[m/s]']);
-    set(h_para(1).text_note_autocor,'String',['Comment: ',tfm_para_user_d_s{tfm_para_user_counter}.comment]);
+    set(h_para.text_disp_autocor,'String',['dcontr=',num2str(tfm_para_user_d_pav{tfm_para_user_counter}.peak_amp,'%.2e'),'[m]',',n=',num2str(tfm_para_user_d_pav{tfm_para_user_counter}.n_peaks)]);
+    set(h_para.text_force_autocor,'String',['F=',num2str(tfm_para_user_F_pav{tfm_para_user_counter}.peak_amp,'%.2e'),'[N]',',n=',num2str(tfm_para_user_F_pav{tfm_para_user_counter}.n_peaks)]);
+    set(h_para.text_vcontr_autocor,'String',['vcontr=',num2str(tfm_para_user_d_pav{tfm_para_user_counter}.d_peak_max,'%.2e'),'[m/s]']);
+    set(h_para.text_vrelax_autocor,'String',['vrelax=',num2str(tfm_para_user_d_pav{tfm_para_user_counter}.d_peak_min,'%.2e'),'[m/s]']);
+    set(h_para.text_note_autocor,'String',['Comment: ',tfm_para_user_d_s{tfm_para_user_counter}.comment]);
     
     %set texts to 1st vid
-    set(h_para(1).text_whichvidname,'String',tfm_init_user_filenamestack{1,tfm_para_user_counter});
-    set(h_para(1).text_whichvid,'String',[num2str(tfm_para_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
+    set(h_para.text_whichvidname,'String',tfm_init_user_filenamestack{1,tfm_para_user_counter});
+    set(h_para.text_whichvid,'String',[num2str(tfm_para_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
     
     
     %forward /backbutton
     if tfm_para_user_counter==1
-        set(h_para(1).button_backwards,'Enable','off');
+        set(h_para.button_backwards,'Enable','off');
     else
-        set(h_para(1).button_backwards,'Enable','on');
+        set(h_para.button_backwards,'Enable','on');
     end
     if tfm_para_user_counter==tfm_init_user_Nfiles
-        set(h_para(1).button_forwards,'Enable','off');
+        set(h_para.button_forwards,'Enable','off');
     else
-        set(h_para(1).button_forwards,'Enable','on');
+        set(h_para.button_forwards,'Enable','on');
     end
     
     %Export result panel image
-    %export_fig([tfm_init_user_pathnamestack{1,tfm_para_user_counter},tfm_init_user_filenamestack{1,tfm_para_user_counter},'/Plots/Curve Plots/results_panel'],'-png','-m1.5',h_para(1).fig);
+    %export_fig([tfm_init_user_pathnamestack{1,tfm_para_user_counter},tfm_init_user_filenamestack{1,tfm_para_user_counter},'/Plots/Curve Plots/results_panel'],'-png','-m1.5',h_para.fig);
 
     %shared data
     setappdata(0,'tfm_para_user_other_comments',tfm_para_user_other_comments);
@@ -6207,10 +6220,10 @@ end
 
 function para_push_backwards(hObject, eventdata, h_para)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 
 try
@@ -6299,56 +6312,56 @@ try
     tfm_para_user_disp_l = getappdata(0,'tfm_para_user_disp_l');
     
     %save current stuff
-    tfm_para_user_other_comments{tfm_para_user_counter}=get(h_para(1).edit_other,'String');
-    tfm_para_user_para_ratiop{tfm_para_user_counter}=str2double(get(h_para(1).edit_ratio,'String'));
+    tfm_para_user_other_comments{tfm_para_user_counter}=get(h_para.edit_other,'String');
+    tfm_para_user_para_ratiop{tfm_para_user_counter}=str2double(get(h_para.edit_ratio,'String'));
     %     if tfm_para_user_para_tagdp{tfm_para_user_counter}
-    %         tfm_para_user_para_ratiodp{tfm_para_user_counter}=str2double(get(h_para(1).edit_dp2,'String'));
+    %         tfm_para_user_para_ratiodp{tfm_para_user_counter}=str2double(get(h_para.edit_dp2,'String'));
     %     end
     
     %go to video before
     tfm_para_user_counter=tfm_para_user_counter-1;
     
     %set tags
-    set(h_para(1).edit_ratio,'String',num2str(tfm_para_user_para_ratiop{tfm_para_user_counter}));
+    set(h_para.edit_ratio,'String',num2str(tfm_para_user_para_ratiop{tfm_para_user_counter}));
     %     if tfm_para_user_para_tagdp{tfm_para_user_counter}
-    %         set(h_para(1).edit_dp2,'String',num2str(tfm_para_user_para_ratiodp{tfm_para_user_counter}));
+    %         set(h_para.edit_dp2,'String',num2str(tfm_para_user_para_ratiodp{tfm_para_user_counter}));
     %     end
     %checkboxes
     if tfm_para_user_discard_tag{tfm_para_user_counter}
-        set(h_para(1).checkbox_disc,'Value',1)
+        set(h_para.checkbox_disc,'Value',1)
     else
-        set(h_para(1).checkbox_disc,'Value',0)
+        set(h_para.checkbox_disc,'Value',0)
     end
     if tfm_para_user_dbl_tag{tfm_para_user_counter}
-        set(h_para(1).checkbox_dbl,'Value',1)
+        set(h_para.checkbox_dbl,'Value',1)
     else
-        set(h_para(1).checkbox_dbl,'Value',0)
+        set(h_para.checkbox_dbl,'Value',0)
     end
     if tfm_para_user_drift_tag{tfm_para_user_counter}
-        set(h_para(1).checkbox_drift,'Value',1)
+        set(h_para.checkbox_drift,'Value',1)
     else
-        set(h_para(1).checkbox_drift,'Value',0)
+        set(h_para.checkbox_drift,'Value',0)
     end
     if tfm_para_user_other_tag{tfm_para_user_counter}
-        set(h_para(1).checkbox_other,'Value',1)
+        set(h_para.checkbox_other,'Value',1)
     else
-        set(h_para(1).checkbox_other,'Value',0)
+        set(h_para.checkbox_other,'Value',0)
     end
-    set(h_para(1).edit_other,'String',tfm_para_user_other_comments{tfm_para_user_counter})
+    set(h_para.edit_other,'String',tfm_para_user_other_comments{tfm_para_user_counter})
     %     if tfm_para_user_para_tagdp{tfm_para_user_counter}
-    %         set(h_para(1).panel_dp2,'Visible','on')
-    %         set(h_para(1).checkbox_dpyes,'Value',1)
-    %         set(h_para(1).checkbox_dpno,'Value',0)
+    %         set(h_para.panel_dp2,'Visible','on')
+    %         set(h_para.checkbox_dpyes,'Value',1)
+    %         set(h_para.checkbox_dpno,'Value',0)
     %     else
-    %         set(h_para(1).checkbox_dpyes,'Value',0)
-    %         set(h_para(1).checkbox_dpno,'Value',1)
-    %         set(h_para(1).panel_dp2,'Visible','off')
+    %         set(h_para.checkbox_dpyes,'Value',0)
+    %         set(h_para.checkbox_dpno,'Value',1)
+    %         set(h_para.panel_dp2,'Visible','off')
     %     end
     
     %display plots
     %plot 1st displ. in axes
-    cla(h_para(1).axes_disp)
-    axes(h_para(1).axes_disp)
+    cla(h_para.axes_disp)
+    axes(h_para.axes_disp)
     plot(dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
     plot(dt{tfm_para_user_counter},tfm_para_user_disp_l*ones(size(dt{tfm_para_user_counter},2),1)',':m'), hold on;
     text(dt{tfm_para_user_counter}(1),tfm_para_user_disp_l*1e6,[num2str(tfm_para_user_disp_l) '[m]'],'FontSize',10);
@@ -6360,8 +6373,8 @@ try
     ylim([0 5e-8]);
     
     %     %displ. in double peak
-    %     cla(h_para(1).axes_dp2)
-    %     axes(h_para(1).axes_dp2)
+    %     cla(h_para.axes_dp2)
+    %     axes(h_para.axes_dp2)
     %     plot(dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
     %     plot(tfm_para_user_tdp{tfm_para_user_counter}(:,1),tfm_para_user_tdp{tfm_para_user_counter}(:,3),'.r','MarkerSize',10)
     %     plot(tfm_para_user_tdp{tfm_para_user_counter}(:,2),tfm_para_user_tdp{tfm_para_user_counter}(:,4),'.r','MarkerSize',10)
@@ -6375,8 +6388,8 @@ try
     %     set(gca, 'YTick', []);
     
     %plot 1st velocity. in axes
-    cla(h_para(1).axes_vel)
-    axes(h_para(1).axes_vel)
+    cla(h_para.axes_vel)
+    axes(h_para.axes_vel)
     plot(dt{tfm_para_user_counter},zeros(1,length(dt{tfm_para_user_counter})),'--k'), hold on;
     plot(dt{tfm_para_user_counter},Velocity{tfm_para_user_counter},'-b'), hold on;
     plot(vmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},vmin{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
@@ -6388,8 +6401,8 @@ try
     set(gca, 'YTick', []);
     
     %%plot 1st velocity. in axes
-    cla(h_para(1).axes_contr)
-    axes(h_para(1).axes_contr)
+    cla(h_para.axes_contr)
+    axes(h_para.axes_contr)
     plot(dt{tfm_para_user_counter},Velocity{tfm_para_user_counter},'-b'), hold on;
     plot(tfm_para_user_tcontr{tfm_para_user_counter}(:,1),tfm_para_user_tcontr{tfm_para_user_counter}(:,3),'.r','MarkerSize',10)
     plot(tfm_para_user_tcontr{tfm_para_user_counter}(:,2),tfm_para_user_tcontr{tfm_para_user_counter}(:,4),'.r','MarkerSize',10)
@@ -6403,8 +6416,8 @@ try
     set(gca, 'YTick', []);
     
     %plot strain energy
-    reset(h_para(1).axes_strain)
-    axes(h_para(1).axes_strain)
+    reset(h_para.axes_strain)
+    axes(h_para.axes_strain)
     plot(dt{tfm_para_user_counter},tfm_para_user_U{tfm_para_user_counter},'-b'), hold on;
     plot(tfm_para_user_Umin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Umin{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
     plot(tfm_para_user_Umax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Umax{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
@@ -6412,27 +6425,27 @@ try
     set(gca, 'YTick', []);
     
     %plot contractile moment
-    if get(h_para(1).radiobutton_Mxx,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    if get(h_para.radiobutton_Mxx,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Mxx{tfm_para_user_counter},'-b')
         plot(tfm_para_user_Mxx_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Mxx_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
         plot(tfm_para_user_Mxx_max{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Mxx_max{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
-    elseif get(h_para(1).radiobutton_Myy,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    elseif get(h_para.radiobutton_Myy,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Myy{tfm_para_user_counter},'-b')
         plot(tfm_para_user_Myy_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Myy_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
         plot(tfm_para_user_Myy_max{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Myy_max{tfm_para_user_counter}(:,2),'.g','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
-    elseif get(h_para(1).radiobutton_mu,'Value')
-        reset(h_para(1).axes_moment)
-        axes(h_para(1).axes_moment)
+    elseif get(h_para.radiobutton_mu,'Value')
+        reset(h_para.axes_moment)
+        axes(h_para.axes_moment)
         plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_mu{tfm_para_user_counter},'-b')
         plot(tfm_para_user_mu_min{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_mu_min{tfm_para_user_counter}(:,2),'.r','MarkerSize',10), hold on;
@@ -6447,10 +6460,10 @@ try
     theta_sort = tfm_para_user_dtheta{tfm_para_user_counter}(di);
     Mxx_sort = tfm_para_user_Mxx{tfm_para_user_counter}(di);
     
-    if get(h_para(1).radiobutton_center,'Value')
+    if get(h_para.radiobutton_center,'Value')
         %plot center of contraction
-        reset(h_para(1).axes_orient)
-        axes(h_para(1).axes_orient)
+        reset(h_para.axes_orient)
+        axes(h_para.axes_orient)
         [theta_center,r_center] = cart2pol(center_sort(:,1),center_sort(:,2));
         polarscatter(theta_center,r_center,10,d_sort,'filled');
         %set(gca, 'RTickLabel', []);
@@ -6459,10 +6472,10 @@ try
         rlim([0 5e-6]);
         rticks([2.5e-6 5e-6]);
         rticklabels({'r = 2.5e-6 [m]',''});
-    elseif get(h_para(1).radiobutton_orient,'Value')
+    elseif get(h_para.radiobutton_orient,'Value')
         %plot traction orientation
-        reset(h_para(1).axes_orient)
-        axes(h_para(1).axes_orient)
+        reset(h_para.axes_orient)
+        axes(h_para.axes_orient)
         polarscatter(theta_sort.*(pi/180),Mxx_sort,10,d_sort,'filled');
         set(gca, 'RTickLabel', []);
         set(gca, 'ThetaTickLabel', []);
@@ -6471,8 +6484,8 @@ try
     
     %plot peak averaging results
     %displacement
-    reset(h_para(1).axes_disp_autocor)
-    axes(h_para(1).axes_disp_autocor)
+    reset(h_para.axes_disp_autocor)
+    axes(h_para.axes_disp_autocor)
     if ~isnan(tfm_para_user_d_pav{tfm_para_user_counter}.n_peaks)
         plot(tfm_para_user_d_pav{tfm_para_user_counter}.peak_wins_t,tfm_para_user_d_pav{tfm_para_user_counter}.av_peak), hold on;
         area(tfm_para_user_d_pav{tfm_para_user_counter}.t_peak,tfm_para_user_d_pav{tfm_para_user_counter}.av_peak+tfm_para_user_d_pav{tfm_para_user_counter}.av_peak_std,min(tfm_para_user_d_pav{tfm_para_user_counter}.av_peak-tfm_para_user_d_pav{tfm_para_user_counter}.av_peak_std),'FaceColor',[0.8 0.8 0.8],'FaceAlpha',0.5,'EdgeColor','none');
@@ -6501,8 +6514,8 @@ try
     
     
     %force
-    reset(h_para(1).axes_force_autocor)
-    axes(h_para(1).axes_force_autocor)
+    reset(h_para.axes_force_autocor)
+    axes(h_para.axes_force_autocor)
     if ~isnan(tfm_para_user_F_pav{tfm_para_user_counter}.n_peaks)
         plot(tfm_para_user_F_pav{tfm_para_user_counter}.peak_wins_t,tfm_para_user_F_pav{tfm_para_user_counter}.av_peak), hold on;
         area(tfm_para_user_F_pav{tfm_para_user_counter}.t_peak,tfm_para_user_F_pav{tfm_para_user_counter}.av_peak+tfm_para_user_F_pav{tfm_para_user_counter}.av_peak_std,min(tfm_para_user_F_pav{tfm_para_user_counter}.av_peak-tfm_para_user_F_pav{tfm_para_user_counter}.av_peak_std),'FaceColor',[0.8 0.8 0.8],'FaceAlpha',0.5,'EdgeColor','none');
@@ -6521,47 +6534,47 @@ try
     
     
     %preview traction animation
-    set(h_para(1).button_traction_anim,'string',['<html><img src="file:',tfm_init_user_pathnamestack{1,tfm_para_user_counter},tfm_init_user_filenamestack{1,tfm_para_user_counter},filesep,'heatmap_anim.gif"/></html>']);
+    set(h_para.button_traction_anim,'string',['<html><img src="file:',tfm_init_user_pathnamestack{1,tfm_para_user_counter},tfm_init_user_filenamestack{1,tfm_para_user_counter},filesep,'heatmap_anim.gif"/></html>']);
     
     %forces
-    if get(h_para(1).radiobutton_forcetot,'Value') %ftot
+    if get(h_para.radiobutton_forcetot,'Value') %ftot
         %set correct plot
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_F_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(tfm_para_user_Fmax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fmax{tfm_para_user_counter}(:,2)*1e9,'.g','MarkerSize',10), hold on;
         plot(tfm_para_user_Fmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fmin{tfm_para_user_counter}(:,2)*1e9,'.r','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
         %set correct text
-        set(h_para(1).text_forces,'String',['F=',num2str(tfm_para_user_para_DeltaF{tfm_para_user_counter},'%.2e'),'[N]']);
-    elseif get(h_para(1).radiobutton_forcex,'Value') %fx
+        set(h_para.text_forces,'String',['F=',num2str(tfm_para_user_para_DeltaF{tfm_para_user_counter},'%.2e'),'[N]']);
+    elseif get(h_para.radiobutton_forcex,'Value') %fx
         %set correct plot
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Fx_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(tfm_para_user_Fxmax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fxmax{tfm_para_user_counter}(:,2)*1e9,'.g','MarkerSize',10), hold on;
         plot(tfm_para_user_Fxmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fxmin{tfm_para_user_counter}(:,2)*1e9,'.r','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
         %set correct text
-        set(h_para(1).text_forces,'String',['Fx=',num2str(tfm_para_user_para_DeltaFx{tfm_para_user_counter},'%.2e'),'[N]']);
-    elseif get(h_para(1).radiobutton_forcey,'Value') %fy
+        set(h_para.text_forces,'String',['Fx=',num2str(tfm_para_user_para_DeltaFx{tfm_para_user_counter},'%.2e'),'[N]']);
+    elseif get(h_para.radiobutton_forcey,'Value') %fy
         %set correct plot
-        cla(h_para(1).axes_forces)
-        axes(h_para(1).axes_forces)
+        cla(h_para.axes_forces)
+        axes(h_para.axes_forces)
         plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Fy_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
         plot(tfm_para_user_Fymax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fymax{tfm_para_user_counter}(:,2)*1e9,'.g','MarkerSize',10), hold on;
         plot(tfm_para_user_Fymin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fymin{tfm_para_user_counter}(:,2)*1e9,'.r','MarkerSize',10), hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
         %set correct text
-        set(h_para(1).text_forces,'String',['Fy=',num2str(tfm_para_user_para_DeltaFy{tfm_para_user_counter},'%.2e'),'[N]']);
+        set(h_para.text_forces,'String',['Fy=',num2str(tfm_para_user_para_DeltaFy{tfm_para_user_counter},'%.2e'),'[N]']);
     end
     
     %power
-    cla(h_para(1).axes_power)
-    axes(h_para(1).axes_power)
+    cla(h_para.axes_power)
+    axes(h_para.axes_power)
     plot(dt{tfm_para_user_counter},zeros(1,length(dt{tfm_para_user_counter})),'--k'), hold on;
     plot(dt{tfm_para_user_counter},tfm_para_user_power{tfm_para_user_counter}*1e12,'-b'), hold on;
     plot(tfm_para_user_Pmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Pmin{tfm_para_user_counter}(:,2)*1e12,'.r','MarkerSize',10), hold on;
@@ -6570,18 +6583,18 @@ try
     set(gca, 'YTick', []);
     
     %freq.
-    if get(h_para(1).radiobutton_fft,'Value')
+    if get(h_para.radiobutton_fft,'Value')
         %make unwanted buttons invisible
-        set(h_para(1).button_freq_add,'Visible','off');
-        set(h_para(1).button_freq_remove,'Visible','off');
-        set(h_para(1).button_freq_clearall,'Visible','off');
+        set(h_para.button_freq_add,'Visible','off');
+        set(h_para.button_freq_remove,'Visible','off');
+        set(h_para.button_freq_clearall,'Visible','off');
         %enable wanted button
-        set(h_para(1).button_freq_addfft,'Visible','on');
+        set(h_para.button_freq_addfft,'Visible','on');
         %plot frequency. in axes
         x=tfm_para_user_para_freq{tfm_para_user_counter};
         y=tfm_para_user_para_freqy{tfm_para_user_counter};
-        cla(h_para(1).axes_freq)
-        axes(h_para(1).axes_freq)
+        cla(h_para.axes_freq)
+        axes(h_para.axes_freq)
         plot(freq{tfm_para_user_counter},y_fft{tfm_para_user_counter},'-b'), hold on;
         plot(x,y,'.g','MarkerSize',10)
         set(gca, 'XTick', []);
@@ -6589,20 +6602,20 @@ try
         set(gca, 'XLim', [0 5]);% freq{tfm_para_user_counter}(end)]);
         %set(gca, 'YLim', [0 max(y_fft{tfm_para_user_counter})]);
         %para
-        set(h_para(1).text_freq1,'String',['f=',num2str(x,'%.2e'),'[Hz]']);
-        set(h_para(1).text_freq2,'String',['T=',num2str(1/(x+eps),'%.2e'),'[s]']);
-    elseif get(h_para(1).radiobutton_pick,'Value')
+        set(h_para.text_freq1,'String',['f=',num2str(x,'%.2e'),'[Hz]']);
+        set(h_para.text_freq2,'String',['T=',num2str(1/(x+eps),'%.2e'),'[s]']);
+    elseif get(h_para.radiobutton_pick,'Value')
         %make  buttons visible
-        set(h_para(1).button_freq_add,'Visible','on');
-        set(h_para(1).button_freq_remove,'Visible','on');
-        set(h_para(1).button_freq_clearall,'Visible','on');
+        set(h_para.button_freq_add,'Visible','on');
+        set(h_para.button_freq_remove,'Visible','on');
+        set(h_para.button_freq_clearall,'Visible','on');
         %disable unwanted button
-        set(h_para(1).button_freq_addfft,'Visible','off');
+        set(h_para.button_freq_addfft,'Visible','off');
         %plot displ. in axes
         t_new=tfm_para_user_freq2{tfm_para_user_counter};
         x=1/(tfm_para_user_para_freq2{tfm_para_user_counter}+eps);
-        cla(h_para(1).axes_freq)
-        axes(h_para(1).axes_freq)
+        cla(h_para.axes_freq)
+        axes(h_para.axes_freq)
         plot(dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
         %plot delta t
         dtcontr=zeros(1,size(t_new,1));
@@ -6616,70 +6629,70 @@ try
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
         %para
-        set(h_para(1).text_freq1,'String',['f=',num2str(1/(x+eps),'%.2e'),'[Hz]']);
-        set(h_para(1).text_freq2,'String',['T=',num2str(x,'%.2e'),'[s]']);
+        set(h_para.text_freq1,'String',['f=',num2str(1/(x+eps),'%.2e'),'[Hz]']);
+        set(h_para.text_freq2,'String',['T=',num2str(x,'%.2e'),'[s]']);
         
-    elseif get(h_para(1).radiobutton_autocorr,'Value')
+    elseif get(h_para.radiobutton_autocorr,'Value')
         %make unwanted buttons invisible
-        set(h_para(1).button_freq_add,'Visible','off');
-        set(h_para(1).button_freq_remove,'Visible','off');
-        set(h_para(1).button_freq_clearall,'Visible','off');
+        set(h_para.button_freq_add,'Visible','off');
+        set(h_para.button_freq_remove,'Visible','off');
+        set(h_para.button_freq_clearall,'Visible','off');
         %disable unwanted button
-        set(h_para(1).button_freq_addfft,'Visible','off');
+        set(h_para.button_freq_addfft,'Visible','off');
         
-        cla(h_para(1).axes_freq)
-        axes(h_para(1).axes_freq)
+        cla(h_para.axes_freq)
+        axes(h_para.axes_freq)
         plot(tfm_para_user_d_s{tfm_para_user_counter}.signal_t,tfm_para_user_d_s{tfm_para_user_counter}.autocorr_signal,'-m'), hold on;
         plot(tfm_para_user_d_s{tfm_para_user_counter}.autocorr_peaks_lags/tfm_para_user_d_s{tfm_para_user_counter}.framerate,tfm_para_user_d_s{tfm_para_user_counter}.autocorr_peaks,'ob','MarkerSize',3); hold on;
         set(gca, 'XTick', []);
         set(gca, 'YTick', []);
         %para
-        set(h_para(1).text_freq1,'String',['f= XX [Hz]']);
-        set(h_para(1).text_freq2,'String',['T= XX [s]']);
+        set(h_para.text_freq1,'String',['f= XX [Hz]']);
+        set(h_para.text_freq2,'String',['T= XX [s]']);
     end
     
     %display para
     %diplay
-    set(h_para(1).text_disp,'String',['dcontr=',num2str(tfm_para_user_para_Deltad{tfm_para_user_counter},'%.2e'),'[m]']);
-    set(h_para(1).text_vel1,'String',['vcontr=',num2str(tfm_para_user_para_vcontr{tfm_para_user_counter},'%.2e'),'[m/s]']);
-    set(h_para(1).text_vel2,'String',['vrelax=',num2str(tfm_para_user_para_vrelax{tfm_para_user_counter},'%.2e'),'[m/s]']);
-    %     set(h_para(1).text_dp2_2,'String',['t=',num2str(tfm_para_user_para_tdp{tfm_para_user_counter},'%.2e'),'[s]']);
-    set(h_para(1).text_contr,'String',['tcontr=',num2str(tfm_para_user_para_tcontr{tfm_para_user_counter},'%.2e'),'[s]']);
-    set(h_para(1).text_power1,'String',['Pcontr=',num2str(tfm_para_user_para_Pcontr{tfm_para_user_counter},'%.2e'),'[W]']);
-    set(h_para(1).text_power2,'String',['Prelax=',num2str(tfm_para_user_para_Prelax{tfm_para_user_counter},'%.2e'),'[W]']);
-    set(h_para(1).text_strain,'String',['U=',num2str(tfm_para_user_para_U{tfm_para_user_counter},'%.2e'),'[J]']);
-    if get(h_para(1).radiobutton_Mxx,'Value')
-        set(h_para(1).text_moment,'String',['Mxx=',num2str(tfm_para_user_para_Mxx{tfm_para_user_counter},'%.2e'),'[Nm]']);
-    elseif get(h_para(1).radiobutton_Myy,'Value')
-        set(h_para(1).text_moment,'String',['Myy=',num2str(tfm_para_user_para_Myy{tfm_para_user_counter},'%.2e'),'[Nm]']);
-    elseif get(h_para(1).radiobutton_mu,'Value')
-        set(h_para(1).text_moment,'String',['mu=',num2str(tfm_para_user_para_mu{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    set(h_para.text_disp,'String',['dcontr=',num2str(tfm_para_user_para_Deltad{tfm_para_user_counter},'%.2e'),'[m]']);
+    set(h_para.text_vel1,'String',['vcontr=',num2str(tfm_para_user_para_vcontr{tfm_para_user_counter},'%.2e'),'[m/s]']);
+    set(h_para.text_vel2,'String',['vrelax=',num2str(tfm_para_user_para_vrelax{tfm_para_user_counter},'%.2e'),'[m/s]']);
+    %     set(h_para.text_dp2_2,'String',['t=',num2str(tfm_para_user_para_tdp{tfm_para_user_counter},'%.2e'),'[s]']);
+    set(h_para.text_contr,'String',['tcontr=',num2str(tfm_para_user_para_tcontr{tfm_para_user_counter},'%.2e'),'[s]']);
+    set(h_para.text_power1,'String',['Pcontr=',num2str(tfm_para_user_para_Pcontr{tfm_para_user_counter},'%.2e'),'[W]']);
+    set(h_para.text_power2,'String',['Prelax=',num2str(tfm_para_user_para_Prelax{tfm_para_user_counter},'%.2e'),'[W]']);
+    set(h_para.text_strain,'String',['U=',num2str(tfm_para_user_para_U{tfm_para_user_counter},'%.2e'),'[J]']);
+    if get(h_para.radiobutton_Mxx,'Value')
+        set(h_para.text_moment,'String',['Mxx=',num2str(tfm_para_user_para_Mxx{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    elseif get(h_para.radiobutton_Myy,'Value')
+        set(h_para.text_moment,'String',['Myy=',num2str(tfm_para_user_para_Myy{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    elseif get(h_para.radiobutton_mu,'Value')
+        set(h_para.text_moment,'String',['mu=',num2str(tfm_para_user_para_mu{tfm_para_user_counter},'%.2e'),'[Nm]']);
     end
-    set(h_para(1).text_disp_autocor,'String',['dcontr=',num2str(tfm_para_user_d_pav{tfm_para_user_counter}.peak_amp,'%.2e'),'[m]',',n=',num2str(tfm_para_user_d_pav{tfm_para_user_counter}.n_peaks)]);
-    set(h_para(1).text_force_autocor,'String',['F=',num2str(tfm_para_user_F_pav{tfm_para_user_counter}.peak_amp,'%.2e'),'[N]',',n=',num2str(tfm_para_user_F_pav{tfm_para_user_counter}.n_peaks)]);
-    set(h_para(1).text_vcontr_autocor,'String',['vcontr=',num2str(tfm_para_user_d_pav{tfm_para_user_counter}.d_peak_max,'%.2e'),'[m/s]']);
-    set(h_para(1).text_vrelax_autocor,'String',['vrelax=',num2str(tfm_para_user_d_pav{tfm_para_user_counter}.d_peak_min,'%.2e'),'[m/s]']);
-    set(h_para(1).text_note_autocor,'String',['Comment: ',tfm_para_user_d_s{tfm_para_user_counter}.comment]);
+    set(h_para.text_disp_autocor,'String',['dcontr=',num2str(tfm_para_user_d_pav{tfm_para_user_counter}.peak_amp,'%.2e'),'[m]',',n=',num2str(tfm_para_user_d_pav{tfm_para_user_counter}.n_peaks)]);
+    set(h_para.text_force_autocor,'String',['F=',num2str(tfm_para_user_F_pav{tfm_para_user_counter}.peak_amp,'%.2e'),'[N]',',n=',num2str(tfm_para_user_F_pav{tfm_para_user_counter}.n_peaks)]);
+    set(h_para.text_vcontr_autocor,'String',['vcontr=',num2str(tfm_para_user_d_pav{tfm_para_user_counter}.d_peak_max,'%.2e'),'[m/s]']);
+    set(h_para.text_vrelax_autocor,'String',['vrelax=',num2str(tfm_para_user_d_pav{tfm_para_user_counter}.d_peak_min,'%.2e'),'[m/s]']);
+    set(h_para.text_note_autocor,'String',['Comment: ',tfm_para_user_d_s{tfm_para_user_counter}.comment]);
     
     %set texts to 1st vid
-    set(h_para(1).text_whichvidname,'String',tfm_init_user_filenamestack{1,tfm_para_user_counter});
-    set(h_para(1).text_whichvid,'String',[num2str(tfm_para_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
+    set(h_para.text_whichvidname,'String',tfm_init_user_filenamestack{1,tfm_para_user_counter});
+    set(h_para.text_whichvid,'String',[num2str(tfm_para_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
     
     
     %forward /backbutton
     if tfm_para_user_counter==1
-        set(h_para(1).button_backwards,'Enable','off');
+        set(h_para.button_backwards,'Enable','off');
     else
-        set(h_para(1).button_backwards,'Enable','on');
+        set(h_para.button_backwards,'Enable','on');
     end
     if tfm_para_user_counter==tfm_init_user_Nfiles
-        set(h_para(1).button_forwards,'Enable','off');
+        set(h_para.button_forwards,'Enable','off');
     else
-        set(h_para(1).button_forwards,'Enable','on');
+        set(h_para.button_forwards,'Enable','on');
     end
     
     %Export result panel image
-    %export_fig([tfm_init_user_pathnamestack{1,tfm_para_user_counter},tfm_init_user_filenamestack{1,tfm_para_user_counter},'/Plots/Curve Plots/results_panel'],'-png','-m1.5',h_para(1).fig);
+    %export_fig([tfm_init_user_pathnamestack{1,tfm_para_user_counter},tfm_init_user_filenamestack{1,tfm_para_user_counter},'/Plots/Curve Plots/results_panel'],'-png','-m1.5',h_para.fig);
     
     %shared data
     setappdata(0,'tfm_para_user_other_comments',tfm_para_user_other_comments);
@@ -6697,10 +6710,10 @@ end
 
 function para_push_ok(hObject, eventdata, h_para, h_main)
 %disable figure during calculation
-enableDisableFig(h_para(1).fig,0);
+enableDisableFig(h_para.fig,0);
 
 %turn back on in the end
-%clean1=onCleanup(@()enableDisableFig(h_para(1).fig,1));
+%clean1=onCleanup(@()enableDisableFig(h_para.fig,1));
 
 %userTiming= getappdata(0,'userTiming');
 %userTiming.para{2} = toc(userTiming.para{1});
@@ -6782,10 +6795,10 @@ try
     
     
     %save current stuff
-    tfm_para_user_other_comments{tfm_para_user_counter}=get(h_para(1).edit_other,'String');
-    tfm_para_user_para_ratiop{tfm_para_user_counter}=str2double(get(h_para(1).edit_ratio,'String'));
+    tfm_para_user_other_comments{tfm_para_user_counter}=get(h_para.edit_other,'String');
+    tfm_para_user_para_ratiop{tfm_para_user_counter}=str2double(get(h_para.edit_ratio,'String'));
     if tfm_para_user_para_tagdp{tfm_para_user_counter}
-        tfm_para_user_para_ratiodp{tfm_para_user_counter}=str2double(get(h_para(1).edit_dp2,'String'));
+        tfm_para_user_para_ratiodp{tfm_para_user_counter}=str2double(get(h_para.edit_dp2,'String'));
     end
     
     %save para to excel
@@ -6794,7 +6807,7 @@ try
     %loop over videos
     for ivid=1:tfm_init_user_Nfiles
         %waitbar
-        sb=statusbar(h_para(1).fig,['Saving parameters... ',num2str(floor(100*(ivid-1)/sum(tfm_init_user_Nfiles))), '%% done']);
+        sb=statusbar(h_para.fig,['Saving parameters... ',num2str(floor(100*(ivid-1)/sum(tfm_init_user_Nfiles))), '%% done']);
         sb.getComponent(0).setForeground(java.awt.Color.red);
         %
         newfile=[tfm_init_user_pathnamestack{1,ivid},'/',tfm_init_user_filenamestack{1,ivid},'/Results/',tfm_init_user_filenamestack{1,ivid},'.xlsx'];
@@ -6940,7 +6953,7 @@ try
     status4 = xlwrite(masterfile,B,sheet,xlrange);
     
     %statusbar
-    sb=statusbar(h_para(1).fig,'Saving - Done !');
+    sb=statusbar(h_para.fig,'Saving - Done !');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     
     %save curve data
@@ -6949,7 +6962,7 @@ try
     for ivid=1:tfm_init_user_Nfiles
         clear A A1 A2 A3 A4 A5 A6
         %waitbar
-        sb=statusbar(h_para(1).fig,['Saving curve data... ',num2str(floor(100*(ivid-1)/sum(tfm_init_user_Nfiles))), '%% done']);
+        sb=statusbar(h_para.fig,['Saving curve data... ',num2str(floor(100*(ivid-1)/sum(tfm_init_user_Nfiles))), '%% done']);
         sb.getComponent(0).setForeground(java.awt.Color.red);
         
         %file and sheet
@@ -7057,12 +7070,12 @@ try
     end
     
     %statusbar
-    sb=statusbar(h_para(1).fig,'Saving - Done !');
+    sb=statusbar(h_para.fig,'Saving - Done !');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     
     
     %check if user wants to save plots
-    value = get(h_para(1).checkbox_save, 'Value');
+    value = get(h_para.checkbox_save, 'Value');
     
     if value
         %loop over videos
@@ -7074,7 +7087,7 @@ try
             mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots'])
             
             %waitbar
-            sb=statusbar(h_para(1).fig,['Saving curve plots... ',num2str(floor(100*(ivid-1)/sum(tfm_init_user_Nfiles))), '%% done']);
+            sb=statusbar(h_para.fig,['Saving curve plots... ',num2str(floor(100*(ivid-1)/sum(tfm_init_user_Nfiles))), '%% done']);
             sb.getComponent(0).setForeground(java.awt.Color.red);
             
             %d
@@ -7084,7 +7097,8 @@ try
             xlabel('Time [s]')
             ylabel('Average displacement [m]')
             savefig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/displacement']);
-            export_fig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/displacement'],'-png','-m1.5',sh);
+            saveas(sh,[tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/displacement','.png']);
+            %export_fig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/displacement'],'-png','-m1.5',sh);
             close(sh);
             %vel
             sh=figure('Visible','off');
@@ -7164,12 +7178,12 @@ try
 
         end
         %statusbar
-        sb=statusbar(h_para(1).fig,'Saving - Done !');
+        sb=statusbar(h_para.fig,'Saving - Done !');
         sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     end
     
     %check if user wants to save raw traction data
-    value = get(h_para(1).checkbox_save_traction, 'Value');
+    value = get(h_para.checkbox_save_traction, 'Value');
     if value
         %loop over videos
         for ivid=1:tfm_init_user_Nfiles
@@ -7224,8 +7238,7 @@ end
 %save user timing to file
 %temp_table = struct2table(userTiming);
 %writetable(temp_table,[tfm_init_user_pathnamestack{1},'UserTiming.csv']);
-
-sprintf('Data successfully saved in folder: %s',tfm_init_user_pathnamestack{1})
+fprintf(1,'CXS-TFM: Data successfully saved in folder: %s\n',tfm_init_user_pathnamestack{1})
 
 % send notif
 myMessage='Saving results finished';
@@ -7237,13 +7250,13 @@ if notif.on
 end
 
 %enable
-enableDisableFig(h_para(1).fig,1);
+enableDisableFig(h_para.fig,1);
 
 %change main windows 3. button status
-set(h_main(1).button_para,'ForegroundColor',[0 .5 0]);
+set(h_main.button_para,'ForegroundColor',[0 .5 0]);
 
 %close window
-close(h_para(1).fig);
+close(h_para.fig);
 
 
 
@@ -7261,18 +7274,18 @@ tfm_para_user_freq2=getappdata(0,'tfm_para_user_freq2');
 tfm_para_user_para_freq2=getappdata(0,'tfm_para_user_para_freq2');
 tfm_para_user_d_s = getappdata(0,'tfm_para_user_d_s');
 
-if get(h_para(1).radiobutton_fft,'Value')
+if get(h_para.radiobutton_fft,'Value')
     %make unwanted buttons invisible
-    set(h_para(1).button_freq_add,'Visible','off');
-    set(h_para(1).button_freq_remove,'Visible','off');
-    set(h_para(1).button_freq_clearall,'Visible','off');
+    set(h_para.button_freq_add,'Visible','off');
+    set(h_para.button_freq_remove,'Visible','off');
+    set(h_para.button_freq_clearall,'Visible','off');
     %enable wanted button
-    set(h_para(1).button_freq_addfft,'Visible','on');
+    set(h_para.button_freq_addfft,'Visible','on');
     %plot frequency. in axes
     x=tfm_para_user_para_freq{tfm_para_user_counter};
     y=tfm_para_user_para_freqy{tfm_para_user_counter};
-    cla(h_para(1).axes_freq)
-    axes(h_para(1).axes_freq)
+    cla(h_para.axes_freq)
+    axes(h_para.axes_freq)
     plot(freq{tfm_para_user_counter},y_fft{tfm_para_user_counter},'-b'), hold on;
     plot(x,y,'.g','MarkerSize',10)
     set(gca, 'XTick', []);
@@ -7280,20 +7293,20 @@ if get(h_para(1).radiobutton_fft,'Value')
     set(gca, 'XLim', [0 5]);% freq{tfm_para_user_counter}(end)]);
     %set(gca, 'YLim', [0 max(y_fft{tfm_para_user_counter})]);
     %para
-    set(h_para(1).text_freq1,'String',['f=',num2str(x,'%.2e'),'[Hz]']);
-    set(h_para(1).text_freq2,'String',['T=',num2str(1/(x+eps),'%.2e'),'[s]']);
-elseif get(h_para(1).radiobutton_pick,'Value')
+    set(h_para.text_freq1,'String',['f=',num2str(x,'%.2e'),'[Hz]']);
+    set(h_para.text_freq2,'String',['T=',num2str(1/(x+eps),'%.2e'),'[s]']);
+elseif get(h_para.radiobutton_pick,'Value')
     %make  buttons visible
-    set(h_para(1).button_freq_add,'Visible','on');
-    set(h_para(1).button_freq_remove,'Visible','on');
-    set(h_para(1).button_freq_clearall,'Visible','on');
+    set(h_para.button_freq_add,'Visible','on');
+    set(h_para.button_freq_remove,'Visible','on');
+    set(h_para.button_freq_clearall,'Visible','on');
     %disable unwanted button
-    set(h_para(1).button_freq_addfft,'Visible','off');
+    set(h_para.button_freq_addfft,'Visible','off');
     %plot displ. in axes
     t_new=tfm_para_user_freq2{tfm_para_user_counter};
     x=1/(tfm_para_user_para_freq2{tfm_para_user_counter}+eps);
-    cla(h_para(1).axes_freq)
-    axes(h_para(1).axes_freq)
+    cla(h_para.axes_freq)
+    axes(h_para.axes_freq)
     plot(dt{tfm_para_user_counter},tfm_para_user_d{tfm_para_user_counter},'-b'), hold on;
     %plot delta t
     dtcontr=zeros(1,size(t_new,1));
@@ -7307,32 +7320,32 @@ elseif get(h_para(1).radiobutton_pick,'Value')
     set(gca, 'XTick', []);
     set(gca, 'YTick', []);
     %para
-    set(h_para(1).text_freq1,'String',['f=',num2str(1/(x+eps),'%.2e'),'[Hz]']);
-    set(h_para(1).text_freq2,'String',['T=',num2str(x,'%.2e'),'[s]']);
+    set(h_para.text_freq1,'String',['f=',num2str(1/(x+eps),'%.2e'),'[Hz]']);
+    set(h_para.text_freq2,'String',['T=',num2str(x,'%.2e'),'[s]']);
     
-elseif get(h_para(1).radiobutton_autocorr,'Value')
+elseif get(h_para.radiobutton_autocorr,'Value')
     %make unwanted buttons invisible
-    set(h_para(1).button_freq_add,'Visible','off');
-    set(h_para(1).button_freq_remove,'Visible','off');
-    set(h_para(1).button_freq_clearall,'Visible','off');
+    set(h_para.button_freq_add,'Visible','off');
+    set(h_para.button_freq_remove,'Visible','off');
+    set(h_para.button_freq_clearall,'Visible','off');
     %disable unwanted button
-    set(h_para(1).button_freq_addfft,'Visible','off');
+    set(h_para.button_freq_addfft,'Visible','off');
     
-    cla(h_para(1).axes_freq)
-    axes(h_para(1).axes_freq)
+    cla(h_para.axes_freq)
+    axes(h_para.axes_freq)
     plot(tfm_para_user_d_s{tfm_para_user_counter}.signal_t,tfm_para_user_d_s{tfm_para_user_counter}.autocorr_signal,'-m'), hold on;
     plot(tfm_para_user_d_s{tfm_para_user_counter}.autocorr_peaks_lags/tfm_para_user_d_s{tfm_para_user_counter}.framerate,tfm_para_user_d_s{tfm_para_user_counter}.autocorr_peaks,'ob','MarkerSize',3); hold on;
     set(gca, 'XTick', []);
     set(gca, 'YTick', []);
     %para
-    set(h_para(1).text_freq1,'String',['f= XX [Hz]']);
-    set(h_para(1).text_freq2,'String',['T= XX [s]']);
+    set(h_para.text_freq1,'String',['f= XX [Hz]']);
+    set(h_para.text_freq2,'String',['T= XX [s]']);
 end
 
 
 function para_buttongroup_forces(hObject, eventdata, h_para)
 
-if get(h_para(1).radiobutton_forcetot,'Value') %ftot
+if get(h_para.radiobutton_forcetot,'Value') %ftot
     %load
     tfm_para_user_Fmax=getappdata(0,'tfm_para_user_Fmax');
     tfm_para_user_Fmin=getappdata(0,'tfm_para_user_Fmin');
@@ -7342,16 +7355,16 @@ if get(h_para(1).radiobutton_forcetot,'Value') %ftot
     tfm_init_user_framerate=getappdata(0,'tfm_init_user_framerate');
     tfm_para_user_para_DeltaF=getappdata(0,'tfm_para_user_para_DeltaF');
     %set correct plot
-    cla(h_para(1).axes_forces)
-    axes(h_para(1).axes_forces)
+    cla(h_para.axes_forces)
+    axes(h_para.axes_forces)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_F_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
     plot(tfm_para_user_Fmax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fmax{tfm_para_user_counter}(:,2)*1e9,'.g','MarkerSize',10), hold on;
     plot(tfm_para_user_Fmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fmin{tfm_para_user_counter}(:,2)*1e9,'.r','MarkerSize',10), hold on;
     set(gca, 'XTick', []);
     set(gca, 'YTick', []);
     %set correct text
-    set(h_para(1).text_forces,'String',['F=',num2str(tfm_para_user_para_DeltaF{tfm_para_user_counter},'%.2e'),'[N]']);
-elseif get(h_para(1).radiobutton_forcex,'Value') %fx
+    set(h_para.text_forces,'String',['F=',num2str(tfm_para_user_para_DeltaF{tfm_para_user_counter},'%.2e'),'[N]']);
+elseif get(h_para.radiobutton_forcex,'Value') %fx
     %load
     tfm_para_user_Fxmax=getappdata(0,'tfm_para_user_Fxmax');
     tfm_para_user_Fxmin=getappdata(0,'tfm_para_user_Fxmin');
@@ -7361,16 +7374,16 @@ elseif get(h_para(1).radiobutton_forcex,'Value') %fx
     tfm_init_user_framerate=getappdata(0,'tfm_init_user_framerate');
     tfm_para_user_para_DeltaFx=getappdata(0,'tfm_para_user_para_DeltaFx');
     %set correct plot
-    cla(h_para(1).axes_forces)
-    axes(h_para(1).axes_forces)
+    cla(h_para.axes_forces)
+    axes(h_para.axes_forces)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Fx_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
     plot(tfm_para_user_Fxmax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fxmax{tfm_para_user_counter}(:,2)*1e9,'.g','MarkerSize',10), hold on;
     plot(tfm_para_user_Fxmin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fxmin{tfm_para_user_counter}(:,2)*1e9,'.r','MarkerSize',10), hold on;
     set(gca, 'XTick', []);
     set(gca, 'YTick', []);
     %set correct text
-    set(h_para(1).text_forces,'String',['Fx=',num2str(tfm_para_user_para_DeltaFx{tfm_para_user_counter},'%.2e'),'[N]']);
-elseif get(h_para(1).radiobutton_forcey,'Value') %fy
+    set(h_para.text_forces,'String',['Fx=',num2str(tfm_para_user_para_DeltaFx{tfm_para_user_counter},'%.2e'),'[N]']);
+elseif get(h_para.radiobutton_forcey,'Value') %fy
     %load
     tfm_para_user_Fymax=getappdata(0,'tfm_para_user_Fymax');
     tfm_para_user_Fymin=getappdata(0,'tfm_para_user_Fymin');
@@ -7380,21 +7393,21 @@ elseif get(h_para(1).radiobutton_forcey,'Value') %fy
     tfm_init_user_framerate=getappdata(0,'tfm_init_user_framerate');
     tfm_para_user_para_DeltaFy=getappdata(0,'tfm_para_user_para_DeltaFy');
     %set correct plot
-    cla(h_para(1).axes_forces)
-    axes(h_para(1).axes_forces)
+    cla(h_para.axes_forces)
+    axes(h_para.axes_forces)
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Fy_tot{tfm_para_user_counter}*1e9,'-b'), hold on;
     plot(tfm_para_user_Fymax{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fymax{tfm_para_user_counter}(:,2)*1e9,'.g','MarkerSize',10), hold on;
     plot(tfm_para_user_Fymin{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Fymin{tfm_para_user_counter}(:,2)*1e9,'.r','MarkerSize',10), hold on;
     set(gca, 'XTick', []);
     set(gca, 'YTick', []);
     %set correct text
-    set(h_para(1).text_forces,'String',['Fy=',num2str(tfm_para_user_para_DeltaFy{tfm_para_user_counter},'%.2e'),'[N]']);
+    set(h_para.text_forces,'String',['Fy=',num2str(tfm_para_user_para_DeltaFy{tfm_para_user_counter},'%.2e'),'[N]']);
 end
 
 
 function para_buttongroup_moments(hObject, eventdata, h_para)
 
-if get(h_para(1).radiobutton_Mxx,'Value') %Mxx
+if get(h_para.radiobutton_Mxx,'Value') %Mxx
     %load
     tfm_para_user_Mxx_max=getappdata(0,'tfm_para_user_Mxx_max');
     tfm_para_user_Mxx_min=getappdata(0,'tfm_para_user_Mxx_min');
@@ -7404,8 +7417,8 @@ if get(h_para(1).radiobutton_Mxx,'Value') %Mxx
     tfm_init_user_framerate=getappdata(0,'tfm_init_user_framerate');
     tfm_para_user_para_Mxx=getappdata(0,'tfm_para_user_para_Mxx');
     %set correct plot
-    cla(h_para(1).axes_moment)
-    axes(h_para(1).axes_moment)
+    cla(h_para.axes_moment)
+    axes(h_para.axes_moment)
     plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Mxx{tfm_para_user_counter},'-b')
     plot(tfm_para_user_Mxx_max{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Mxx_max{tfm_para_user_counter}(:,2),'.g','MarkerSize',10)
@@ -7413,8 +7426,8 @@ if get(h_para(1).radiobutton_Mxx,'Value') %Mxx
     set(gca, 'XTick', []);
     set(gca, 'YTick', []);
     %set correct text
-    set(h_para(1).text_moment,'String',['Mxx=',num2str(tfm_para_user_para_Mxx{tfm_para_user_counter},'%.2e'),'[Nm]']);
-elseif get(h_para(1).radiobutton_Myy,'Value') %Myy
+    set(h_para.text_moment,'String',['Mxx=',num2str(tfm_para_user_para_Mxx{tfm_para_user_counter},'%.2e'),'[Nm]']);
+elseif get(h_para.radiobutton_Myy,'Value') %Myy
     %load
     tfm_para_user_Myy_max=getappdata(0,'tfm_para_user_Myy_max');
     tfm_para_user_Myy_min=getappdata(0,'tfm_para_user_Myy_min');
@@ -7424,8 +7437,8 @@ elseif get(h_para(1).radiobutton_Myy,'Value') %Myy
     tfm_init_user_framerate=getappdata(0,'tfm_init_user_framerate');
     tfm_para_user_para_Myy=getappdata(0,'tfm_para_user_para_Myy');
     %set correct plot
-    cla(h_para(1).axes_moment)
-    axes(h_para(1).axes_moment)
+    cla(h_para.axes_moment)
+    axes(h_para.axes_moment)
     plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_Myy{tfm_para_user_counter},'-b')
     plot(tfm_para_user_Myy_max{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_Myy_max{tfm_para_user_counter}(:,2),'.g','MarkerSize',10)
@@ -7433,8 +7446,8 @@ elseif get(h_para(1).radiobutton_Myy,'Value') %Myy
     set(gca, 'XTick', []);
     set(gca, 'YTick', []);
     %set correct text
-    set(h_para(1).text_moment,'String',['Myy=',num2str(tfm_para_user_para_Myy{tfm_para_user_counter},'%.2e'),'[Nm]']);
-elseif get(h_para(1).radiobutton_mu,'Value') %mu
+    set(h_para.text_moment,'String',['Myy=',num2str(tfm_para_user_para_Myy{tfm_para_user_counter},'%.2e'),'[Nm]']);
+elseif get(h_para.radiobutton_mu,'Value') %mu
     %load
     tfm_para_user_mu_max=getappdata(0,'tfm_para_user_mu_max');
     tfm_para_user_mu_min=getappdata(0,'tfm_para_user_mu_min');
@@ -7444,8 +7457,8 @@ elseif get(h_para(1).radiobutton_mu,'Value') %mu
     tfm_init_user_framerate=getappdata(0,'tfm_init_user_framerate');
     tfm_para_user_para_mu=getappdata(0,'tfm_para_user_para_mu');
     %set correct plot
-    cla(h_para(1).axes_moment)
-    axes(h_para(1).axes_moment)
+    cla(h_para.axes_moment)
+    axes(h_para.axes_moment)
     plot(tfm_para_user_dt{tfm_para_user_counter},zeros(1,length(tfm_para_user_dt{tfm_para_user_counter})),'--k'), hold on;
     plot(tfm_para_user_dt{tfm_para_user_counter},tfm_para_user_mu{tfm_para_user_counter},'-b')
     plot(tfm_para_user_mu_max{tfm_para_user_counter}(:,1)/tfm_init_user_framerate{tfm_para_user_counter},tfm_para_user_mu_max{tfm_para_user_counter}(:,2),'.g','MarkerSize',10)
@@ -7453,7 +7466,7 @@ elseif get(h_para(1).radiobutton_mu,'Value') %mu
     set(gca, 'XTick', []);
     set(gca, 'YTick', []);
     %set correct text
-    set(h_para(1).text_moment,'String',['mu=',num2str(tfm_para_user_para_mu{tfm_para_user_counter},'%.2e'),'[Nm]']);
+    set(h_para.text_moment,'String',['mu=',num2str(tfm_para_user_para_mu{tfm_para_user_counter},'%.2e'),'[Nm]']);
 end
 
 
@@ -7472,10 +7485,10 @@ center_sort = tfm_para_user_center{tfm_para_user_counter}(di,:);
 theta_sort = tfm_para_user_dtheta{tfm_para_user_counter}(di);
 Mxx_sort = tfm_para_user_Mxx{tfm_para_user_counter}(di);
 
-if get(h_para(1).radiobutton_center,'Value')
+if get(h_para.radiobutton_center,'Value')
     %plot center of contraction
-    reset(h_para(1).axes_orient)
-    axes(h_para(1).axes_orient)
+    reset(h_para.axes_orient)
+    axes(h_para.axes_orient)
     [theta_center,r_center] = cart2pol(center_sort(:,1),center_sort(:,2));
     polarscatter(theta_center,r_center,10,d_sort,'filled');
     %set(gca, 'RTickLabel', []);
@@ -7484,10 +7497,10 @@ if get(h_para(1).radiobutton_center,'Value')
     rlim([0 5e-6]);
     rticks([2.5e-6 5e-6]);
     rticklabels({'r = 2.5e-6 [m]',''});
-elseif get(h_para(1).radiobutton_orient,'Value')
+elseif get(h_para.radiobutton_orient,'Value')
     %plot traction orientation
-    reset(h_para(1).axes_orient)
-    axes(h_para(1).axes_orient)
+    reset(h_para.axes_orient)
+    axes(h_para.axes_orient)
     polarscatter(theta_sort.*(pi/180),Mxx_sort,10,d_sort,'filled');
     set(gca, 'RTickLabel', []);
     set(gca, 'ThetaTickLabel', []);
@@ -7496,32 +7509,32 @@ end
 
 
 function para_checkbox_dpyes(hObject, eventdata, h_para)
-% set(h_para(1).panel_dp2,'Visible','on');
-set(h_para(1).checkbox_dpno,'Value',0);
+% set(h_para.panel_dp2,'Visible','on');
+set(h_para.checkbox_dpno,'Value',0);
 
 tfm_para_user_para_tagdp=getappdata(0,'tfm_para_user_para_tagdp');
 tfm_para_user_para_ratiodp=getappdata(0,'tfm_para_user_para_ratiodp');
 tfm_para_user_counter=getappdata(0,'tfm_para_user_counter');
 
 %yes: tag dp
-if get(h_para(1).checkbox_dpyes,'Value')
+if get(h_para.checkbox_dpyes,'Value')
     tfm_para_user_para_tagdp{tfm_para_user_counter}=1;
 else
     tfm_para_user_para_tagdp{tfm_para_user_counter}=0;
 end
-set(h_para(1).edit_dp2,'String',num2str(tfm_para_user_para_ratiodp{tfm_para_user_counter}))
+set(h_para.edit_dp2,'String',num2str(tfm_para_user_para_ratiodp{tfm_para_user_counter}))
 setappdata(0,'tfm_para_user_para_tagdp',tfm_para_user_para_tagdp);
 
 
 function para_checkbox_dpno(hObject, eventdata, h_para)
-% set(h_para(1).panel_dp2,'Visible','off');
-set(h_para(1).checkbox_dpyes,'Value',0);
+% set(h_para.panel_dp2,'Visible','off');
+set(h_para.checkbox_dpyes,'Value',0);
 
 tfm_para_user_para_tagdp=getappdata(0,'tfm_para_user_para_tagdp');
 tfm_para_user_counter=getappdata(0,'tfm_para_user_counter');
 
 %yes: tag dp
-if ~get(h_para(1).checkbox_dpno,'Value')
+if ~get(h_para.checkbox_dpno,'Value')
     tfm_para_user_para_tagdp{tfm_para_user_counter}=1;
 else
     tfm_para_user_para_tagdp{tfm_para_user_counter}=0;
@@ -7534,7 +7547,7 @@ tfm_para_user_discard_tag=getappdata(0,'tfm_para_user_discard_tag');
 tfm_para_user_counter=getappdata(0,'tfm_para_user_counter');
 
 %yes: tag disc
-if get(h_para(1).checkbox_disc,'Value')
+if get(h_para.checkbox_disc,'Value')
     tfm_para_user_discard_tag{tfm_para_user_counter}=1;
 else
     tfm_para_user_discard_tag{tfm_para_user_counter}=0;
@@ -7547,7 +7560,7 @@ tfm_para_user_dbl_tag=getappdata(0,'tfm_para_user_dbl_tag');
 tfm_para_user_counter=getappdata(0,'tfm_para_user_counter');
 
 %yes: tag dp
-if get(h_para(1).checkbox_dbl,'Value')
+if get(h_para.checkbox_dbl,'Value')
     tfm_para_user_dbl_tag{tfm_para_user_counter}=1;
 else
     tfm_para_user_dbl_tag{tfm_para_user_counter}=0;
@@ -7560,7 +7573,7 @@ tfm_para_user_drift_tag=getappdata(0,'tfm_para_user_drift_tag');
 tfm_para_user_counter=getappdata(0,'tfm_para_user_counter');
 
 %yes: tag dp
-if get(h_para(1).checkbox_drift,'Value')
+if get(h_para.checkbox_drift,'Value')
     tfm_para_user_drift_tag{tfm_para_user_counter}=1;
 else
     tfm_para_user_drift_tag{tfm_para_user_counter}=0;
@@ -7573,7 +7586,7 @@ tfm_para_user_other_tag=getappdata(0,'tfm_para_user_other_tag');
 tfm_para_user_counter=getappdata(0,'tfm_para_user_counter');
 
 %yes: tag dp
-if get(h_para(1).checkbox_other,'Value')
+if get(h_para.checkbox_other,'Value')
     tfm_para_user_other_tag{tfm_para_user_counter}=1;
 else
     tfm_para_user_other_tag{tfm_para_user_counter}=0;

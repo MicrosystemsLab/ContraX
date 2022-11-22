@@ -108,7 +108,7 @@ signal(isnan(signal))=0;%change NaN to 0
 %================================
 
 %Compute curve - average for comparison with fft filter below
-%curve = curve - nanmean(curve);
+%curve = curve - mean(curve);
 
 %Use fft to filter signalwith a bandpass filter
 df = fs/size(signal,1);
@@ -256,7 +256,7 @@ s.ref_peak_lag = s.signal_t(mp_peak_lg-floor(s.peak_win_l/2)+1:mp_peak_lg+floor(
 %Pad the curve signal with mean*zeros in front and back 
 %================================
 %calculate mean of curve
-mcurve = nanmean(s.fsignal);
+mcurve = mean(s.fsignal);
 
 %Pad curve with a full moving window length in front and back
 %Add zeros in front
@@ -326,8 +326,8 @@ end
 %================================
 
 %Calculate the average peak and the standard deviation envelop 
-p_av.av_peak = nanmean(p_av.peaks,2);
-p_av.av_peak_std = nanstd(p_av.peaks,0,2);
+p_av.av_peak = mean(p_av.peaks,2,'omitnan');
+p_av.av_peak_std = std(p_av.peaks,0,2,'omitnan');
 
 %Find minimum and remove y-offset
 p_av.filtyoffs = min(p_av.av_peak);
@@ -380,8 +380,8 @@ for i =1:size(p_av.peaks,2)
         width(i) = width_i;
     end
 end
-p_av.av_peak_width = nanmean(width)/fs;
-p_av.av_peak_width_std = nanstd(width)/fs;
+p_av.av_peak_width = mean(width,'omitnan')/fs;
+p_av.av_peak_width_std = std(width,'omitnan')/fs;
 
 %%
 %Find relax and contracted point in the average peak
@@ -442,7 +442,7 @@ p_av.peak_basel = min(p_av.peak_min);
 p_av.peak_basel_std = p_av.av_peak_std(min(p_av.peak_min_t));
 
 %Calculate the peak amplitude
-p_av.peak_amp = nanmean(p_av.peak_max-p_av.peak_basel);
+p_av.peak_amp = mean(p_av.peak_max-p_av.peak_basel,'omitnan');
 p_av.peak_amp_std = sqrt(p_av.peak_max_std^2+p_av.peak_basel_std^2);
 %%Compare with the peak prominence
 %peak_prom = max(p);
@@ -464,8 +464,8 @@ if incl_diff
     p_av.d_t_peak  = p_av.t_peak(1:end-1);
     
     %Calculate the average peak derivative and the standard deviation envelop 
-    p_av.d_av_peak = nanmean(p_av.d_peaks,2);
-    p_av.d_av_peak_std = nanstd(p_av.d_peaks,0,2);
+    p_av.d_av_peak = mean(p_av.d_peaks,2,'omitnan');
+    p_av.d_av_peak_std = std(p_av.d_peaks,0,2,'omitnan');
     
    
     

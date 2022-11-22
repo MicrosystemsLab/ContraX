@@ -38,13 +38,13 @@ ys_frame=s.y(:,:,frame);
 %get angle
 deltaU=(us_contr-us_relax);%mask.*(us_contr-us_relax);
 deltaV=(vs_contr-vs_relax);%mask.*(vs_contr-vs_relax);
-u1_0=(us_contr-us_relax)-nanmean(deltaU(:)).*ones(size(us_relax,1),size(us_relax,2));
-v1_0=(vs_contr-vs_relax)-nanmean(deltaV(:)).*ones(size(vs_relax,1),size(vs_relax,2));
+u1_0=(us_contr-us_relax)-mean(deltaU(:),'omitnan').*ones(size(us_relax,1),size(us_relax,2));
+v1_0=(vs_contr-vs_relax)-mean(deltaV(:),'omitnan').*ones(size(vs_relax,1),size(vs_relax,2));
 
 %angle
 Ang=atand((mask.*v1_0)./(mask.*u1_0+eps));
 Weights = sqrt(mask.*u1_0.^2+mask.*v1_0.^2);
-theta_0 = nansum(nansum(Ang.*Weights))./nansum(nansum(Weights));
+theta_0 = sum(sum(Ang.*Weights,'omitnan'),'omitnan')./sum(sum(Weights,'omitnan'),'omitnan');
 % Ang=atan((mask.*v1_0)./(mask.*u1_0+eps));
 % Ang_vec = subsref(Ang.', substruct('()', {':'})).';
 % Ang_vec(isnan(Ang_vec))=[];
@@ -56,8 +56,8 @@ theta_0 = nansum(nansum(Ang.*Weights))./nansum(nansum(Weights));
 %between current frame and relaxed:
 deltaU=(us_frame-us_relax);%mask.*(us_frame-us_relax);
 deltaV=(vs_frame-vs_relax);%mask.*(vs_frame-vs_relax);
-u1_0=(us_frame-us_relax)-nanmean(deltaU(:)).*ones(size(us_relax,1),size(us_relax,2));
-v1_0=(vs_frame-vs_relax)-nanmean(deltaV(:)).*ones(size(vs_relax,1),size(vs_relax,2));
+u1_0=(us_frame-us_relax)-mean(deltaU(:),'omitnan').*ones(size(us_relax,1),size(us_relax,2));
+v1_0=(vs_frame-vs_relax)-mean(deltaV(:),'omitnan').*ones(size(vs_relax,1),size(vs_relax,2));
 x1=xs_frame;
 y1=ys_frame;
 

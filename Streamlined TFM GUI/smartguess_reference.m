@@ -20,23 +20,23 @@ for frame=1:Num
     for ktest=1:Num
         deltaU=mask.*(us{ktest}-u1ref);
         deltaV=mask.*(vs{ktest}-v1ref);
-        usn=(us{ktest}-u1ref)-nanmean(deltaU(:)).*ones(size(u1ref,1),size(u1ref,2));
-        vsn=(vs{ktest}-v1ref)-nanmean(deltaV(:)).*ones(size(v1ref,1),size(v1ref,2));
+        usn=(us{ktest}-u1ref)-mean(deltaU(:),'omitnan').*ones(size(u1ref,1),size(u1ref,2));
+        vsn=(vs{ktest}-v1ref)-mean(deltaV(:),'omitnan').*ones(size(v1ref,1),size(v1ref,2));
         dsn=mask.*sqrt(usn.^2+vsn.^2);
-        d(ktest)=nanmean(dsn(:));
+        d(ktest)=mean(dsn(:),'omitnan');
     end
     d(Nref_test)=NaN;
-    K1=nanmax(d)-nanmin(d);
-    K2(frame)=nansum(d);
+    K1=max(d,[],'omitnan')-min(d,[],'omitnan');
+    K2(frame)=sum(d,'omitnan');
     
     %look for relaxed
     if frame==1
         K1_1=K1; 
-        relax=1; [~,contr]=nanmax(d);
+        relax=1; [~,contr]=max(d,[],'omitnan');
     else
         if K1>K1_1
         relax=frame;
-        [~,contr]=nanmax(d);
+        [~,contr]=max(d,[],'omitnan');
         K1_1=K1;
         end
     end

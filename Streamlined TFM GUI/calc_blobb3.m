@@ -26,8 +26,8 @@ mask(mask==0)=NaN;
 %get angle
 deltaU=mask.*(us_contr-us_relax);
 deltaV=mask.*(vs_contr-vs_relax);
-u1_0=(us_contr-us_relax)-nanmean(deltaU(:)).*ones(size(us_relax,1),size(us_relax,2));
-v1_0=(vs_contr-vs_relax)-nanmean(deltaV(:)).*ones(size(vs_relax,1),size(vs_relax,2));
+u1_0=(us_contr-us_relax)-mean(deltaU(:),'omitnan').*ones(size(us_relax,1),size(us_relax,2));
+v1_0=(vs_contr-vs_relax)-mean(deltaV(:),'omitnan').*ones(size(vs_relax,1),size(vs_relax,2));
 
 %angle
 Ang=atan((v1_0)./(u1_0+eps));
@@ -37,8 +37,8 @@ theta=mean(Ang_vec)*180/pi;
 %between current frame and relaxed:
 deltaU=mask.*(us_frame-us_relax);
 deltaV=mask.*(vs_frame-vs_relax);
-u1_0=(us_frame-us_relax)-nanmean(deltaU(:)).*ones(size(us_relax,1),size(us_relax,2));
-v1_0=(vs_frame-vs_relax)-nanmean(deltaV(:)).*ones(size(vs_relax,1),size(vs_relax,2));
+u1_0=(us_frame-us_relax)-mean(deltaU(:),'omitnan').*ones(size(us_relax,1),size(us_relax,2));
+v1_0=(vs_frame-vs_relax)-mean(deltaV(:),'omitnan').*ones(size(vs_relax,1),size(vs_relax,2));
 x1=xs_frame;
 y1=ys_frame;
 
@@ -75,8 +75,8 @@ vn_prime2=un*R(2,1)+vn*R(2,2);
 %average and std angle of displacmeents
 un_prime_vec = subsref(un_prime2.', substruct('()', {':'})).';
 vn_prime_vec = subsref(vn_prime2.', substruct('()', {':'})).';
-un_prime_vec(isnan(un_prime_vec))=[];
-vn_prime_vec(isnan(vn_prime_vec))=[];
+un_prime_vec(isnan(un_prime_vec))=[]; %#ok<NASGU> % init this var 
+vn_prime_vec(isnan(vn_prime_vec))=[]; %#ok<NASGU> % init this var 
 
 
 binary3=double(binary0);
