@@ -40,7 +40,7 @@ tfm_gui_call_piv_flag=getappdata(0,'tfm_gui_call_piv_flag');
 
 % create new window for displacement
 % fig size [height, width]
-figsize=[450,800];
+figsize=[470,800];
 % get screen size  [left bottom width height]
 screensize = get(0,'ScreenSize');
 % position fig on center of screen
@@ -211,7 +211,7 @@ h_piv.text_whichvidname.ForegroundColor = ptcolor;
 h_piv.text_whichvidname.BackgroundColor = pcolor;
 
 %create ok button
-h_piv.button_ok = uicontrol('Parent',h_piv.fig,'style','pushbutton','position',[735,30,45,20],'string','OK','visible','on');
+h_piv.button_ok = uicontrol('Parent',h_piv.fig,'style','pushbutton','position',[735,30,45,20],'string','OK','visible','on','FontWeight','bold');
 %create matrix save checkbox
 h_piv.checkbox_matrix = uicontrol('Parent',h_piv.fig,'style','checkbox','position',[550,30,160,15],'string','Save displacement matrices','HorizontalAlignment','left','value',1);
 h_piv.checkbox_matrix.ForegroundColor = ptcolor;
@@ -293,6 +293,10 @@ fp = get(h_piv.fig,'Position');
 set(h_main.fig,'Units','pixels');
 ap = get(h_main.fig,'Position');
 set(h_main.fig,'Position',[fp(1)-ap(3) fp(2)+fp(4)-ap(4) ap(3) ap(4)]);
+
+% initialize status bar
+sb=statusbar(h_piv.fig,'Ready');
+sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
 
 %Streamlining
 if tfm_init_user_strln
@@ -383,13 +387,13 @@ try
     for ivid=1:tfm_init_user_Nfiles
         Num=tfm_init_user_Nframes{ivid};
         
-        disp([' Analyzing Video ',num2str(ivid),'/',num2str(tfm_init_user_Nfiles),'...', num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '% done'])
-        sb=statusbar(h_piv.fig,['Analyzing Video ',num2str(ivid),'/',num2str(tfm_init_user_Nfiles),'...', num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '%% done']);
+        disp([' Analyzing Video ',num2str(ivid),'/',num2str(tfm_init_user_Nfiles),'... '])
+        sb=statusbar(h_piv.fig,['Analyzing Video ',num2str(ivid),'/',num2str(tfm_init_user_Nfiles),'... ']);
         sb.getComponent(0).setForeground(java.awt.Color.red);
         
         %create folder to save disp.
-        mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots'])
-        mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Displacement Heatmaps'])
+        [~,~] = mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots']);  
+        [~,~] = mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Displacement Heatmaps']);  
         
         % load image stack
         s = load(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,ivid},'/image_stack.mat'],'image_stack');
@@ -502,11 +506,14 @@ try
 
 		fprintf(1,'CXS-TFM: Start frame processing at %.02f s\n',toc(tstartMH));
 		tstartFRAME = tic;
+        h_pf = h_piv.fig;
 		
         parfor frame = 1:length(cur)
 %        for frame = 1:length(cur)
 			%timeperframe = toc(tstartFRAME)/frame;
-            if rem(frame,20)==0, fprintf(1,' #%d/%d, %.02f sec elapsed\n',frame,length(cur),toc(tstartFRAME)); end
+            if rem(frame,20)==0
+                fprintf(1,' #%d/%d, %.02f sec elapsed\n',frame,length(cur),toc(tstartFRAME));
+            end
             %disp(['Calculating frame #',num2str(frame)])
             
             [seedinfo(frame), convergeinfo, success_seeds] = ncorr_alg_calcseeds(ref.formatted(), ...
@@ -1764,7 +1771,7 @@ try
         for ivid=1:tfm_init_user_Nfiles
             % make output folder for displacements
             if ~isequal(exist([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Datasets/Displacements'], 'dir'),7)
-                mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Datasets/Displacements']);
+                [~,~] = mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Datasets/Displacements']);  
             end
             
             %loop over frames

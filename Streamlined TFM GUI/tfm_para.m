@@ -40,7 +40,7 @@ fprintf(1,'CXS-TFM: Results Module\n');
 
 %create new window for parameter
 %fig size
-figsize=[680,955];
+figsize=[700,955];
 %get screen size
 screensize = get(0,'ScreenSize');
 %position fig on center of screen
@@ -404,7 +404,7 @@ h_para.text_whichvidname.ForegroundColor = ptcolor;
 h_para.text_whichvidname.BackgroundColor = pcolor;
 
 %create ok button
-h_para.button_ok = uicontrol('Parent',h_para.fig,'style','pushbutton','position',[870,37,70,30],'string','OK','visible','on');
+h_para.button_ok = uicontrol('Parent',h_para.fig,'style','pushbutton','position',[870,37,70,30],'string','OK','visible','on','FontWeight','bold');
 %create save checkbox
 h_para.checkbox_save = uicontrol('Parent',h_para.fig,'style','checkbox','position',[740,60,120,15],'string','Save plots {.fig,.png}','HorizontalAlignment','left');
 h_para.checkbox_save.ForegroundColor = ptcolor;
@@ -512,7 +512,6 @@ setappdata(0,'tfm_para_user_counter',tfm_para_user_counter)
 
 %make fig visible
 set(h_para.fig,'visible','on');
-%movegui(h_para.fig,'north');
 
 %move main window to the side
 % movegui(h_main.fig,'west')
@@ -525,8 +524,12 @@ set(h_main.fig,'Position',[fp(1)-ap(3) fp(2)+fp(4)-ap(4) ap(3) ap(4)]);
 
 drawnow;
 
+% initialize status bar
+sb=statusbar(h_para.fig,'Ready');
+sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
+
 %trigger guess all
-para_push_guess(h_para.button_guess, h_para, h_para)
+para_push_guess(h_para.button_guess, h_para, h_para);
 
 
 
@@ -6708,6 +6711,7 @@ catch errorObj
 end
 
 
+%% para_push_ok
 function para_push_ok(hObject, eventdata, h_para, h_main)
 %disable figure during calculation
 enableDisableFig(h_para.fig,0);
@@ -7107,7 +7111,8 @@ try
             xlabel('Time [s]')
             ylabel('Velocity [m/s]')
             savefig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/velocity']);
-            export_fig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/velocity'],'-png','-m1.5',sh);
+            saveas(sh,[tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/velocity','.png']);
+            %export_fig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/velocity'],'-png','-m1.5',sh);
             close(sh);
             %forces
             sh=figure('Visible','off');
@@ -7119,7 +7124,7 @@ try
             xlabel('Time [s]')
             ylabel('Forces [N]')
             savefig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/forces']);
-            export_fig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/forces'],'-png','-m1.5',sh);
+            saveas(sh,[tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/forces','.png']);
             close(sh);
             %power
             sh=figure('Visible','off');
@@ -7128,7 +7133,7 @@ try
             xlabel('Time [s]')
             ylabel('Power [W]')
             savefig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/power']);
-            export_fig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/power'],'-png','-m1.5',sh);
+            saveas(sh,[tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/power','.png']);
             close(sh);
             %strain
             sh=figure('Visible','off');
@@ -7137,7 +7142,7 @@ try
             xlabel('Time [s]')
             ylabel('Strain [J]')
             savefig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/strain']);
-            export_fig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/strain'],'-png','-m1.5',sh);
+            saveas(sh,[tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/strain','.png']);
             close(sh);
             %moment
             sh=figure('Visible','off');
@@ -7146,7 +7151,7 @@ try
             xlabel('Time [s]')
             ylabel('Mxx [Nm]')
             savefig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/Mxx']);
-            export_fig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/Mxx'],'-png','-m1.5',sh);
+            saveas(sh,[tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/Mxx','.png']);
             close(sh);
             sh=figure('Visible','off');
             plot(tfm_para_user_dt{ivid},tfm_para_user_Mxy{ivid})
@@ -7154,7 +7159,7 @@ try
             xlabel('Time [s]')
             ylabel('Mxy [Nm]')
             savefig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/Mxy']);
-            export_fig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/Mxy'],'-png','-m1.5',sh);
+            saveas(sh,[tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/Mxy','.png']);
             close(sh);
             sh=figure('Visible','off');
             plot(tfm_para_user_dt{ivid},tfm_para_user_Myy{ivid})
@@ -7162,7 +7167,7 @@ try
             xlabel('Time [s]')
             ylabel('Myy [Nm]')
             savefig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/Myy']);
-            export_fig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/Myy'],'-png','-m1.5',sh);
+            saveas(sh,[tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/Myy','.png']);
             close(sh);
             sh=figure('Visible','off');
             plot(tfm_para_user_dt{ivid},tfm_para_user_mu{ivid})
@@ -7170,7 +7175,7 @@ try
             xlabel('Time [s]')
             ylabel('mu [Nm]')
             savefig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/mu']);
-            export_fig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/mu'],'-png','-m1.5',sh);
+            saveas(sh,[tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Curve Plots/mu','.png']);
             close(sh);
             %orientation
             
@@ -7260,7 +7265,7 @@ close(h_para.fig);
 
 
 
-
+%% para_buttongroup_freq
 function para_buttongroup_freq(hObject, eventdata, h_para)
 %load shared needed para
 tfm_para_user_d=getappdata(0,'tfm_para_user_d');

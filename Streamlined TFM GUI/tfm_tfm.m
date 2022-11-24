@@ -35,10 +35,11 @@ fprintf(1,'CXS-TFM: TFM Module\n');
 %userTiming= getappdata(0,'userTiming');
 %userTiming.piv2tfm{2} = toc(userTiming.piv2tfm{1});
 
+warning('off','MATLAB:MKDIR:DirectoryExists');
 
 %create new window for tfm
 %fig size
-figsize=[450,800];
+figsize=[470,800];
 %get screen size
 screensize = get(0,'ScreenSize');
 %position fig on center of screen
@@ -51,7 +52,7 @@ h_tfm.fig=figure(...
     'renderer','OpenGL',...
     'MenuBar','none',...
     'PaperPositionMode','auto',...
-    'Name','Beads Traction Forces',...
+    'Name','ContraX Traction Forces',...
     'NumberTitle','off',...
     'Resize','off',...
     'Color',[.2,.2,.2],...
@@ -160,7 +161,7 @@ h_tfm.axes_tfm = axes('Parent',h_tfm.panel_tfm,'Units', 'pixels','Position',[10,
 % h_tfm.axes_tfm_gif = axes('Parent',h_tfm.panel_tfm_gif,'Units', 'pixels','Position',[0,0,287,160]);%737,285]);
 
 %create ok button
-h_tfm.button_ok = uicontrol('Parent',h_tfm.fig,'style','pushbutton','position',[735,413,45,20],'string','OK','visible','on');
+h_tfm.button_ok = uicontrol('Parent',h_tfm.fig,'style','pushbutton','position',[735,30,45,20],'string','OK','visible','on','FontWeight','bold'); % [735,413,45,20]
 %create matrix save checkbox
 h_tfm.checkbox_matrix = uicontrol('Parent',h_tfm.fig,'style','checkbox','position',[630,335,160,15],'string','Save traction matrices','HorizontalAlignment','left','value',1);
 h_tfm.checkbox_matrix.ForegroundColor = ptcolor;
@@ -210,8 +211,15 @@ set(h_main.fig,'Units','pixels');
 ap = get(h_main.fig,'Position');
 set(h_main.fig,'Position',[fp(1)-ap(3) fp(2)+fp(4)-ap(4) ap(3) ap(4)]);
 
-%trigger guess all
+% initialize status bar
+sb=statusbar(h_tfm.fig,'Ready');
+sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
+
+% automatically trigger guess all
 tfm_push_guess(h_tfm.button_guess, h_tfm, h_tfm, h_main)
+
+
+
 
 function tfm_push_guess(hObject, eventdata, h_tfm, h_main)
 
@@ -371,6 +379,7 @@ if tfm_init_user_strln
 end
 
 
+%% tfm_push_update
 function tfm_push_update(hObject, eventdata, h_tfm)
 
 %profile on
@@ -557,8 +566,8 @@ try
         fprintf(1,'CXS-TFM: Calculating traction stress for video #%d\n',ivid);
         
         %create folder to save disp.
-        mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots'])
-        mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Traction Heatmaps'])
+        [mf,mf2] = mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots']); %#ok<NASGU> 
+        [mf,mf2] = mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Traction Heatmaps']); %#ok<NASGU> 
 
 % removed for parfor                    
 %         reset(h_tfm.axes_tfm);
@@ -1060,7 +1069,7 @@ try
         for ivid=1:tfm_init_user_Nfiles
             %make output folder for displacements
             if ~isequal(exist([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Datasets/Traction Forces'], 'dir'),7)
-                mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Datasets/Traction Forces']);
+                [mf,mf2] = mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Datasets/Traction Forces']); %#ok<ASGLU> 
             end
             
             %loop over frames

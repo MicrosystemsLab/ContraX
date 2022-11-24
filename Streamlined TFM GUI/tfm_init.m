@@ -133,7 +133,7 @@ h_init.button_auto_draw = uicontrol('Parent',h_init.panel_vid,'style','pushbutto
 %h_init.button_crop_all = uicontrol('Parent',h_init.panel_vid,'style','pushbutton','position',[700,345,120,15],'string','Crop all videos','visible','off');
 
 %create ok button
-h_init.button_ok = uicontrol('Parent',h_init.fig,'style','pushbutton','position',[835,20,100,20],'string','OK','visible','off');
+h_init.button_ok = uicontrol('Parent',h_init.fig,'style','pushbutton','position',[835,20,100,20],'string','OK','visible','off','FontWeight','bold');
 %create ok (streamlined) button
 h_init.button_ok_strln = uicontrol('Parent',h_init.fig,'style','pushbutton','position',[940,20,100,20],'string','OK (streamlined)','visible','off');
 
@@ -452,7 +452,6 @@ setappdata(0,'tfm_init_user_strln',tfm_init_user_strln);
 
 %make figure visible
 set(h_init.fig,'visible','on');
-movegui(h_init.fig,'north');
 
 %move main window to the side
 % movegui(h_main.fig,'west')
@@ -463,10 +462,15 @@ set(h_main.fig,'Units','pixels');
 ap = get(h_main.fig,'Position');
 set(h_main.fig,'Position',[fp(1)-ap(3) fp(2)+fp(4)-ap(4) ap(3) ap(4)]);
 
+% initialize status bar
+sb=statusbar(h_init.fig,'Ready');
+sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
+
 %profile viewer
 %userTiming= getappdata(0,'userTiming');
 %userTiming.init{1} = tic;
 %setappdata(0,'userTiming',userTiming);
+
 
 
 function init_push_readvid(hObject, eventdata, h_init)
@@ -2896,6 +2900,8 @@ catch errorObj
     errordlg(getReport(errorObj,'extended','hyperlinks','off'));
 end
 
+
+%% init_push_auto_draw
 function init_push_auto_draw(hObject, eventdata, h_init)
 
 %profile on
@@ -2953,12 +2959,13 @@ try
     else
         
         axes(h_init.axes_curr)
+        fprintf(1,'Processing %d video files...\n',tfm_init_user_Nfiles)
         
         %auto-draw cell outlines
         for ivid=1:tfm_init_user_Nfiles
             
             %status bar
-            sb = statusbar(h_init.fig,['Calculating outlines... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)),'%% done']);
+            sb = statusbar(h_init.fig,sprintf('Calculating outlines... %d/%d',ivid,tfm_init_user_Nfiles));
             sb.getComponent(0).setForeground(java.awt.Color.red);
             
             %check for bf image
@@ -3027,7 +3034,9 @@ try
                 %Select cell to outline manually
                 axes(h_init.axes_curr)
                 enableDisableFig(h_init.axes_curr,1);
-                BW5=bwselect(BW4,8);
+                statusbar(h_init.fig,'Double-click on the shape to confirm the cell outline');
+                fprintf(1,'  Double-click on the shape to confirm the cell outline\n')
+                BW5=bwselect(BW4,8); % this requires the user to double-click on the image
                 enableDisableFig(h_init.axes_curr,0);
                 
                 
@@ -3129,7 +3138,7 @@ try
                     tfm_init_user_outline3x{ivid}=x_mask;
                     tfm_init_user_outline3y{ivid}=y_mask;
                 else
-                    tfm_init_user_binary3{ivid}=logical(ones(size(image,1),size(image,2)));
+                    tfm_init_user_binary3{ivid}=true(size(image,1),size(image,2));
                     tfm_init_user_outline3x{ivid}=[];
                     tfm_init_user_outline3y{ivid}=[];
                 end
@@ -3533,6 +3542,7 @@ try
     tfm_init_user_rotate=getappdata(0,'tfm_init_user_rotate');
     multichannelczi = getappdata(0,'multichannelczi');
 	tfm_init_use_parallel=getappdata(0,'use_parallel');
+    path_to_templates = getappdata(0,'path_to_templates');
 	
     
     %compatibility with sarcomere analysis
@@ -4224,8 +4234,9 @@ try
                 ThreeD(:,:,ifr)=im_curr;
             end
             
+            % THIS ONLY WORKS ON MAC
             %start miji
-            path=cd;
+            path=pwd;
             %start fiji
             addpath('/Applications/Fiji.app/scripts/');
             evalc('Miji(false);');
@@ -4288,10 +4299,14 @@ try
         end
     end
     
-    %copy master excel file
+    %copy master excel file % nothing better than a hard-coded filename...
     masterfile = [tfm_init_user_pathnamestack{1},'/Batch_Results.xlsx',];
-    copyfile('Master_DO_NOT_EDIT.xlsx',masterfile,'f');
-    
+    if isdeployed
+        copyfile(fullfile(path_to_templates,'Master_DO_NOT_EDIT.xlsx'),masterfile,'f');
+    else
+        copyfile('Master_DO_NOT_EDIT.xlsx',masterfile,'f');
+    end
+
     %save micro data & save mask
     for ivid=1:tfm_init_user_Nfiles
         sb=statusbar(h_init.fig,['Saving... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '%% done']);
@@ -4307,7 +4322,11 @@ try
         
         %copy excel file to new result file
         newfile=[tfm_init_user_pathnamestack{1,ivid},'/',tfm_init_user_filenamestack{1,ivid},'/Results/',tfm_init_user_filenamestack{1,ivid},'.xlsx'];
-        copyfile(['Sample_DO_NOT_EDIT.xlsx'],newfile);
+        if isdeployed
+            copyfile(fullfile(path_to_templates,'Sample_DO_NOT_EDIT.xlsx'),newfile,'f');
+        else
+            copyfile('Sample_DO_NOT_EDIT.xlsx',newfile);
+        end
         
         %write microscope data to excel file
         A = {tfm_init_user_framerate{ivid},tfm_init_user_conversion{ivid},tfm_init_user_Nframes{ivid},tfm_init_user_cellname{ivid}};

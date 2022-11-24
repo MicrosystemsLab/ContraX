@@ -26,8 +26,10 @@
 % To analyse TFM video, execute tfm_main.m
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% entry point for the ContraX analysis
 function tfm_main
-%main function for the main window of lifeact analysis
+% Creates a gui window with four buttons representing the major steps of
+%  the ContraX workflow
 
 % the code is intended to be run from the Matlab command window,
 %  so initialize the environment when we start
@@ -49,10 +51,11 @@ use_parallel=24; % set to positive integer to enable parallel processing with th
 % disable warning for obsolete java components
 %  See: https://www.mathworks.com/products/matlab/app-designer/java-swing-alternatives.html?s_tid=OIT_20611
 % This appears to be caused by the use of non-authorized matlab code for
-% the statusbar update and window state. These can be replaced. -MH 
+%  the statusbar update and window state. These can be replaced. -MH 
 warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
 % easier to suppress this warning than to fix the problem MH
 warning('off','MATLAB:MKDIR:DirectoryExists');
+
 
 % what build?
 if isdeployed
@@ -65,12 +68,71 @@ else
 end
 
 fprintf(1,'\nContraX Streamlined TFM: Microscope Image TFM Analysis\n');
-fprintf(1,'          %s\n\n',buildver);
+fprintf(1,'   %s\n\n',buildver);
 fprintf(1,'  Start Time: %s \n\n',datestr(now));
 
 fprintf(1,'\n');
 fprintf(1,'CXS-TFM: main function\n');
 
+% where are the template files?
+%which('Master_DO_NOT_EDIT.xlsx')
+[path_to_template_files,~,~] = fileparts(which('Master_DO_NOT_EDIT.xlsx'));
+
+
+%% MH set a location in the filesystem for a working directory
+%  The code stores partial results in a folder called vars_DO_NOT_DELETE
+progName = 'ContraX';
+if isdeployed
+    if isunix % MacOS or Linux [NB: ~ expansion not reliable]
+        homeDir = char(java.lang.System.getProperty('user.home'));
+        if  isfolder(fullfile(homeDir,'Documents'))
+            defaultstartdir = fullfile(homeDir,'Documents',progName);
+        else
+            defaultstartdir = fullfile(homeDir,progName);
+        end
+    elseif ispc
+        userDoc = winqueryreg('HKEY_CURRENT_USER',...
+            ['Software\Microsoft\Windows\CurrentVersion\' ...
+             'Explorer\Shell Folders'],'Personal');
+        defaultstartdir = fullfile(userDoc,progName);
+    else
+        fprintf(1,'WARNING: Unable to determine OS\n');
+        defaultstartdir = pwd;
+    end
+else % running at command line
+    defaultstartdir = pwd;
+end
+% make the directory
+if ~isfolder(defaultstartdir)
+    try
+        mkdir(defaultstartdir);
+    catch
+        fprintf(1,'WARNING: unable to create working directory\n');
+        defaultstartdir = char(java.lang.System.getProperty('user.home'));
+    end
+end
+
+% go to the directory for saving data files, waveforms, etc
+try
+    cd(defaultstartdir);
+catch
+    fprintf(1,'WARNING: unable to go to default directory\n    %s\n',defaultstartdir);
+    %fprintf(1,'    Use a File Load or Save operation to select a writeable directory\n');
+end
+
+fprintf(1,' Working directory: %s\n',pwd);
+
+% template files
+if isdeployed
+    if ~isfile(fullfile(path_to_template_files,'Master_DO_NOT_EDIT.xlsx'))
+        fprintf(1,'WARNING: Master xlsx file not found\n');
+        disp(fullfile(path_to_template_files,'Master_DO_NOT_EDIT.xlsx'))
+    end
+    if ~isfile(fullfile(path_to_template_files,'Sample_DO_NOT_EDIT.xlsx'))
+        fprintf(1,'WARNING: Sample xlsx file not found\n');
+        disp(fullfile(path_to_template_files,'Sample_DO_NOT_EDIT.xlsx'))
+    end
+end
 
 % use this to check timing throughout image processing
 %userTiming.mainTiming{1} = tic;
@@ -79,27 +141,28 @@ fprintf(1,'CXS-TFM: main function\n');
 %profile on
 
 
-%add paths of external funcs
+% add paths of external funcs
 if ~isdeployed
     addpath('External');
     addpath('External/bfmatlab');
     addpath('External/statusbar');
     addpath('External/20130227_xlwrite');
-    if ispc
-	    try
-    % 		addpath('External/ncorr_OpenMP'); % this version has OpenMP support
-    %		fprintf('CXS-TFM: Using ncorr with OpenMP support.\n');
-		    addpath('External/ncorr_v1_2');
-		    fprintf('CXS-TFM: OpenMP version of ncorr is not available.\n');
-	    catch
-		    addpath('External/ncorr_v1_2');
-		    fprintf('CXS-TFM: OpenMP version of ncorr is not available.\n');
-	    end
-    else
-	    addpath('External/ncorr_v1_2');
-    end
-    addpath('External/ojwoodford-export_fig-5735e6d')
-    addpath('External/freezeColors');
+%     if ispc
+% 	    try
+%     % 		addpath('External/ncorr_OpenMP'); % this version has OpenMP support
+%     %		fprintf('CXS-TFM: Using ncorr with OpenMP support.\n');
+% 		    addpath('External/ncorr_v1_2');
+% 		    fprintf('CXS-TFM: OpenMP version of ncorr is not available.\n');
+% 	    catch
+% 		    addpath('External/ncorr_v1_2');
+% 		    fprintf('CXS-TFM: OpenMP version of ncorr is not available.\n');
+% 	    end
+%     else
+% 	    addpath('External/ncorr_v1_2');
+%     end
+    addpath('External/ncorr_v1_2');
+%     addpath('External/ojwoodford-export_fig-5735e6d')
+%     addpath('External/freezeColors');
     addpath('External/regu/regu');
 
     javaaddpath('External/20130227_xlwrite/poi_library/poi-3.8-20120326.jar');
@@ -175,13 +238,15 @@ set(h_main.button_para,'callback',{@main_push_para,h_main})
 notif.on = false; %set to true if notification are desired
 notif.url={}; %input the ifttt trigger url to implement a notification during computing
 setappdata(0,'notif',notif);
-setappdata(0,'use_parallel',use_parallel);
 
+setappdata(0,'use_parallel',use_parallel);
+setappdata(0,'path_to_templates',path_to_template_files);
 
 
 %profile off
 
 fprintf(1,'CXS-TFM: Ready\n');
+figure(h_main.fig);
 
 function main_push_init(hObject, eventdata, h_main) %#ok<INUSL>
 %launch the initialization window
@@ -203,6 +268,7 @@ function main_push_para(hObject, eventdata, h_main) %#ok<INUSL>
 %launch the results window
 %profile resume
 tfm_para(h_main);
+
 
 function tfmCloseFcn(hObject, eventdata, h_main)
 % executed when the main window is closed by the user

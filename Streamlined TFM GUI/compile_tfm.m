@@ -11,8 +11,7 @@ updateRepo=0; % update the repository with this source code?
 if ispc, updateRepo=0; end
 %copyFiles=0; % copy executables to correct locations?
 
-% make sure working directory is on the path
-addpath(pwd);
+
 
 arch = computer('arch');
 matver=ver('MATLAB');
@@ -25,6 +24,16 @@ end
 
 fprintf(1,'\nCompile %s:\n',progname);
 
+% make sure necessary directories are on the path
+fprintf(1,'Add files to path\n');
+addpath(pwd);
+addpath('External');
+addpath('External/20130227_xlwrite');
+addpath('External/20130227_xlwrite/poi_library');
+addpath('External/bfmatlab');
+addpath('External/ncorr_v1_2');
+addpath('External/regu/regu');
+addpath('External/statusbar');
 
 if isempty(which([mainFunction '.m']))
     error('"%s" program files (*.m) not found on the MATLAB path.\n',mainFunction);
@@ -40,7 +49,7 @@ for k= 1:length(pList)
 end
 fprintf(1,'\n');
 if length(pList)>1
-    fprintf(1,'WARNING: Looks like additional toolboxes are required (%d).\n',length(pList));
+    fprintf(1,'WARNING: Looks like additional toolboxes are required (%d).\n',length(pList)-1); % -1 for MATLAB
     fprintf(1,'  Ensure that they are included in the compile script.\n');
 end
 
@@ -78,11 +87,13 @@ end
 % include build version number
 compile_cmd =[compile_cmd ' -a buildversion.txt'];
 
-% include some Java libraries
-compile_cmd =[compile_cmd ' -a poi_library/'];
-
 % include some template files
-compile_cmd =[compile_cmd ' -a Master_DO_NOT_EDIT.xlsx -a Sample_DO_NOT_EDIT.xlsx'];
+compile_cmd =[compile_cmd ' -a ../Master_DO_NOT_EDIT.xlsx -a ../Sample_DO_NOT_EDIT.xlsx'];
+
+% include some Java libraries
+%compile_cmd =[compile_cmd ' -a poi_library'];
+compile_cmd =[compile_cmd ' -a ../External/20130227_xlwrite/poi_library'];
+
 
 % include image files
 %compile_cmd =[compile_cmd ' -a woodchuck5sm.jpg'];
@@ -143,7 +154,11 @@ end
 
 % Windows compile tool can include an icon in the executable
 if ispc
-    compile_cmd =[compile_cmd ' -r control_icon.ico'];
+    if ~isfile('win_icon.ico')
+        fprintf(1,' Icon file "win_icon.ico" not found!\n');
+    else
+        compile_cmd =[compile_cmd ' -r win_icon.ico'];
+    end
 end
 
 %% Compile
@@ -164,53 +179,71 @@ beep; pause(0.1); beep; pause(0.2); beep; pause(0.3); beep;
 fprintf(1,'%s compilation complete at %s.\n\n',progname,datestr(clock));
 
 
-%% Install OS X icon
+%% Install application icon
 if ismac
     fprintf(1,'Set OS X icon... ');
-    icontarget = sprintf('%s.app/Contents/Resources/membrane.icns',progname);
-    copyfile('membrane.icns',icontarget,'f');
-    fprintf(1,'done.\n');
+    if ~isfile('membrane.icns')
+        fprintf(1,' Icon file "membrane.icns" not found!\n');
+    else
+        icontarget = sprintf('%s.app/Contents/Resources/membrane.icns',progname);
+        copyfile('membrane.icns',icontarget,'f');
+        fprintf(1,'done.\n');
+    end
 end
 
-% %% Install Windows icon
-% if ispc    
-%     % Setting icon requires Resource Hacker
-%     %  http://www.angusj.com/resourcehacker/
-%     % For example:
-% %     C:\Users\hopcroft\Documents\Software_20200317\build>"C:\Program Files (x86)\Resource Hacker\ResourceHacker.exe" -open PressureControl2.exe -save PressureControl2.exe -action addoverwrite -res control_icon.ico -mask ICONGROUP,1
-% % 
-% %     C:\Users\hopcroft\Documents\Software_20200317\build>
-% % 
-% %     [17 Mar 2020, 12:49:19]
-% % 
-% %     Current Directory:
-% %     C:\Users\hopcroft\Documents\Software_20200317\build
-% % 
-% %     Commandline:
-% %     "C:\Program Files (x86)\Resource Hacker\ResourceHacker.exe"  -open PressureControl2.exe -save PressureControl2.exe -action addoverwrite -res control_icon.ico -mask ICONGROUP,1
-% % 
-% %     Open    : C:\Users\hopcroft\Documents\Software_20200317\build\PressureControl2.exe
-% %     Save    : C:\Users\hopcroft\Documents\Software_20200317\build\PressureControl2.exe
-% %     Resource: C:\Users\hopcroft\Documents\Software_20200317\build\control_icon.ico
-% % 
-% %       Modified: ICONGROUP,1,1033
-% % 
-% %     Success!
+%% Install Windows icon
+% Setting icon requires Resource Hacker
+%  http://www.angusj.com/resourcehacker/
+% For example:
+%     C:\Users\hopcroft\Documents\Software_20200317\build>"C:\Program Files (x86)\Resource Hacker\ResourceHacker.exe" -open PressureControl2.exe -save PressureControl2.exe -action addoverwrite -res control_icon.ico -mask ICONGROUP,1
 % 
-%     iconFile=which('control_icon.ico');
-%     reshackerPath='C:\Program Files (x86)\Resource Hacker\ResourceHacker.exe';
-%     iconcmd=sprintf('"%s" -open %s.exe -save %s.exe -action addoverwrite -res %s -mask ICONGROUP,1',reshackerPath,progname,progname,iconFile);
-%     [sic,rmes] = system(iconcmd);
-%     if sic < 0
-%         fprintf(1,'WARNING: Icon Set command failed (%d)\n%s\n',sic,rmes);
-%         fprintf(1,'  (Try runnning ResourceHacker manually)\n');
+%     C:\Users\hopcroft\Documents\Software_20200317\build>
+% 
+%     [17 Mar 2020, 12:49:19]
+% 
+%     Current Directory:
+%     C:\Users\hopcroft\Documents\Software_20200317\build
+% 
+%     Commandline:
+%     "C:\Program Files (x86)\Resource Hacker\ResourceHacker.exe"  -open PressureControl2.exe -save PressureControl2.exe -action addoverwrite -res control_icon.ico -mask ICONGROUP,1
+% 
+%     Open    : C:\Users\hopcroft\Documents\Software_20200317\build\PressureControl2.exe
+%     Save    : C:\Users\hopcroft\Documents\Software_20200317\build\PressureControl2.exe
+%     Resource: C:\Users\hopcroft\Documents\Software_20200317\build\control_icon.ico
+% 
+%       Modified: ICONGROUP,1,1033
+% 
+%     Success!
+
+% Adding icon is performed by mcc -r (see above)
+% if ispc
+%     if ~isfile('win_icon.ico')
+%         fprintf(1,' Icon file "win_icon.ico" not found!\n');
 %     else
-%         fprintf(1,'Icon set command succeeded (%d).\n',sic);
-%         disp(rmes)
+%         iconFile=which('win_icon.ico');
+%         reshackerPath='C:\Program Files (x86)\Resource Hacker\ResourceHacker.exe';
+%         iconcmd=sprintf('"%s" -open %s.exe -save %s.exe -action addoverwrite -res %s -mask ICONGROUP,1',reshackerPath,progname,progname,iconFile);
+%         [sic,rmes] = system(iconcmd);
+%         if sic < 0
+%             fprintf(1,'WARNING: Icon Set command failed (%d)\n%s\n',sic,rmes);
+%             fprintf(1,'  (Try runnning ResourceHacker manually)\n');
+%         else
+%             fprintf(1,'Icon set command succeeded (%d).\n',sic);
+%             disp(rmes)
+%         end
+%         %system(['"C:\Program Files (x86)\Resource Hacker\ResHacker.exe" -addoverwrite TagVideo.exe, TagVideo.exe, ' iconFile ', ICONGROUP,1,']);
 %     end
-%     %system(['"C:\Program Files (x86)\Resource Hacker\ResHacker.exe" -addoverwrite TagVideo.exe, TagVideo.exe, ' iconFile ', ICONGROUP,1,']);
 % end
 
+% cleanup
+if ismac
+    delete(['run_' progname '.sh'])
+end
+if ispc
+    if isfile([mainFunction '.exe'])
+        movefile([mainFunction '.exe'],[progname '.exe'])
+    end
+end
 
 cd('..');
 
