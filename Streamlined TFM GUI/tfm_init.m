@@ -67,7 +67,7 @@ bcolor = [.3 .3 .3];														%#ok<NASGU>
 btcolor = [1 1 1];															%#ok<NASGU>
 h_init.ForegroundColor = ptcolor;
 h_init.BackgroundColor = pcolor;
-fontsizeA = 8;
+fontsizeA = 10;
 
 
 %create uipanel for readin & buttons
@@ -78,7 +78,7 @@ h_init.panel_read.BackgroundColor = pcolor;
 %button 1: read in videos
 h_init.button_readvid = uicontrol('Parent',h_init.panel_read,'style','pushbutton','position',[5,95,140,25],...
     'string','Add TFM video','FontSize',fontsizeA);
-%button 2: read in folder
+%button 2: read images in folder
 h_init.button_readfolder = uicontrol('Parent',h_init.panel_read,'style','pushbutton','position',[5,65,140,25],...
     'string','Add images folder','FontSize',fontsizeA);
 %button 3: read bf videos
@@ -336,7 +336,7 @@ if ~isempty(getappdata(0,'tfm_init_user_filenamestack'))                        
     tfm_init_user_outline2y=getappdata(0,'tfm_init_user_outline2y');
     tfm_init_user_outline3x=getappdata(0,'tfm_init_user_outline3x');
     tfm_init_user_outline3y=getappdata(0,'tfm_init_user_outline3y');
-	tfm_init_user_useparallel=getappdata(0,'use_parallel');
+	tfm_init_use_parallel=getappdata(0,'use_parallel');
     
     %change display strings and values
     %put video files into listbox
@@ -443,7 +443,7 @@ else %turn off panels
     set(h_init.menu_bin,'Visible','off');
 	
 	if isempty(getappdata(0,'TFMChannel'))
-%  		setappdata(0,'TFMChannel',1); % MH 11Oct2020 Otherwise TFMChannel defaults to []
+ 		setappdata(0,'TFMChannel',1); % MH 11Oct2020 Otherwise TFMChannel defaults to []
 	end
 end
 
@@ -452,6 +452,7 @@ setappdata(0,'tfm_init_user_strln',tfm_init_user_strln);
 
 %make figure visible
 set(h_init.fig,'visible','on');
+%movegui(h_init.fig,'north');
 
 %move main window to the side
 % movegui(h_main.fig,'west')
@@ -462,17 +463,12 @@ set(h_main.fig,'Units','pixels');
 ap = get(h_main.fig,'Position');
 set(h_main.fig,'Position',[fp(1)-ap(3) fp(2)+fp(4)-ap(4) ap(3) ap(4)]);
 
-% initialize status bar
-sb=statusbar(h_init.fig,'Ready');
-sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
-
 %profile viewer
 %userTiming= getappdata(0,'userTiming');
 %userTiming.init{1} = tic;
 %setappdata(0,'userTiming',userTiming);
 
-
-
+%% callback for the "Add TFM Video" button
 function init_push_readvid(hObject, eventdata, h_init)
 
 %profile on
@@ -675,12 +671,13 @@ try
     %loop over vids and extract first frame data
     for j = 1:size(filename,2)
         if strcmp(tfm_init_user_vidext{1,Nfiles0+j},'.czi')
+            fprintf(1,'CXS-TFM: Examining CZI format TFM video...');
             TFMChannel = getappdata(0,'TFMChannel');
             BFChannel = getappdata(0,'BFChannel');
             
             %use bioformats for import
-            [~,reader]=evalc('bfGetReader([tfm_init_user_pathnamestack{1,Nfiles0+j},tfm_init_user_filenamestack{1,Nfiles0+j},tfm_init_user_vidext{1,Nfiles0+j}]);');
-			%reader = bfGetReader(fullfile(tfm_init_user_pathnamestack{1,Nfiles0+j},[tfm_init_user_filenamestack{1,Nfiles0+j},tfm_init_user_vidext{1,Nfiles0+j}]));
+%             [~,reader]=evalc('bfGetReader([tfm_init_user_pathnamestack{1,Nfiles0+j},tfm_init_user_filenamestack{1,Nfiles0+j},tfm_init_user_vidext{1,Nfiles0+j}]);');
+			reader = bfGetReader(fullfile(tfm_init_user_pathnamestack{1,Nfiles0+j},[tfm_init_user_filenamestack{1,Nfiles0+j},tfm_init_user_vidext{1,Nfiles0+j}]));
             omeMeta = reader.getMetadataStore();
             
             N=omeMeta.getPlaneCount(0)/Nchannels; %number of frames
@@ -692,8 +689,8 @@ try
              if get(h_init.checkbox_trim, 'value')
                  display_frame = display_frame + Nchannels;
              end
-            [~,image]=evalc('bfGetPlane(reader, display_frame);'); %MH again with the evalc
-% 			image = bfGetPlane(reader, display_frame);
+%             [~,image]=evalc('bfGetPlane(reader, display_frame);'); %MH again with the evalc
+			image = bfGetPlane(reader, display_frame);
              %convert to grey
 %              if ndims(image) == 3
 %                  image=rgb2gray(image);
@@ -713,8 +710,8 @@ try
                 if get(h_init.checkbox_trim, 'value')
                     display_frame_bf = display_frame_bf + Nchannels;
                 end
-                [~,image1]=evalc('bfGetPlane(reader, display_frame_bf);');
-				%image = bfGetPlane(reader, display_frame_bf);
+%                 [~,image1]=evalc('bfGetPlane(reader, display_frame_bf);');
+				image = bfGetPlane(reader, display_frame_bf);
 				
                 %convert to grey
                 if ndims(image) == 3
@@ -734,6 +731,7 @@ try
             
             
         elseif strcmp(tfm_init_user_vidext{1,Nfiles0+j},'.tif')
+            fprintf(1,'CXS-TFM: Examining TIFF format TFM video...');
             if exist('multichannelczi','var') == 0
                 multichannelczi = false;
             end
@@ -766,6 +764,7 @@ try
 %              tfm_init_user_preview_frame1{Nfiles0+j}=normalise(image1);
 			
         elseif strcmp(tfm_init_user_vidext{1,Nfiles0+j},'.avi')
+            fprintf(1,'CXS-TFM: Examining AVI format TFM video...');
             if exist('multichannelczi','var') == 0
                 multichannelczi = false;
             end
@@ -808,6 +807,7 @@ try
 			N = N-1;
 		end
 		
+        fprintf(1,' done.\n');
  		fprintf(1,'CXS-TFM: End TFM video check and first frame load at %.02f s\n',toc(tstartMH));
 		
         %if czi: read metadata, else put the values to NaN;
@@ -1101,6 +1101,8 @@ catch errorObj
     
 end
 
+
+%% closeFig
 function closeFig(hObject, eventdata, selectChannel, Nchannels, TFM_buttons, bf_buttons)
 %determine which channels have been selected
 TFMChannel = 1;
@@ -1124,7 +1126,7 @@ setappdata(0,'BFChannel',BFChannel);
 close(selectChannel.fig);
 
 
-
+%% the 'Add images folder' button
 function init_push_readfolder(hObject, eventdata, h_init)
 %disable figure during calculation
 enableDisableFig(h_init.fig,0);
@@ -1388,7 +1390,7 @@ catch errorObj
 end
 
 
-
+%% the 'Add BF videos' button
 function init_push_readbf(hObject, eventdata, h_init)
 
 try
@@ -1426,7 +1428,7 @@ try
 	
     
     %load in bf images
-    [filename_bf,pathname_bf]=uigetfile({'*.tif';'*.czi';'*.avi'},'Select bf videos',tfm_init_user_pathnamestack{1},'MultiSelect','on');
+    [filename_bf,pathname_bf]=uigetfile({'*.*'},'Select bf videos');
     
     %really a file or did user press cancel?
     if isequal(filename_bf,0)
@@ -1489,9 +1491,9 @@ try
 		
 
         if strcmp(tfm_init_user_bf_vidext{1,Nfiles0_bf+j},'.czi')
-			fprintf(1,'CXS-TFM: Start bfopen for CZI file...\n');
-            [~,data]=evalc('bfopen([tfm_init_user_bf_pathnamestack{1,Nfiles0_bf+j},tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},tfm_init_user_bf_vidext{1,Nfiles0_bf+j}])');
-% 			data = bfopen(fullfile(tfm_init_user_bf_pathnamestack{1,Nfiles0_bf+j},[tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},tfm_init_user_bf_vidext{1,Nfiles0_bf+j}]));
+			fprintf(1,'CXS-TFM: Using bfopen to open CZI file...\n');
+%             [~,data]=evalc('bfopen([tfm_init_user_bf_pathnamestack{1,Nfiles0_bf+j},tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},tfm_init_user_bf_vidext{1,Nfiles0_bf+j}])');
+			data = bfopen(fullfile(tfm_init_user_bf_pathnamestack{1,Nfiles0_bf+j},[tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},tfm_init_user_bf_vidext{1,Nfiles0_bf+j}]));
             
             %--------
             %USE TO ADAPT TO MULTICHANNEL CZI files
@@ -1537,7 +1539,7 @@ try
             image1_raw=image_stack(:,:,1);
             
         elseif strcmp(tfm_init_user_bf_vidext{1,Nfiles0_bf+j},'.tif')
- 			fprintf(1,'CXS-TFM: Start libTIFF open for TIFF file...\n');
+ 			fprintf(1,'CXS-TFM: Using libTIFF (Matlab) to open TIFF file...\n');
             InfoImage=imfinfo([tfm_init_user_bf_pathnamestack{1,Nfiles0_bf+j},tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},tfm_init_user_bf_vidext{1,Nfiles0_bf+j}]);
             bit=InfoImage.BitDepth;
             N = numel(InfoImage);
@@ -1573,9 +1575,9 @@ try
             image1_raw=image_stack(:,:,1);
             
         elseif strcmp(tfm_init_user_bf_vidext{1,Nfiles0_bf+j},'.avi')
-			fprintf(1,'CXS-TFM: Start VideoReader open for AVI file...\n');
+			fprintf(1,'CXS-TFM: Using VideoReader to open AVI file...\n');
             videoObj = VideoReader([tfm_init_user_bf_pathnamestack{1,Nfiles0_bf+j},tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},tfm_init_user_bf_vidext{1,Nfiles0_bf+j}]);
-            N = videoObj.NumberOfFrames;
+            N = videoObj.NumFrames;
             
             %initialize image stack
             imagei = read(videoObj,1);
@@ -1610,7 +1612,7 @@ try
         %save frames to preview stack
         tfm_init_user_bf_preview_frame1{Nfiles0_bf+j}=image1_raw;
         tfm_init_user_Nframes_bf{Nfiles0_bf+j}=size(image_stack,3);
-	end
+    end	
     
  	fprintf(1,'CXS-TFM: End BF video open and save at %.02f s\n',toc(tstartMH));
 	
@@ -2718,8 +2720,8 @@ try
     %check format and load:
     if strcmp(ext,'.czi')
         %use bioformats for import
-        [~,data]=evalc('bfopen([pathname,filename{1,1}]);');
-% 		data=bfopen([pathname,filename{1,1}]);
+%         [~,data]=evalc('bfopen([pathname,filename{1,1}]);');
+		data=bfopen([pathname,filename{1,1}]);
         
         %imagedata
         images=data{1,1}; %images
@@ -2901,7 +2903,7 @@ catch errorObj
 end
 
 
-%% init_push_auto_draw
+%% The "Auto-Draw" button
 function init_push_auto_draw(hObject, eventdata, h_init)
 
 %profile on
@@ -2954,18 +2956,18 @@ try
     
     %check if bf images loaded
     if isempty(tfm_init_user_bf_filenamestack)
-        sb = statusbar(h_init.fig,'No bf images loaded');
+        sb = statusbar(h_init.fig,'No bright field images loaded');
         sb.getComponent(0).setForeground(java.awt.Color.red);
     else
         
         axes(h_init.axes_curr)
-        fprintf(1,'Processing %d video files...\n',tfm_init_user_Nfiles)
+        fprintf(1,' Finding cell outlines on %d video files...\n',tfm_init_user_Nfiles)
         
         %auto-draw cell outlines
         for ivid=1:tfm_init_user_Nfiles
             
             %status bar
-            sb = statusbar(h_init.fig,sprintf('Calculating outlines... %d/%d',ivid,tfm_init_user_Nfiles));
+            sb = statusbar(h_init.fig,sprintf('Finding cell outlines... %d/%d',ivid,tfm_init_user_Nfiles));
             sb.getComponent(0).setForeground(java.awt.Color.red);
             
             %check for bf image
@@ -3074,7 +3076,7 @@ try
                     tfm_init_user_outline1y{ivid}=[];
                 end
                 
-                axes(h_init.axes_bf)
+                axes(h_init.axes_bf);
                 plot(tfm_init_user_outline1x{ivid},tfm_init_user_outline1y{ivid},'r','LineWidth',2);
                 hold off;
                 
@@ -3088,7 +3090,7 @@ try
         %calculate cell dimensions
         for ivid=1:tfm_init_user_Nfiles
             
-            sb = statusbar(h_init.fig,['Calculating cell dimensions... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)),'%% done']);
+            sb = statusbar(h_init.fig,sprintf('Calculating cell dimensions... %d/%d',ivid,tfm_init_user_Nfiles));
             sb.getComponent(0).setForeground(java.awt.Color.red);
             
             %check if outline exists
@@ -3213,6 +3215,7 @@ catch errorObj
 end
 
 %profile viewer
+
 
 function init_push_update(hObject, eventdata, h_init)
 %disable figure during calculation
@@ -3459,32 +3462,48 @@ else
     setappdata(0, 'IntraX_sarco_possible',true);
 end
 
+
+%% Callback for the "OK (streamlined)" button
 function init_push_ok_strln(hObject, eventdata, h_init,h_main)
 
-figuresize=[80,500];
-screensize=get(0,'ScreenSize');
-xpos = ceil((screensize(3)-figuresize(2))/2);
-ypos = ceil((screensize(4)-figuresize(1))/2);
-%create figure
-disablesarcoWarning.fig=figure(...
-    'position',[xpos, ypos, figuresize(2), figuresize(1)],...
-    'units','pixels',...
-    'renderer','OpenGL',...
-    'MenuBar','none',...
-    'PaperPositionMode','auto',...
-    'Name','Warning',...
-    'NumberTitle','off',...
-    'Resize','off',...
-    'Color','w',...
-    'Visible','off');
-annotation('textbox',[0.1 0.1 0.8 0.8], 'String', {'Warning: The analysis will proceed with default parameters', '(unless changed in the code) and only stop once at the end', 'of the beads displacement step, and then at the results panel.','Close to proceed'}, 'FitBoxToText', 'on', 'LineStyle', 'none');
-disablesarcoWarning.fig.Visible='on';
-waitfor(disablesarcoWarning.fig);
+% figuresize=[80,500];
+% screensize=get(0,'ScreenSize');
+% xpos = ceil((screensize(3)-figuresize(2))/2);
+% ypos = ceil((screensize(4)-figuresize(1))/2);
+% %create figure
+% disablesarcoWarning.fig=figure(...
+%     'position',[xpos, ypos, figuresize(2), figuresize(1)],...
+%     'units','pixels',...
+%     'renderer','OpenGL',...
+%     'MenuBar','none',...
+%     'PaperPositionMode','auto',...
+%     'Name','Warning',...
+%     'NumberTitle','off',...
+%     'Resize','off',...
+%     'Color','w',...
+%     'Visible','off');
+% annotation('textbox',[0.1 0.1 0.8 0.8], 'String', {'Warning: The analysis will proceed with default parameters', '(unless changed in the code) and only stop once at the end', 'of the beads displacement step, and then at the results panel.','Close to proceed'}, 'FitBoxToText', 'on', 'LineStyle', 'none');
+% disablesarcoWarning.fig.Visible='on';
+% waitfor(disablesarcoWarning.fig);
 
-tfm_init_user_strln = true;
-setappdata(0,'tfm_init_user_strln',tfm_init_user_strln);
-init_push_ok(hObject, eventdata, h_init,h_main);
+% confirm that the user wants to do the streamlined analysis
+rspns = questdlg('Do you want to perform the analysis with the default parameters?',...
+    'Confirm Streamline','OK','Cancel','OK');
 
+switch rspns
+    case 'OK'
+        tfm_init_user_strln = true;
+        setappdata(0,'tfm_init_user_strln',tfm_init_user_strln);
+        init_push_ok(hObject, eventdata, h_init,h_main);
+        fprintf(1,'CXS-TFM: Streamlined analysis selected.\n')
+
+    case 'Cancel'
+        fprintf(1,'CXS-TFM: Streamlined analysis cancelled.\n')
+end
+
+
+
+%% Callback for the "OK" button
 function init_push_ok(hObject, eventdata, h_init,h_main)
 fprintf('CXS-TFM: Processing images...\n');
 %profile on
@@ -3560,19 +3579,15 @@ try
     %loop over vids, and extract data
     for j=1:tfm_init_user_Nfiles
         %update statusbar
-        if tfm_init_user_Nfiles==1
-            sb=statusbar(h_init.fig,'Importing... ');
-            sb.getComponent(0).setForeground(java.awt.Color.red);
-        else
-            sb=statusbar(h_init.fig,['Importing... ',num2str(floor(100*(j-1)/tfm_init_user_Nfiles)), '%% done']);
-            sb.getComponent(0).setForeground(java.awt.Color.red);
-        end
+        sb=statusbar(h_init.fig,sprintf('Importing... %d/%d video files',j,tfm_init_user_Nfiles));
+        sb.getComponent(0).setForeground(java.awt.Color.red);
         
         %check format, load and save:
         if strcmp(tfm_init_user_vidext{1,j},'.czi')
+            fprintf('CXS-TFM: Importing CZI file...\n');
             %use bioformats for import
-            [~,data]=evalc('bfopen([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]);');
-% 			data = bfopen([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]);
+%             [~,data]=evalc('bfopen([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]);');
+			data = bfopen([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]);
             metadata = data{1, 2};
             tincrement=str2double(metadata.get('Global Information|Image|T|Interval|Increment #1'));
             tfm_init_user_framerate{j}=1/tincrement;
@@ -3649,6 +3664,7 @@ try
             end
             
         elseif strcmp(tfm_init_user_vidext{1,j},'.tif')
+            fprintf('CXS-TFM: Importing TIFF file...\n');
             InfoImage=imfinfo([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]);
             N=length(InfoImage);
             %bit=InfoImage.BitDepth;
@@ -3684,8 +3700,10 @@ try
             save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,j},'/image_stack.mat'],'image_stack','-v7.3');
             
         elseif strcmp(tfm_init_user_vidext{1,j},'.avi')
+            fprintf('CXS-TFM: Importing AVI file...\n');
+
             videoObj = VideoReader([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]);
-            N = videoObj.NumberOfFrames;
+            N = videoObj.NumFrames;
             
             %initialize image stack
             imagei = read(videoObj,1);
@@ -3734,12 +3752,11 @@ try
         tfm_gui_call_piv_flag = true;
     end
     
-    %first check: has user entered all the necessary info: fps,
-    %conversion
+    %first check: has user entered all the necessary info: fps, conversion
     for ivid=1:tfm_init_user_Nfiles
         if ~isempty(find(isnan([tfm_init_user_framerate{:}]))) || ~isempty(find(isnan([tfm_init_user_conversion{:}])))
             errordlg('Please enter all the necessary values: frames per second and Conversion.','Error');
-            enableDisableFig(h_init.fig,1)
+            enableDisableFig(h_init.fig,1);
             return;
         end
         
@@ -4234,7 +4251,7 @@ try
                 ThreeD(:,:,ifr)=im_curr;
             end
             
-            % THIS ONLY WORKS ON MAC
+            % THIS ONLY WORKS ON MAC??
             %start miji
             path=pwd;
             %start fiji
@@ -4285,13 +4302,13 @@ try
             %sb.getComponent(0).setForeground(java.awt.Color.red);
             fprintf(1,'CXS-TFM: Denoizing video #%d\n',ivid)
             if tfm_init_user_Nframes{ivid} > 11
-                folder=['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,ivid}];
+                folder=fullfile('vars_DO_NOT_DELETE',tfm_init_user_filenamestack{1,ivid});
                 N=tfm_init_user_Nframes{ivid};
                 Kalman_Stack_Filter_modified(folder,N,gain,percentvar,0);
                 % tfm_init_user_Nframes{ivid}=tfm_init_user_Nframes{ivid}-10; % New filter does not delete frames
             end
             if tfm_init_user_Nframes_bf{ivid} > 11
-                folder=['vars_DO_NOT_DELETE/',tfm_init_user_bf_filenamestack{1,ivid}];
+                folder=fullfile('vars_DO_NOT_DELETE',tfm_init_user_bf_filenamestack{1,ivid});
                 N=tfm_init_user_Nframes_bf{ivid};
                 Kalman_Stack_Filter_modified(folder,N,gain,percentvar,1)
                 % tfm_init_user_Nframes_bf{ivid}=tfm_init_user_Nframes_bf{ivid}-10; % New filter does not delete frames
@@ -4445,6 +4462,8 @@ set(h_main.button_init,'ForegroundColor',[0 .5 0]);
 
 %move main window to center
 movegui(h_main.fig,'center')
+figure(h_main.fig)
+
 
 %Streamlining
 if tfm_init_user_strln

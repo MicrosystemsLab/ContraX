@@ -29,11 +29,14 @@ fprintf(1,'Add files to path\n');
 addpath(pwd);
 addpath('External');
 addpath('External/20130227_xlwrite');
-addpath('External/20130227_xlwrite/poi_library');
+%addpath('External/20130227_xlwrite/poi_library');
 addpath('External/bfmatlab');
 addpath('External/ncorr_v1_2');
 addpath('External/regu/regu');
 addpath('External/statusbar');
+% remove the startup.m file
+user_path = userpath;
+rmpath(user_path);
 
 if isempty(which([mainFunction '.m']))
     error('"%s" program files (*.m) not found on the MATLAB path.\n',mainFunction);
@@ -48,8 +51,8 @@ for k= 1:length(pList)
 	disp(pList(k).Name)
 end
 fprintf(1,'\n');
-if length(pList)>1
-    fprintf(1,'WARNING: Looks like additional toolboxes are required (%d).\n',length(pList)-1); % -1 for MATLAB
+if length(pList)-1 > 1
+    fprintf(1,'WARNING: Looks like Matlab toolboxes are required (%d).\n',length(pList)-1); % -1 for core MATLAB
     fprintf(1,'  Ensure that they are included in the compile script.\n');
 end
 
@@ -72,7 +75,7 @@ fclose(fid);
 % compile options
 compile_cmd =['mcc -v -m -o ' progname ' ' mainFunction '.m' ' -N'];
 if ispc
-    compile_cmd=['mcc -W ''main:' progname ',version=1.0.0'' -T link:exe ' mainFunction '.m' ' -N -v'];
+    compile_cmd=['mcc -W ''main:' progname ',version=1.0.0'' -T link:exe ' mainFunction '.m' ' -v -N'];
 end
 
 % -s Obfuscate folder structures and file names in the deployable archive (.ctf file) from the end user. Optionally encrypt additional file types.
@@ -87,11 +90,11 @@ end
 % include build version number
 compile_cmd =[compile_cmd ' -a buildversion.txt'];
 
-% include some template files
-compile_cmd =[compile_cmd ' -a ../Master_DO_NOT_EDIT.xlsx -a ../Sample_DO_NOT_EDIT.xlsx'];
+% include template files for saving results
+compile_cmd =[compile_cmd ' -a Master_DO_NOT_EDIT.xlsx -a Sample_DO_NOT_EDIT.xlsx'];
 
 % include some Java libraries
-%compile_cmd =[compile_cmd ' -a poi_library'];
+compile_cmd =[compile_cmd ' -a ../External/bfmatlab/bioformats_package.jar'];
 compile_cmd =[compile_cmd ' -a ../External/20130227_xlwrite/poi_library'];
 
 
@@ -235,18 +238,36 @@ end
 %     end
 % end
 
-% cleanup
+
+%% Cleanup
 if ismac
     delete(['run_' progname '.sh'])
+
+    % delete localization files
+    dl = dir([progname '.app/Contents/Resources/*.lproj']);
+    fprintf(1,'Delete extraneous directories (%d)... ',length(dl));
+    for f=1:length(dl)
+        if dl(f).folder
+            if isempty(ls(fullfile(dl(f).folder,dl(f).name)))
+                %disp(['Delete ' dl(f).name])
+                rmdir(fullfile(dl(f).folder,dl(f).name))
+            end
+        end
+    end
+    fprintf(1,'done.\n');
+
 end
+
+
 if ispc
     if isfile([mainFunction '.exe'])
         movefile([mainFunction '.exe'],[progname '.exe'])
     end
 end
 
-cd('..');
 
+cd('..');
+addpath(user_path);
 
 %% update repo
 if updateRepo

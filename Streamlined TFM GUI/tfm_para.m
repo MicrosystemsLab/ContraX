@@ -633,7 +633,7 @@ try
 
     %format diplacements
     for current_vid=1:tfm_init_user_Nfiles % parfor
-        disp(['Calculating results for video #',num2str(current_vid)])
+        fprintf(1,' Calculating results for video %d/%d...',current_vid,tfm_init_user_Nfiles);
         
         tfm_para_user_d{current_vid}=[tfm_piv_user_meand{current_vid,:}];
         %Exclude 4 datapoints on each side of the relaxed frame, assigning the
@@ -1166,6 +1166,9 @@ try
     
     end
     
+    fprintf(1,' done\n');
+
+
     % calculate contraction times
     for current_vid = 1:tfm_init_user_Nfiles
         %init
@@ -1727,6 +1730,7 @@ try
         end
     end
 
+    fprintf(1,'CXS-TFM: Results ready.\n');
    
 catch errorObj
     % If there is a problem, we display the error message
@@ -6810,7 +6814,7 @@ try
     
     %loop over videos
     for ivid=1:tfm_init_user_Nfiles
-        %waitbar
+        fprintf(1,'CSX-TFM: Saving parameters for video %d/%d\n',ivid,tfm_init_user_Nfiles);
         sb=statusbar(h_para.fig,['Saving parameters... ',num2str(floor(100*(ivid-1)/sum(tfm_init_user_Nfiles))), '%% done']);
         sb.getComponent(0).setForeground(java.awt.Color.red);
         %

@@ -46,7 +46,8 @@ for ii = 1:numel(fns)
   rmappdata(0,fns{ii});
 end
 
-use_parallel=24; % set to positive integer to enable parallel processing with that many workers, or 0 to disable
+ % set to positive integer to enable parallel processing with that many workers, or 0 to disable
+use_parallel=24; % note you will only get as many workers as you have CPU cores available
 
 % disable warning for obsolete java components
 %  See: https://www.mathworks.com/products/matlab/app-designer/java-swing-alternatives.html?s_tid=OIT_20611
@@ -55,6 +56,13 @@ use_parallel=24; % set to positive integer to enable parallel processing with th
 warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
 % easier to suppress this warning than to fix the problem MH
 warning('off','MATLAB:MKDIR:DirectoryExists');
+
+% are template files available?
+which('bioformats_package.jar')
+path_to_templates = fileparts(which('Master_DO_NOT_EDIT.xlsx'));
+if isempty(path_to_templates)
+    fprintf(1,'WARNING: Master xlsx file not found\n');
+end
 
 
 % what build?
@@ -70,13 +78,10 @@ end
 fprintf(1,'\nContraX Streamlined TFM: Microscope Image TFM Analysis\n');
 fprintf(1,'   %s\n\n',buildver);
 fprintf(1,'  Start Time: %s \n\n',datestr(now));
+fprintf(1,'Java Runtime Max. Memory: %d MB\n',java.lang.Runtime.getRuntime.maxMemory/1024)
 
 fprintf(1,'\n');
 fprintf(1,'CXS-TFM: main function\n');
-
-% where are the template files?
-%which('Master_DO_NOT_EDIT.xlsx')
-[path_to_template_files,~,~] = fileparts(which('Master_DO_NOT_EDIT.xlsx'));
 
 
 %% MH set a location in the filesystem for a working directory
@@ -122,15 +127,13 @@ end
 
 fprintf(1,' Working directory: %s\n',pwd);
 
-% template files
+% make sure that the template files are available
 if isdeployed
-    if ~isfile(fullfile(path_to_template_files,'Master_DO_NOT_EDIT.xlsx'))
+    if ~isfile(fullfile(path_to_templates,'Master_DO_NOT_EDIT.xlsx'))
         fprintf(1,'WARNING: Master xlsx file not found\n');
-        disp(fullfile(path_to_template_files,'Master_DO_NOT_EDIT.xlsx'))
     end
-    if ~isfile(fullfile(path_to_template_files,'Sample_DO_NOT_EDIT.xlsx'))
+    if ~isfile(fullfile(path_to_templates,'Sample_DO_NOT_EDIT.xlsx'))
         fprintf(1,'WARNING: Sample xlsx file not found\n');
-        disp(fullfile(path_to_template_files,'Sample_DO_NOT_EDIT.xlsx'))
     end
 end
 
@@ -190,7 +193,7 @@ figuresize=[200,225];
 screensize = get(0,'ScreenSize');
 xpos = ceil((screensize(3)-figuresize(2))/2);
 ypos = ceil((screensize(4)-figuresize(1))/2);
-fontsizeA = 10;
+fontsizeA = 10; if ismac, fontsizeA = fontsizeA+2; end
 
 %create figure
 h_main.fig=figure(...
@@ -234,13 +237,17 @@ set(h_main.button_tfm,'callback',{@main_push_tfm,h_main})
 %button 5
 set(h_main.button_para,'callback',{@main_push_para,h_main})
 
+% save some mouse clicks
+set(h_main.fig,'KeyPressFcn',{@main_push_init,h_main});
+
+
 %JFM
 notif.on = false; %set to true if notification are desired
 notif.url={}; %input the ifttt trigger url to implement a notification during computing
 setappdata(0,'notif',notif);
 
 setappdata(0,'use_parallel',use_parallel);
-setappdata(0,'path_to_templates',path_to_template_files);
+setappdata(0,'path_to_templates',path_to_templates);
 
 
 %profile off
@@ -269,7 +276,7 @@ function main_push_para(hObject, eventdata, h_main) %#ok<INUSL>
 %profile resume
 tfm_para(h_main);
 
-
 function tfmCloseFcn(hObject, eventdata, h_main)
 % executed when the main window is closed by the user
+close all
 fprintf(1,'CXS-TFM: Program closed.\n');

@@ -156,7 +156,7 @@ h_piv.edit_post_eps = uicontrol('Parent',h_piv.panel_post,'style','edit','positi
 %post settings: edit: thresh
 h_piv.edit_post_thresh = uicontrol('Parent',h_piv.panel_post,'style','edit','position',[170,5,50,15],'string','3','HorizontalAlignment','center');
 %button: calculate all
-h_piv.button_calcncorr = uicontrol('Parent',h_piv.panel_ncorr,'style','pushbutton','position',[5,5,240,30],'string','Calculate all');
+h_piv.button_calcncorr = uicontrol('Parent',h_piv.panel_ncorr,'style','pushbutton','position',[5,5,240,30],'string','Calculate all','FontSize',fontsizeA);
 %checkbox: delete extra files after ncorr
 h_piv.checkbox_delete = uicontrol('Parent',h_piv.panel_ncorr,'style','checkbox','position',[100,150,150,15],'string','Delete extra files after ncorr','value',0);
 h_piv.checkbox_delete.ForegroundColor = ptcolor;
@@ -420,6 +420,9 @@ try
             % cur(end).set_img('lazy',struct('name',['image',num2str(ifr),'.png'],'path',['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,ivid}]));
         end
 		fprintf(1,'CXS-TFM: End ncorr init at %.02f s\n',toc(tstartMH));
+
+        statusbar(h_piv.fig,sprintf('Analyzing Video %d/%d (%d frames)...',ivid,tfm_init_user_Nfiles,length(cur)));
+        fprintf(1,'  Video has %d frames\n',length(cur));
         
         %set roi
         mask = true([ref.height ref.width]);
@@ -506,7 +509,7 @@ try
 
 		fprintf(1,'CXS-TFM: Start frame processing at %.02f s\n',toc(tstartMH));
 		tstartFRAME = tic;
-        h_pf = h_piv.fig;
+        %h_pf = h_piv.fig;
 		
         parfor frame = 1:length(cur)
 %        for frame = 1:length(cur)
@@ -514,7 +517,7 @@ try
             if rem(frame,20)==0
                 fprintf(1,' #%d/%d, %.02f sec elapsed\n',frame,length(cur),toc(tstartFRAME));
             end
-            %disp(['Calculating frame #',num2str(frame)])
+            %disp([' Calculating frame #',num2str(frame)])
             
             [seedinfo(frame), convergeinfo, success_seeds] = ncorr_alg_calcseeds(ref.formatted(), ...
                 cur(frame).formatted(), ...
@@ -682,7 +685,7 @@ try
             %export_fig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Displacement Heatmaps/heatmap',int2str(frame)],...
             %    '-png','-painters','-m1.5',p);
             close(p)
-			[lsta,lastb]=lastwarn
+			%[lsta,lastb]=lastwarn
             
             %%%%%%%%%%%%%%
             
@@ -873,7 +876,9 @@ try
         %for later use
         tfm_piv_user_d{current_vid}=d*tfm_init_user_conversion{current_vid}*1e-6;
     end
-    %statusbar
+
+    fprintf(1,'CSX-TFM: Ready to calculate displacements\n');
+    % statusbar
     sb=statusbar(h_piv.fig,'Calculation - Done !');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     

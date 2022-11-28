@@ -566,8 +566,8 @@ try
         fprintf(1,'CXS-TFM: Calculating traction stress for video #%d\n',ivid);
         
         %create folder to save disp.
-        [mf,mf2] = mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots']); %#ok<NASGU> 
-        [mf,mf2] = mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Traction Heatmaps']); %#ok<NASGU> 
+        [mf,mf2] = mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots']);  %#ok<ASGLU> 
+        [mf,mf2] = mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Traction Heatmaps']);  %#ok<ASGLU> 
 
 % removed for parfor                    
 %         reset(h_tfm.axes_tfm);
