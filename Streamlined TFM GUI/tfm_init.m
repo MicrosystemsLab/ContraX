@@ -463,6 +463,10 @@ set(h_main.fig,'Units','pixels');
 ap = get(h_main.fig,'Position');
 set(h_main.fig,'Position',[fp(1)-ap(3) fp(2)+fp(4)-ap(4) ap(3) ap(4)]);
 
+% initialize status bar
+sb=statusbar(h_piv.fig,'Ready');
+sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
+
 %profile viewer
 %userTiming= getappdata(0,'userTiming');
 %userTiming.init{1} = tic;
@@ -3753,10 +3757,14 @@ try
     end
     
     %first check: has user entered all the necessary info: fps, conversion
+    % MH This needs to be checked; does not set all GUI logic when user
+    %  tries to fix it.
     for ivid=1:tfm_init_user_Nfiles
-        if ~isempty(find(isnan([tfm_init_user_framerate{:}]))) || ~isempty(find(isnan([tfm_init_user_conversion{:}])))
+        if any(isnan([tfm_init_user_framerate{:}])) || any(isnan([tfm_init_user_conversion{:}]))
             errordlg('Please enter all the necessary values: frames per second and Conversion.','Error');
             enableDisableFig(h_init.fig,1);
+            set(h_init.edit_fps,'Enable','on'); % MH I added these lines but not sure it is enough
+            set(h_init.edit_conversion,'Enable','on');
             return;
         end
         
