@@ -31,6 +31,7 @@
 function tfm_init(h_main)
 fprintf(1,'\n');
 fprintf(1,'CXS-TFM: Initialization Module\n');
+fprintf(1,'  Analysis Start Time: %s \n',datestr(now));
 
 warning('off','MATLAB:ui:javaframe:PropertyToBeRemoved');
 
@@ -1233,7 +1234,7 @@ try
     for i = 1:N
         %update statusbar
         %sb=statusbar(h_init.fig,'Importing... ');
-        sb=statusbar(h_init.fig,['Importing... video ',num2str(i),'/',num2str(N),'... ',num2str(floor(100*(i-1)/h_init)), '%% done']);
+        sb=statusbar(h_init.fig,['Importing video ',num2str(i),'/',num2str(N),'... ',num2str(floor(100*(i-1)/h_init)), '%% done']);
         sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
         
         
@@ -1508,7 +1509,7 @@ try
 		
 
         if strcmp(tfm_init_user_bf_vidext{1,Nfiles0_bf+j},'.czi')
-			fprintf(1,'CXS-TFM: Using bfopen to open CZI file...\n');
+			fprintf(1,'CXS-TFM: Open BF CZI file...\n');
 %             [~,data]=evalc('bfopen([tfm_init_user_bf_pathnamestack{1,Nfiles0_bf+j},tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},tfm_init_user_bf_vidext{1,Nfiles0_bf+j}])');
 			data = bfopen(fullfile(tfm_init_user_bf_pathnamestack{1,Nfiles0_bf+j},[tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},tfm_init_user_bf_vidext{1,Nfiles0_bf+j}]));
             
@@ -1556,7 +1557,7 @@ try
             image1_raw=image_stack(:,:,1);
             
         elseif strcmp(tfm_init_user_bf_vidext{1,Nfiles0_bf+j},'.tif')
- 			fprintf(1,'CXS-TFM: Using libTIFF (Matlab) to open TIFF file...\n');
+ 			fprintf(1,'CXS-TFM: Open BF TIFF file...\n');
             InfoImage=imfinfo([tfm_init_user_bf_pathnamestack{1,Nfiles0_bf+j},tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},tfm_init_user_bf_vidext{1,Nfiles0_bf+j}]);
             bit=InfoImage.BitDepth;
             N = numel(InfoImage);
@@ -1592,7 +1593,7 @@ try
             image1_raw=image_stack(:,:,1);
             
         elseif strcmp(tfm_init_user_bf_vidext{1,Nfiles0_bf+j},'.avi')
-			fprintf(1,'CXS-TFM: Using VideoReader to open AVI file...\n');
+			fprintf(1,'CXS-TFM: Open BF AVI file...\n');
             videoObj = VideoReader([tfm_init_user_bf_pathnamestack{1,Nfiles0_bf+j},tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},tfm_init_user_bf_vidext{1,Nfiles0_bf+j}]);
             N = videoObj.NumFrames;
             
@@ -3601,15 +3602,16 @@ try
     %loop over vids, and extract data
     for j=1:tfm_init_user_Nfiles
         %update statusbar
-        sb=statusbar(h_init.fig,sprintf('Importing... %d/%d video files',j,tfm_init_user_Nfiles));
+        sb=statusbar(h_init.fig,sprintf('Importing %d/%d video files...',j,tfm_init_user_Nfiles));
         sb.getComponent(0).setForeground(java.awt.Color.red);
         
         %check format, load and save:
         if strcmp(tfm_init_user_vidext{1,j},'.czi')
-            fprintf('CXS-TFM: Importing CZI file...\n');
+            fprintf('CXS-TFM: Importing TFM CZI file...\n');
             %use bioformats for import
 %             [~,data]=evalc('bfopen([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]);');
 			data = bfopen([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]);
+            fprintf('CXS-TFM: Process metadata\n');
             metadata = data{1, 2};
             tincrement = str2double(metadata.get('Global Information|Image|T|Interval|Increment #1'));
             if tincrement > 0
@@ -3664,6 +3666,7 @@ try
             
             BFChannel = getappdata(0, 'BFChannel');
             if multichannelczi && BFChannel <= Nchannels %also load bf frames
+                fprintf('CXS-TFM: Load BF image frames\n');
                %[~,data]=evalc('bfopen([tfm_init_user_bf_pathnamestack{1,j},tfm_init_user_bf_filenamestack{1,j},tfm_init_user_bf_vidext{1,j}]);');
 % 				data = bfopen([tfm_init_user_bf_pathnamestack{1,j},tfm_init_user_bf_filenamestack{1,j},tfm_init_user_bf_vidext{1,j}]);
                 images=data{1,1}; %images
@@ -3688,7 +3691,7 @@ try
             end
             
         elseif strcmp(tfm_init_user_vidext{1,j},'.tif')
-            fprintf('CXS-TFM: Importing TIFF file...\n');
+            fprintf('CXS-TFM: Importing TFM TIFF file...\n');
             InfoImage=imfinfo([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]);
             N=length(InfoImage);
             %bit=InfoImage.BitDepth;
@@ -3724,7 +3727,7 @@ try
             save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,j},'/image_stack.mat'],'image_stack','-v7.3');
             
         elseif strcmp(tfm_init_user_vidext{1,j},'.avi')
-            fprintf('CXS-TFM: Importing AVI file...\n');
+            fprintf('CXS-TFM: Importing TFM AVI file...\n');
 
             videoObj = VideoReader([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]);
             N = videoObj.NumFrames;

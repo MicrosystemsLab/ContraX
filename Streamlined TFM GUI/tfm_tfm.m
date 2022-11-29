@@ -1017,6 +1017,8 @@ setappdata(0,'tfm_tfm_user_lambda',tfm_tfm_user_lambda)
 setappdata(0,'tfm_tfm_user_clims',tfm_tfm_user_clims)
 setappdata(0,'tfm_tfm_user_counter',tfm_tfm_user_counter)
 
+
+%% Callback for the "OK" button
 function tfm_push_ok(hObject, eventdata, h_tfm, h_main)
 %disable figure during calculation
 enableDisableFig(h_tfm.fig,0);
@@ -1106,6 +1108,7 @@ catch errorObj
 end
 
 fprintf(1,'CXS-TFM: TFM calculations complete.\n')
+fprintf(1,'  Analysis End Time: %s \n',datestr(now));
 
 %enable fig
 enableDisableFig(h_tfm.fig,1);
@@ -1124,6 +1127,8 @@ movegui(h_main(1).fig,'center')
 if tfm_init_user_strln
     tfm_para(h_main)
 end
+
+
 
 function tfm_buttongroup_constrain(hObject, eventdata, h_tfm)
 %load

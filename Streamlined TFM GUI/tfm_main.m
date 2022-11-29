@@ -58,7 +58,9 @@ warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
 warning('off','MATLAB:MKDIR:DirectoryExists');
 
 % are template files available?
-which('bioformats_package.jar')
+if isempty(which('bioformats_package.jar'))
+    fprintf(1,'WARNING: bioformats_package.jar file not found\n');
+end
 path_to_templates = fileparts(which('Master_DO_NOT_EDIT.xlsx'));
 if isempty(path_to_templates)
     fprintf(1,'WARNING: Master xlsx file not found\n');
@@ -143,6 +145,8 @@ end
 
 %profile on
 
+% start the parallel computing pool
+%if use_parallel > 0, gcp; end
 
 % add paths of external funcs
 if ~isdeployed
@@ -250,7 +254,7 @@ setappdata(0,'path_to_templates',path_to_templates);
 
 setappdata(0,'use_parallel',use_parallel);
 drawnow;
-if use_parallel > 0, gcp; end
+
 
 %profile off
 

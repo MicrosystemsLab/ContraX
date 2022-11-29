@@ -3,6 +3,8 @@
 %
 % Before compiling, ensure that all of the necessary files are on the MATLAB path.
 %
+% M. Hopcroft, mhopeng@gmail.com
+%
 
 %% Setup
 progname='ContraX';
@@ -10,7 +12,6 @@ mainFunction='tfm_main';
 updateRepo=1; % update the repository with this source code?
 if ispc, updateRepo=0; end
 %copyFiles=0; % copy executables to correct locations?
-
 
 
 arch = computer('arch');
