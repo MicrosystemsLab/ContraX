@@ -464,7 +464,7 @@ ap = get(h_main.fig,'Position');
 set(h_main.fig,'Position',[fp(1)-ap(3) fp(2)+fp(4)-ap(4) ap(3) ap(4)]);
 
 % initialize status bar
-sb=statusbar(h_piv.fig,'Ready');
+sb=statusbar(h_init.fig,'Ready');
 sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
 
 %profile viewer
@@ -601,6 +601,7 @@ try
         Nchannels = omeMeta.getChannelCount(0);
         if Nchannels > 1
             multichannelczi = true;
+            fprintf('This appears to be a multi-channel CZI file, with %d channels',Nchannels);
         else
             multichannelczi = false;
         end
@@ -675,7 +676,7 @@ try
     %loop over vids and extract first frame data
     for j = 1:size(filename,2)
         if strcmp(tfm_init_user_vidext{1,Nfiles0+j},'.czi')
-            fprintf(1,'CXS-TFM: Examining CZI format TFM video...');
+            fprintf(1,'CXS-TFM: Examining CZI format TFM video... (%d)',Nfiles0+j);
             TFMChannel = getappdata(0,'TFMChannel');
             BFChannel = getappdata(0,'BFChannel');
             
@@ -688,13 +689,14 @@ try
             m = omeMeta.getPixelsSizeY(0).getValue(); %height in pixels
             n = omeMeta.getPixelsSizeX(0).getValue(); %width in pixels
 
+
             %save display image in variable
             display_frame = TFMChannel;
-             if get(h_init.checkbox_trim, 'value')
-                 display_frame = display_frame + Nchannels;
-             end
+            if get(h_init.checkbox_trim, 'value')
+                display_frame = display_frame + Nchannels;
+            end
 %             [~,image]=evalc('bfGetPlane(reader, display_frame);'); %MH again with the evalc
-			image = bfGetPlane(reader, display_frame);
+            image = bfGetPlane(reader, display_frame);
              %convert to grey
 %              if ndims(image) == 3
 %                  image=rgb2gray(image);
@@ -817,11 +819,22 @@ try
         %if czi: read metadata, else put the values to NaN;
         if strcmp(tfm_init_user_vidext{1,Nfiles0+j},'.czi')
             %conversion factor px-> um
-            voxelSizeX = double(omeMeta.getPixelsPhysicalSizeX(0).value()); % in ?m %prev: getValue, no double
+            voxelSizeX = double(omeMeta.getPixelsPhysicalSizeX(0).value());
+            % get framerate
+            td=zeros(1,N);
+            for k=0:N-1
+                td(k+1)=double(omeMeta.getPlaneDeltaT(0,k).value());
+            end
+            if mean(diff(td)) > 0
+                fps = round(10*1/mean(diff(td)))/10;
+            else
+                fps = 30; % default
+                fprintf(1,'Unable to get framerate from metadata\n');
+            end
             
             %for later use:
             tfm_init_user_conversion{Nfiles0+j}=voxelSizeX;
-            tfm_init_user_framerate{Nfiles0+j}=0;
+            tfm_init_user_framerate{Nfiles0+j}=fps;
             tfm_init_user_Nframes{Nfiles0+j}=N;
             
             tfm_init_user_imsize_m{Nfiles0+j}=m;
@@ -887,13 +900,13 @@ try
     %editing of boxes for fps, conversion
     set(h_init.edit_fps,'String',num2str(tfm_init_user_framerate{1}));
     set(h_init.edit_conversion,'String',num2str(tfm_init_user_conversion{1}));
-    if strcmp(tfm_init_user_vidext{1,1},'.tif') || strcmp(tfm_init_user_vidext{1,1},'.avi') || strcmp(tfm_init_user_vidext{1,1},'none')
+    %if strcmp(tfm_init_user_vidext{1,1},'.tif') || strcmp(tfm_init_user_vidext{1,1},'.avi') || strcmp(tfm_init_user_vidext{1,1},'none')
         set(h_init.edit_fps,'Enable','on');
         set(h_init.edit_conversion,'Enable','on');
-    else
-        set(h_init.edit_fps,'Enable','off');
-        set(h_init.edit_conversion,'Enable','off');
-    end
+    %else
+    %    set(h_init.edit_fps,'Enable','off');
+    %    set(h_init.edit_conversion,'Enable','off');
+    %end
     
     set(h_init.edit_nframes,'String',num2str(tfm_init_user_Nframes{1}));
     set(h_init.edit_nframes,'Enable','off');
@@ -1982,6 +1995,8 @@ catch errorObj
     errordlg(getReport(errorObj,'extended','hyperlinks','off'));
 end
 
+
+%% The ">" button ????
 function init_push_forwards(hObject, eventdata, h_init)
 %disable figure during calculation
 enableDisableFig(h_init.fig,0);
@@ -3375,6 +3390,8 @@ catch errorObj
     errordlg(getReport(errorObj,'extended','hyperlinks','off'));
 end
 
+
+%% callback for all edit fields
 function init_update_field(hObject, eventdata, h_init, field)
 %disable fig
 enableDisableFig(h_init.fig,0);
@@ -3427,6 +3444,7 @@ try
         tfm_init_user_rotate(tfm_init_user_counter) = get(h_init.checkbox_rotate,'value');
         setappdata(0, 'tfm_init_user_rotate', tfm_init_user_rotate)
     end
+    fprintf(1,'CXS-TFM: Updated analysis info.\n')
     
 catch errorObj
     % If there is a problem, we display the error message
@@ -3593,9 +3611,11 @@ try
 %             [~,data]=evalc('bfopen([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]);');
 			data = bfopen([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]);
             metadata = data{1, 2};
-            tincrement=str2double(metadata.get('Global Information|Image|T|Interval|Increment #1'));
-            tfm_init_user_framerate{j}=1/tincrement;
-            set(h_init.edit_fps,'String',num2str(tfm_init_user_framerate{j}));
+            tincrement = str2double(metadata.get('Global Information|Image|T|Interval|Increment #1'));
+            if tincrement > 0
+                tfm_init_user_framerate{j}=1/tincrement;
+                set(h_init.edit_fps,'String',num2str(tfm_init_user_framerate{j}));
+            end
             % check for image stack
             info = data{1, 1}{1, 2};
             Nchannels = 1;
@@ -3762,6 +3782,7 @@ try
     for ivid=1:tfm_init_user_Nfiles
         if any(isnan([tfm_init_user_framerate{:}])) || any(isnan([tfm_init_user_conversion{:}]))
             errordlg('Please enter all the necessary values: frames per second and Conversion.','Error');
+            fprintf(1,'Error: Some video parameters are not valid.\n')
             enableDisableFig(h_init.fig,1);
             set(h_init.edit_fps,'Enable','on'); % MH I added these lines but not sure it is enough
             set(h_init.edit_conversion,'Enable','on');

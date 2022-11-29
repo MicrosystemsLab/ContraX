@@ -246,14 +246,19 @@ notif.on = false; %set to true if notification are desired
 notif.url={}; %input the ifttt trigger url to implement a notification during computing
 setappdata(0,'notif',notif);
 
-setappdata(0,'use_parallel',use_parallel);
 setappdata(0,'path_to_templates',path_to_templates);
 
+setappdata(0,'use_parallel',use_parallel);
+drawnow;
+if use_parallel > 0, gcp; end
 
 %profile off
 
+
 fprintf(1,'CXS-TFM: Ready\n');
 figure(h_main.fig);
+
+
 
 function main_push_init(hObject, eventdata, h_main) %#ok<INUSL>
 %launch the initialization window
