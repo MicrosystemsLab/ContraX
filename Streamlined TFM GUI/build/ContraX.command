@@ -11,6 +11,8 @@
 #
 
 app_name="ContraX"
+MCRVER="v911"
+MATLABVER="R2021b"
 
 # Set the screen size to match the application window
 printf '\e[8;30;100t'
@@ -30,22 +32,22 @@ cd "$exe_dir"
 #  echo    $0 \<deployedMCRroot\> args
 #else
   echo "Setting up environment variables"
-  MCRVER="v911"
+
   #MCRROOT="$1"
   if [ -d "/Applications/MATLAB/MATLAB_Compiler_Runtime/${MCRVER}" ] ; then
-  	echo "Using MCR v9.11 (R2021b) (_Compiler)"
+  	echo "Using MCR v9.11 ($MATLABVER) (_Compiler)"
   	MCRROOT=/Applications/MATLAB/MATLAB_Compiler_Runtime/${MCRVER}
 
   elif [ -d "/Applications/MATLAB/MATLAB_Runtime/${MCRVER}" ] ; then
-  	echo "Using MCR v9.11 (R2021b)"
+  	echo "Using MCR v9.11 ($MATLABVER)"
   	MCRROOT=/Applications/MATLAB/MATLAB_Runtime/${MCRVER}
 
-  elif [ -d "/Applications/MATLAB_R2020b.app" ] ; then
-  	echo "Using MATLAB R2021b application"
+  elif [ -d "/Applications/MATLAB_${MATLABVER}.app" ] ; then
+  	echo "Using MATLAB $MATLABVER application"
   	MCRROOT=/Applications/MATLAB_R2021b.app
 
   else
-  	echo "No MATLAB libraries found! Install MCR R2021b from:"
+  	echo "No MATLAB libraries found! Install MCR $MATLABVER from:"
   	echo " https://www.mathworks.com/products/compiler/matlab-runtime.html"
   	echo " "
   	sleep 10

@@ -1446,7 +1446,8 @@ try
 	
     
     %load in bf images
-    [filename_bf,pathname_bf]=uigetfile({'*.*'},'Select bf videos');
+    [filename_bf,pathname_bf]=uigetfile({'*.*','All Files';'*.czi','Zeiss microscope videos (.czi)';'*.tif*','TIFF image stacks (.tif)';'*.avi','AVI video files (.avi)'},...
+        'Select BF videos',tfm_init_user_pathnamestack{1},'MultiSelect','on');
     
     %really a file or did user press cancel?
     if isequal(filename_bf,0)
@@ -1535,7 +1536,8 @@ try
             start_frame = 0;
 			if get(h_init.checkbox_trim, 'value')
                 start_frame = 1;
-			end
+            end
+            fprintf(1,' Convert images to greyscale\n');
             parfor (i = start_frame:N-1,tfm_init_use_parallel)
                 index = TFMChannel + Nchannels*i
                 imagei=images{index,1};
@@ -1575,6 +1577,7 @@ try
                 TifLink.read(); %read past first frame
                 image_stack = zeros(m,n,N-1,'uint8');
             end
+            fprintf(1,' Convert images to greyscale\n');
             for i=1:end_frame
                 TifLink.setDirectory(i);
                 imagei=TifLink.read();
@@ -1607,6 +1610,7 @@ try
                 num_frames = N-1;
                 image_stack = zeros(m,n,N-1,'uint8');
             end
+            fprintf(1,' Convert images to greyscale\n');
             parfor (i=1:num_frames,tfm_init_use_parallel)
                 if get(h_init.checkbox_trim, 'value')
                     imagei=read(videoObj, i+1);
@@ -1632,7 +1636,7 @@ try
         tfm_init_user_Nframes_bf{Nfiles0_bf+j}=size(image_stack,3);
     end	
     
- 	fprintf(1,'CXS-TFM: End BF video open and save at %.02f s\n',toc(tstartMH));
+ 	fprintf(1,'CXS-TFM: End BF video import and save at %.02f s\n',toc(tstartMH));
 	
     %update statusbar
     sb=statusbar(h_init.fig,'Import - Done !');

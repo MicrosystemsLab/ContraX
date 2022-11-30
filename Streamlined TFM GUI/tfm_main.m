@@ -80,6 +80,9 @@ end
 fprintf(1,'\nContraX Streamlined TFM: Microscope Image TFM Analysis\n');
 fprintf(1,'   %s\n\n',buildver);
 fprintf(1,'  Start Time: %s \n\n',datestr(now));
+
+% check this machine
+fprintf(1,'System Architecture: %s, Number of CPU cores: %d\n',computer('arch'),feature('numCores'));
 fprintf(1,'Java Runtime Max. Memory: %d MB\n',java.lang.Runtime.getRuntime.maxMemory/1024)
 
 fprintf(1,'\n');
@@ -242,7 +245,7 @@ set(h_main.button_tfm,'callback',{@main_push_tfm,h_main})
 set(h_main.button_para,'callback',{@main_push_para,h_main})
 
 % save some mouse clicks
-set(h_main.fig,'KeyPressFcn',{@main_push_init,h_main});
+if ~isdeployed, set(h_main.fig,'KeyPressFcn',{@main_push_init,h_main}); end
 
 
 %JFM
