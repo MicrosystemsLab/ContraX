@@ -29,6 +29,11 @@
 
 
 function tfm_init(h_main)
+fprintf(1,'\n');
+fprintf(1,'CXS-TFM: Initialization Module\n');
+fprintf(1,'  Analysis Start Time: %s \n',datestr(now));
+
+warning('off','MATLAB:ui:javaframe:PropertyToBeRemoved');
 
 %profile on
 
@@ -43,13 +48,14 @@ screensize = get(0,'ScreenSize');
 xpos = ceil((screensize(3)-figuresize(2))/2);
 ypos = ceil((screensize(4)-figuresize(1))/2);
 %create figure; invisible at first
-h_init(1).fig=figure(...
-    'position',[xpos, ypos, figuresize(2), figuresize(1)],...
+% MH: add 20 px to height to make room for statusbar
+h_init.fig=figure(...
+    'position',[xpos, ypos, figuresize(2), figuresize(1)+20],...
     'units','pixels',...
     'renderer','OpenGL',...
     'MenuBar','none',...
     'PaperPositionMode','auto',...
-    'Name','Beads Initialization',...
+    'Name','ContraX Initialization',...
     'NumberTitle','off',...
     'Resize','off',...
     'Color',[.2,.2,.2],...
@@ -58,243 +64,247 @@ h_init(1).fig=figure(...
 %color of the background and foreground
 pcolor = [.2 .2 .2];
 ptcolor = [1 1 1];
-bcolor = [.3 .3 .3];
-btcolor = [1 1 1];
-h_init(1).ForegroundColor = ptcolor;
-h_init(1).BackgroundColor = pcolor;
+bcolor = [.3 .3 .3];														%#ok<NASGU>
+btcolor = [1 1 1];															%#ok<NASGU>
+h_init.ForegroundColor = ptcolor;
+h_init.BackgroundColor = pcolor;
+fontsizeA = 10;
 
 
 %create uipanel for readin & buttons
 %uipanel: contains readin button for videos and folders
-h_init(1).panel_read = uipanel('Parent',h_init(1).fig,'Title','Open 1 or more video files','units','pixels','Position',[20,350,155,135]);
-h_init(1).panel_read.ForegroundColor = ptcolor;
-h_init(1).panel_read.BackgroundColor = pcolor;
+h_init.panel_read = uipanel('Parent',h_init.fig,'Title','Open 1 or more video files','units','pixels','Position',[20,350,155,135]);
+h_init.panel_read.ForegroundColor = ptcolor;
+h_init.panel_read.BackgroundColor = pcolor;
 %button 1: read in videos
-h_init(1).button_readvid = uicontrol('Parent',h_init(1).panel_read,'style','pushbutton','position',[5,95,140,25],'string','Add video (tif, czi, avi)');
-%button 2: read in folder
-h_init(1).button_readfolder = uicontrol('Parent',h_init(1).panel_read,'style','pushbutton','position',[5,65,140,25],'string','Add images folder');
+h_init.button_readvid = uicontrol('Parent',h_init.panel_read,'style','pushbutton','position',[5,95,140,25],...
+    'string','Add TFM video','FontSize',fontsizeA);
+%button 2: read images in folder
+h_init.button_readfolder = uicontrol('Parent',h_init.panel_read,'style','pushbutton','position',[5,65,140,25],...
+    'string','Add images folder','FontSize',fontsizeA);
 %button 3: read bf videos
-h_init(1).button_readbf = uicontrol('Parent',h_init(1).panel_read,'style','pushbutton','position',[5,35,140,25],'string','Add bf videos');
+h_init.button_readbf = uicontrol('Parent',h_init.panel_read,'style','pushbutton','position',[5,35,140,25],...
+    'string','Add BF videos','FontSize',fontsizeA);
 %take read bf out of readvid and add here
 
 % checkbox for remove first frame
-h_init(1).checkbox_trim = uicontrol('Parent',h_init(1).panel_read,'style','checkbox','position',[5,5,140,25],'string',{'Trim 1st frames', '(select before loading)'},'visible','on','value',0);
-h_init(1).checkbox_trim.ForegroundColor = ptcolor;
-h_init(1).checkbox_trim.BackgroundColor = pcolor;
+h_init.checkbox_trim = uicontrol('Parent',h_init.panel_read,'style','checkbox','position',[5,5,140,25],'string',{'Trim 1st frames', '(select before loading)'},'visible','on','value',0);
+h_init.checkbox_trim.ForegroundColor = ptcolor;
+h_init.checkbox_trim.BackgroundColor = pcolor;
 
 %create uipanel to display and delete loaded videos
 %uipanel: list all the loaded videos, invisible
-h_init(1).panel_list = uipanel('Parent',h_init(1).fig,'Title','List of loaded videos','units','pixels','Position',[20,45,155,300],'visible','off');
-h_init(1).panel_list.ForegroundColor = ptcolor;
-h_init(1).panel_list.BackgroundColor = pcolor;
+h_init.panel_list = uipanel('Parent',h_init.fig,'Title','List of loaded videos','units','pixels','Position',[20,45,155,300],'visible','off');
+h_init.panel_list.ForegroundColor = ptcolor;
+h_init.panel_list.BackgroundColor = pcolor;
 %listbox 1: lists videos
-h_init(1).listbox_display = uicontrol('Parent',h_init(1).panel_list,'style','listbox','position',[5,35,140,250]);
+h_init.listbox_display = uicontrol('Parent',h_init.panel_list,'style','listbox','position',[5,35,140,250]);
 %button 3: delete current video
-h_init(1).button_delete = uicontrol('Parent',h_init(1).panel_list,'style','pushbutton','position',[5,5,140,25],'string','Delete selected');
+h_init.button_delete = uicontrol('Parent',h_init.panel_list,'style','pushbutton','position',[5,5,140,25],'string','Delete selected');
 
 %create uipanel to display video information and first frame
 %uipanel:
-h_init(1).panel_vid = uipanel('Parent',h_init(1).fig,'Title','Video information','units','pixels','Position',[190,45,850,440],'visible','off');
-h_init(1).panel_vid.ForegroundColor = ptcolor;
-h_init(1).panel_vid.BackgroundColor = pcolor;
+h_init.panel_vid = uipanel('Parent',h_init.fig,'Title','Video information','units','pixels','Position',[190,45,850,440],'visible','off');
+h_init.panel_vid.ForegroundColor = ptcolor;
+h_init.panel_vid.BackgroundColor = pcolor;
 %subpanel for masks
-h_init(1).subpanel_vid = uipanel('Parent',h_init(1).panel_vid,'Title','Masks information','units','pixels','Position',[550,320,290,110],'visible','off');
-h_init(1).subpanel_vid.ForegroundColor = ptcolor;
-h_init(1).subpanel_vid.BackgroundColor = pcolor;
+h_init.subpanel_vid = uipanel('Parent',h_init.panel_vid,'Title','Masks information','units','pixels','Position',[550,320,290,110],'visible','off');
+h_init.subpanel_vid.ForegroundColor = ptcolor;
+h_init.subpanel_vid.BackgroundColor = pcolor;
 %axes: display first frame of current
-h_init(1).axes_curr = axes('Parent',h_init(1).panel_vid,'Units', 'pixels','Position',[15,35,400,290]);
+h_init.axes_curr = axes('Parent',h_init.panel_vid,'Units', 'pixels','Position',[15,35,400,290]);
 %axes: display corresponding bf frame
-h_init(1).axes_bf = axes('Parent',h_init(1).panel_vid,'Units','pixels','Position',[430,35,400,290]);
+h_init.axes_bf = axes('Parent',h_init.panel_vid,'Units','pixels','Position',[430,35,400,290]);
 %button 4: forwards
-h_init(1).button_forwards = uicontrol('Parent',h_init(1).panel_vid,'style','pushbutton','position',[385,5,25,25],'string','>');
+h_init.button_forwards = uicontrol('Parent',h_init.panel_vid,'style','pushbutton','position',[385,5,25,25],'string','>');
 %button 5: backwards
-h_init(1).button_backwards = uicontrol('Parent',h_init(1).panel_vid,'style','pushbutton','position',[360,5,25,25],'string','<');
+h_init.button_backwards = uicontrol('Parent',h_init.panel_vid,'style','pushbutton','position',[360,5,25,25],'string','<');
 %button 6: load outline
-h_init(1).button_load = uicontrol('Parent',h_init(1).panel_vid,'style','pushbutton','position',[460,385,70,15],'string','Load');
+h_init.button_load = uicontrol('Parent',h_init.panel_vid,'style','pushbutton','position',[460,385,70,15],'string','Load');
 %button 6b: draw outline
-h_init(1).button_draw = uicontrol('Parent',h_init(1).panel_vid,'style','pushbutton','position',[410,365,120,15],'string','Draw from loaded image');
+h_init.button_draw = uicontrol('Parent',h_init.panel_vid,'style','pushbutton','position',[410,365,120,15],'string','Draw from loaded image');
 %button 6c: draw outline from new image
-h_init(1).button_draw_new = uicontrol('Parent',h_init(1).panel_vid,'style','pushbutton','position',[410,345,120,15],'string','Draw from new image');
+h_init.button_draw_new = uicontrol('Parent',h_init.panel_vid,'style','pushbutton','position',[410,345,120,15],'string','Draw from new image');
 %button 7: update outlines
-h_init(1).button_update = uicontrol('Parent',h_init(1).subpanel_vid,'style','pushbutton','position',[5,5,120,15],'string','Update Outlines');
+h_init.button_update = uicontrol('Parent',h_init.subpanel_vid,'style','pushbutton','position',[5,5,120,15],'string','Update Outlines');
 %button 8: auto-draw outline
-h_init(1).button_auto_draw = uicontrol('Parent',h_init(1).panel_vid,'style','pushbutton','position',[460,405,70,15],'string','Auto-Draw');
+h_init.button_auto_draw = uicontrol('Parent',h_init.panel_vid,'style','pushbutton','position',[460,405,70,15],'string','Auto-Draw');
 
 %button 9: crop all vids REMOVE WHEN CHECKBOX WORKS
-h_init(1).button_crop_all = uicontrol('Parent',h_init(1).panel_vid,'style','pushbutton','position',[700,345,120,15],'string','Crop all videos','visible','off');
+%h_init.button_crop_all = uicontrol('Parent',h_init.panel_vid,'style','pushbutton','position',[700,345,120,15],'string','Crop all videos','visible','off');
 
 %create ok button
-h_init(1).button_ok = uicontrol('Parent',h_init(1).fig,'style','pushbutton','position',[835,20,100,20],'string','OK','visible','off');
+h_init.button_ok = uicontrol('Parent',h_init.fig,'style','pushbutton','position',[835,20,100,20],'string','OK','visible','off','FontWeight','bold');
 %create ok (streamlined) button
-h_init(1).button_ok_strln = uicontrol('Parent',h_init(1).fig,'style','pushbutton','position',[940,20,100,20],'string','OK (streamlined)','visible','off');
+h_init.button_ok_strln = uicontrol('Parent',h_init.fig,'style','pushbutton','position',[940,20,100,20],'string','OK (streamlined)','visible','off');
 
 
 %text 1: show which video (i/n)
-h_init(1).text_whichvid = uicontrol('Parent',h_init(1).panel_vid,'style','text','position',[300,10,50,15],'string','(1/1)','HorizontalAlignment','left');
-h_init(1).text_whichvid.ForegroundColor = ptcolor;
-h_init(1).text_whichvid.BackgroundColor = pcolor;
+h_init.text_whichvid = uicontrol('Parent',h_init.panel_vid,'style','text','position',[300,10,50,15],'string','(1/1)','HorizontalAlignment','left');
+h_init.text_whichvid.ForegroundColor = ptcolor;
+h_init.text_whichvid.BackgroundColor = pcolor;
 %text 2: show fps
-h_init(1).text_fps = uicontrol('Parent',h_init(1).panel_vid,'style','text','position',[10,365,150,15],'string','Frames per second','HorizontalAlignment','left');
-h_init(1).text_fps.ForegroundColor = ptcolor;
-h_init(1).text_fps.BackgroundColor = pcolor;
+h_init.text_fps = uicontrol('Parent',h_init.panel_vid,'style','text','position',[10,365,150,15],'string','Frames per second','HorizontalAlignment','left');
+h_init.text_fps.ForegroundColor = ptcolor;
+h_init.text_fps.BackgroundColor = pcolor;
 %text 3: show conversion
-h_init(1).text_conversion = uicontrol('Parent',h_init(1).panel_vid,'style','text','position',[10,345,150,15],'string','Conversion (um/px)','HorizontalAlignment','left');
-h_init(1).text_conversion.ForegroundColor = ptcolor;
-h_init(1).text_conversion.BackgroundColor = pcolor;
+h_init.text_conversion = uicontrol('Parent',h_init.panel_vid,'style','text','position',[10,345,150,15],'string','Conversion (um/px)','HorizontalAlignment','left');
+h_init.text_conversion.ForegroundColor = ptcolor;
+h_init.text_conversion.BackgroundColor = pcolor;
 %text 4: show number of frames
-h_init(1).text_nframes = uicontrol('Parent',h_init(1).panel_vid,'style','text','position',[10,385,150,15],'string','Number of frames','HorizontalAlignment','left');
-h_init(1).text_nframes.ForegroundColor = ptcolor;
-h_init(1).text_nframes.BackgroundColor = pcolor;
+h_init.text_nframes = uicontrol('Parent',h_init.panel_vid,'style','text','position',[10,385,150,15],'string','Number of frames','HorizontalAlignment','left');
+h_init.text_nframes.ForegroundColor = ptcolor;
+h_init.text_nframes.BackgroundColor = pcolor;
 %text 5: show cellname
-h_init(1).text_cellname = uicontrol('Parent',h_init(1).panel_vid,'style','text','position',[10,405,150,15],'string','Cell name','HorizontalAlignment','left');
-h_init(1).text_cellname.ForegroundColor = ptcolor;
-h_init(1).text_cellname.BackgroundColor = pcolor;
+h_init.text_cellname = uicontrol('Parent',h_init.panel_vid,'style','text','position',[10,405,150,15],'string','Cell name','HorizontalAlignment','left');
+h_init.text_cellname.ForegroundColor = ptcolor;
+h_init.text_cellname.BackgroundColor = pcolor;
 %text 6: cell outline
-h_init(1).text_cell1 = uicontrol('Parent',h_init(1).panel_vid,'style','text','position',[410,405,40,15],'string','Cell','HorizontalAlignment','left');
-h_init(1).text_cell1.ForegroundColor = ptcolor;
-h_init(1).text_cell1.BackgroundColor = pcolor;
-h_init(1).text_cell2 = uicontrol('Parent',h_init(1).panel_vid,'style','text','position',[410,388,40,15],'string','Outline','HorizontalAlignment','left');
-h_init(1).text_cell2.ForegroundColor = ptcolor;
-h_init(1).text_cell2.BackgroundColor = pcolor;
+h_init.text_cell1 = uicontrol('Parent',h_init.panel_vid,'style','text','position',[410,405,40,15],'string','Cell','HorizontalAlignment','left');
+h_init.text_cell1.ForegroundColor = ptcolor;
+h_init.text_cell1.BackgroundColor = pcolor;
+h_init.text_cell2 = uicontrol('Parent',h_init.panel_vid,'style','text','position',[410,388,40,15],'string','Outline','HorizontalAlignment','left');
+h_init.text_cell2.ForegroundColor = ptcolor;
+h_init.text_cell2.BackgroundColor = pcolor;
 %text 7: show which video (name)
-h_init(1).text_whichvidname = uicontrol('Parent',h_init(1).panel_vid,'style','text','position',[20,10,240,15],'string','Experiment','HorizontalAlignment','left');
-h_init(1).text_whichvidname.ForegroundColor = ptcolor;
-h_init(1).text_whichvidname.BackgroundColor = pcolor;
+h_init.text_whichvidname = uicontrol('Parent',h_init.panel_vid,'style','text','position',[20,10,240,15],'string','Experiment','HorizontalAlignment','left');
+h_init.text_whichvidname.ForegroundColor = ptcolor;
+h_init.text_whichvidname.BackgroundColor = pcolor;
 %text 7b: show bf video name
-h_init(1).text_bf_whichvidname = uicontrol('Parent',h_init(1).panel_vid,'style','text','position',[450,10,200,15],'string','Experiment','HorizontalAlignment','left');
-h_init(1).text_bf_whichvidname.ForegroundColor = ptcolor;
-h_init(1).text_bf_whichvidname.BackgroundColor = pcolor;
+h_init.text_bf_whichvidname = uicontrol('Parent',h_init.panel_vid,'style','text','position',[450,10,200,15],'string','Experiment','HorizontalAlignment','left');
+h_init.text_bf_whichvidname.ForegroundColor = ptcolor;
+h_init.text_bf_whichvidname.BackgroundColor = pcolor;
 %text 8: crop mask
-h_init(1).text_cropmask = uicontrol('Parent',h_init(1).subpanel_vid,'style','text','position',[150,80,100,15],'string','Crop mask (green)','HorizontalAlignment','left');
-h_init(1).text_cropmask.ForegroundColor = ptcolor;
-h_init(1).text_cropmask.BackgroundColor = pcolor;
+h_init.text_cropmask = uicontrol('Parent',h_init.subpanel_vid,'style','text','position',[150,80,100,15],'string','Crop mask (green)','HorizontalAlignment','left');
+h_init.text_cropmask.ForegroundColor = ptcolor;
+h_init.text_cropmask.BackgroundColor = pcolor;
 %text 8b: crop mask preview
-h_init(1).text_cropmask = uicontrol('Parent',h_init(1).subpanel_vid,'style','text','position',[170,5,100,15],'string','Preview crop mask (green)','HorizontalAlignment','left');
-h_init(1).text_cropmask.ForegroundColor = ptcolor;
-h_init(1).text_cropmask.BackgroundColor = pcolor;
+h_init.text_cropmask = uicontrol('Parent',h_init.subpanel_vid,'style','text','position',[170,5,100,15],'string','Preview crop mask (green)','HorizontalAlignment','left');
+h_init.text_cropmask.ForegroundColor = ptcolor;
+h_init.text_cropmask.BackgroundColor = pcolor;
 %text 9: length
-h_init(1).text_length = uicontrol('Parent',h_init(1).subpanel_vid,'style','text','position',[150,60,60,15],'string','Length (um)','HorizontalAlignment','left');
-h_init(1).text_length.ForegroundColor = ptcolor;
-h_init(1).text_length.BackgroundColor = pcolor;
+h_init.text_length = uicontrol('Parent',h_init.subpanel_vid,'style','text','position',[150,60,60,15],'string','Length (um)','HorizontalAlignment','left');
+h_init.text_length.ForegroundColor = ptcolor;
+h_init.text_length.BackgroundColor = pcolor;
 %text 10: width
-h_init(1).text_width = uicontrol('Parent',h_init(1).subpanel_vid,'style','text','position',[150,40,60,15],'string','Width (um)','HorizontalAlignment','left');
-h_init(1).text_width.ForegroundColor = ptcolor;
-h_init(1).text_width.BackgroundColor = pcolor;
+h_init.text_width = uicontrol('Parent',h_init.subpanel_vid,'style','text','position',[150,40,60,15],'string','Width (um)','HorizontalAlignment','left');
+h_init.text_width.ForegroundColor = ptcolor;
+h_init.text_width.BackgroundColor = pcolor;
 %text 11: analysis region
-h_init(1).text_anlysreg = uicontrol('Parent',h_init(1).subpanel_vid,'style','text','position',[5,80,120,15],'string','Analysis Region (blue)','HorizontalAlignment','left');
-h_init(1).text_anlysreg.ForegroundColor = ptcolor;
-h_init(1).text_anlysreg.BackgroundColor = pcolor;
+h_init.text_anlysreg = uicontrol('Parent',h_init.subpanel_vid,'style','text','position',[5,80,120,15],'string','Analysis Region (blue)','HorizontalAlignment','left');
+h_init.text_anlysreg.ForegroundColor = ptcolor;
+h_init.text_anlysreg.BackgroundColor = pcolor;
 %text 12: youngs
-h_init(1).text_youngs = uicontrol('Parent',h_init(1).panel_vid,'style','text','position',[210,405,100,15],'string','Young"s Mod (Pa)','HorizontalAlignment','left');
-h_init(1).text_youngs.ForegroundColor = ptcolor;
-h_init(1).text_youngs.BackgroundColor = pcolor;
+h_init.text_youngs = uicontrol('Parent',h_init.panel_vid,'style','text','position',[210,405,100,15],'string','Young"s Mod (Pa)','HorizontalAlignment','left');
+h_init.text_youngs.ForegroundColor = ptcolor;
+h_init.text_youngs.BackgroundColor = pcolor;
 %text 13: poisson
-h_init(1).text_poisson = uicontrol('Parent',h_init(1).panel_vid,'style','text','position',[210,385,80,15],'string','Poisson Ratio','HorizontalAlignment','left');
-h_init(1).text_poisson.ForegroundColor = ptcolor;
-h_init(1).text_poisson.BackgroundColor = pcolor;
+h_init.text_poisson = uicontrol('Parent',h_init.panel_vid,'style','text','position',[210,385,80,15],'string','Poisson Ratio','HorizontalAlignment','left');
+h_init.text_poisson.ForegroundColor = ptcolor;
+h_init.text_poisson.BackgroundColor = pcolor;
 %text 14: area factor
-h_init(1).text_area_factor = uicontrol('Parent',h_init(1).subpanel_vid,'style','text','position',[5,60,80,15],'string','Area Factor','HorizontalAlignment','left');
-h_init(1).text_area_factor.ForegroundColor = ptcolor;
-h_init(1).text_area_factor.BackgroundColor = pcolor;
+h_init.text_area_factor = uicontrol('Parent',h_init.subpanel_vid,'style','text','position',[5,60,80,15],'string','Area Factor','HorizontalAlignment','left');
+h_init.text_area_factor.ForegroundColor = ptcolor;
+h_init.text_area_factor.BackgroundColor = pcolor;
 %text 15: scale factor
-h_init(1).text_scale_factor = uicontrol('Parent',h_init(1).subpanel_vid,'style','text','position',[5,40,80,15],'string','Scale Factor','HorizontalAlignment','left');
-h_init(1).text_scale_factor.ForegroundColor = ptcolor;
-h_init(1).text_scale_factor.BackgroundColor = pcolor;
+h_init.text_scale_factor = uicontrol('Parent',h_init.subpanel_vid,'style','text','position',[5,40,80,15],'string','Scale Factor','HorizontalAlignment','left');
+h_init.text_scale_factor.ForegroundColor = ptcolor;
+h_init.text_scale_factor.BackgroundColor = pcolor;
 
 %edit 1: fps
-h_init(1).edit_fps = uicontrol('Parent',h_init(1).panel_vid,'style','edit','position',[120,365,70,15],'HorizontalAlignment','center');
+h_init.edit_fps = uicontrol('Parent',h_init.panel_vid,'style','edit','position',[120,365,70,15],'HorizontalAlignment','center');
 %edit 2: conversion
-h_init(1).edit_conversion = uicontrol('Parent',h_init(1).panel_vid,'style','edit','position',[120,345,70,15],'HorizontalAlignment','center');
+h_init.edit_conversion = uicontrol('Parent',h_init.panel_vid,'style','edit','position',[120,345,70,15],'HorizontalAlignment','center');
 %edit 3: number of frames
-h_init(1).edit_nframes = uicontrol('Parent',h_init(1).panel_vid,'style','edit','position',[120,385,70,15],'HorizontalAlignment','center');
+h_init.edit_nframes = uicontrol('Parent',h_init.panel_vid,'style','edit','position',[120,385,70,15],'HorizontalAlignment','center');
 %edit 4: cellname
-h_init(1).edit_cellname = uicontrol('Parent',h_init(1).panel_vid,'style','edit','position',[120,405,70,15],'HorizontalAlignment','center');
+h_init.edit_cellname = uicontrol('Parent',h_init.panel_vid,'style','edit','position',[120,405,70,15],'HorizontalAlignment','center');
 %edit 5: crop length
-h_init(1).edit_croplength = uicontrol('Parent',h_init(1).subpanel_vid,'style','edit','position',[220,60,55,15],'HorizontalAlignment','center');
+h_init.edit_croplength = uicontrol('Parent',h_init.subpanel_vid,'style','edit','position',[220,60,55,15],'HorizontalAlignment','center');
 %edit 6: crop width
-h_init(1).edit_cropwidth = uicontrol('Parent',h_init(1).subpanel_vid,'style','edit','position',[220,40,55,15],'HorizontalAlignment','center');
+h_init.edit_cropwidth = uicontrol('Parent',h_init.subpanel_vid,'style','edit','position',[220,40,55,15],'HorizontalAlignment','center');
 %edit 7: youngs
-h_init(1).edit_youngs = uicontrol('Parent',h_init(1).panel_vid,'style','edit','position',[310,405,70,15],'HorizontalAlignment','center');
+h_init.edit_youngs = uicontrol('Parent',h_init.panel_vid,'style','edit','position',[310,405,70,15],'HorizontalAlignment','center');
 %edit 8: poisson
-h_init(1).edit_poisson = uicontrol('Parent',h_init(1).panel_vid,'style','edit','position',[310,385,70,15],'HorizontalAlignment','center');
+h_init.edit_poisson = uicontrol('Parent',h_init.panel_vid,'style','edit','position',[310,385,70,15],'HorizontalAlignment','center');
 %edit 9: area factor
-h_init(1).edit_area_factor = uicontrol('Parent',h_init(1).subpanel_vid,'style','edit','position',[75,60,50,15],'HorizontalAlignment','center');
+h_init.edit_area_factor = uicontrol('Parent',h_init.subpanel_vid,'style','edit','position',[75,60,50,15],'HorizontalAlignment','center');
 %edit 10: scale factor
-h_init(1).edit_scale_factor = uicontrol('Parent',h_init(1).subpanel_vid,'style','edit','position',[75,40,50,15],'HorizontalAlignment','center');
+h_init.edit_scale_factor = uicontrol('Parent',h_init.subpanel_vid,'style','edit','position',[75,40,50,15],'HorizontalAlignment','center');
 
 
 %checkbox: crop mask
-h_init(1).checkbox_cropmask = uicontrol('Parent',h_init(1).subpanel_vid,'style','checkbox','position',[150,5,15,15],'string','Preview crop mask','visible','on','value',0);
-h_init(1).checkbox_cropmask.ForegroundColor = ptcolor;
-h_init(1).checkbox_cropmask.BackgroundColor = pcolor;
+h_init.checkbox_cropmask = uicontrol('Parent',h_init.subpanel_vid,'style','checkbox','position',[150,5,15,15],'string','Preview crop mask','visible','on','value',0);
+h_init.checkbox_cropmask.ForegroundColor = ptcolor;
+h_init.checkbox_cropmask.BackgroundColor = pcolor;
 % checkbox for rotate
-h_init(1).checkbox_rotate = uicontrol('Parent',h_init(1).subpanel_vid,'style','checkbox','position',[150,22,120,15],'string','Rotate region','visible','off','value',1);
-h_init(1).checkbox_rotate.ForegroundColor = ptcolor;
-h_init(1).checkbox_rotate.BackgroundColor = pcolor;
+h_init.checkbox_rotate = uicontrol('Parent',h_init.subpanel_vid,'style','checkbox','position',[150,22,120,15],'string','Rotate region','visible','off','value',1);
+h_init.checkbox_rotate.ForegroundColor = ptcolor;
+h_init.checkbox_rotate.BackgroundColor = pcolor;
 % checkbox for crop
-h_init(1).checkbox_crop = uicontrol('Parent',h_init(1).fig,'style','checkbox','position',[440,20,80,20],'string','Crop videos','visible','off','value',0);
-h_init(1).checkbox_crop.ForegroundColor = ptcolor;
-h_init(1).checkbox_crop.BackgroundColor = pcolor;
+h_init.checkbox_crop = uicontrol('Parent',h_init.fig,'style','checkbox','position',[440,20,80,20],'string','Crop videos','visible','off','value',0);
+h_init.checkbox_crop.ForegroundColor = ptcolor;
+h_init.checkbox_crop.BackgroundColor = pcolor;
 % checkbox for binning
-h_init(1).checkbox_bin = uicontrol('Parent',h_init(1).fig,'style','checkbox','position',[530,20,80,20],'string','Bin videos','visible','off','value',0);
-h_init(1).checkbox_bin.ForegroundColor = ptcolor;
-h_init(1).checkbox_bin.BackgroundColor = pcolor;
+h_init.checkbox_bin = uicontrol('Parent',h_init.fig,'style','checkbox','position',[530,20,80,20],'string','Bin videos','visible','off','value',0);
+h_init.checkbox_bin.ForegroundColor = ptcolor;
+h_init.checkbox_bin.BackgroundColor = pcolor;
 % menu for bin size
-h_init(1).menu_bin = uicontrol('Parent',h_init(1).fig,'style','popup','position',[600,20,60,20],'string',{'2x','4x'},'visible','off');
+h_init.menu_bin = uicontrol('Parent',h_init.fig,'style','popup','position',[600,20,60,20],'string',{'2x','4x'},'visible','off');
 %checkbox for bleachcorrect
-h_init(1).checkbox_bleach = uicontrol('Parent',h_init(1).fig,'style','checkbox','position',[665,20,80,20],'string','Debleach','visible','off','value',0);
-h_init(1).checkbox_bleach.ForegroundColor = ptcolor;
-h_init(1).checkbox_bleach.BackgroundColor = pcolor;
+h_init.checkbox_bleach = uicontrol('Parent',h_init.fig,'style','checkbox','position',[665,20,80,20],'string','Debleach','visible','off','value',0);
+h_init.checkbox_bleach.ForegroundColor = ptcolor;
+h_init.checkbox_bleach.BackgroundColor = pcolor;
 %checkbox for denoise
-h_init(1).checkbox_denoise = uicontrol('Parent',h_init(1).fig,'style','checkbox','position',[750,20,80,20],'string','Denoise','visible','off','value',1);
-h_init(1).checkbox_denoise.ForegroundColor = ptcolor;
-h_init(1).checkbox_denoise.BackgroundColor = pcolor;
+h_init.checkbox_denoise = uicontrol('Parent',h_init.fig,'style','checkbox','position',[750,20,80,20],'string','Denoise','visible','off','value',1);
+h_init.checkbox_denoise.ForegroundColor = ptcolor;
+h_init.checkbox_denoise.BackgroundColor = pcolor;
 
 %assign callbacks to buttons
 %button 1
-set(h_init(1).button_readvid,'callback',{@init_push_readvid,h_init})
+set(h_init.button_readvid,'callback',{@init_push_readvid,h_init})
 %button 2
-set(h_init(1).button_readfolder,'callback',{@init_push_readfolder,h_init})
+set(h_init.button_readfolder,'callback',{@init_push_readfolder,h_init})
 %button 4
-set(h_init(1).button_delete,'callback',{@init_push_delete,h_init})
+set(h_init.button_delete,'callback',{@init_push_delete,h_init})
 %button 5
-set(h_init(1).button_forwards,'callback',{@init_push_forwards,h_init})
+set(h_init.button_forwards,'callback',{@init_push_forwards,h_init})
 %button 6
-set(h_init(1).button_backwards,'callback',{@init_push_backwards,h_init})
+set(h_init.button_backwards,'callback',{@init_push_backwards,h_init})
 %button 7
-set(h_init(1).button_update,'callback',{@init_push_update,h_init})
+set(h_init.button_update,'callback',{@init_push_update,h_init})
 %button 8
-set(h_init(1).button_load,'callback',{@init_push_load,h_init})
+set(h_init.button_load,'callback',{@init_push_load,h_init})
 %button 8b
-set(h_init(1).button_draw,'callback',{@init_push_draw,h_init})
+set(h_init.button_draw,'callback',{@init_push_draw,h_init})
 %button 8c
-set(h_init(1).button_draw_new,'callback',{@init_push_draw_new,h_init})
+set(h_init.button_draw_new,'callback',{@init_push_draw_new,h_init})
 %button 9
-set(h_init(1).button_ok,'callback',{@init_push_ok,h_init,h_main})
+set(h_init.button_ok,'callback',{@init_push_ok,h_init,h_main})
 %button 9b
-set(h_init(1).button_ok_strln,'callback',{@init_push_ok_strln,h_init,h_main})
+set(h_init.button_ok_strln,'callback',{@init_push_ok_strln,h_init,h_main})
 %button 10
-set(h_init(1).button_auto_draw,'callback',{@init_push_auto_draw,h_init})
+set(h_init.button_auto_draw,'callback',{@init_push_auto_draw,h_init})
 %button 11
-set(h_init(1).button_readbf,'callback',{@init_push_readbf,h_init})
-%button 12
-set(h_init(1).button_crop_all,'callback',{@init_push_crop_all,h_init})
+set(h_init.button_readbf,'callback',{@init_push_readbf,h_init})
+%button 12 % using checkbox
+%set(h_init.button_crop_all,'callback',{@init_push_crop_all,h_init})
 
 %assign callbacks to edit fields
-set(h_init(1).edit_fps,'callback',{@init_update_field,h_init,'fps'})
-set(h_init(1).edit_conversion,'callback',{@init_update_field,h_init,'conversion'})
-set(h_init(1).edit_nframes,'callback',{@init_update_field,h_init,'nframes'})
-set(h_init(1).edit_cellname,'callback',{@init_update_field,h_init,'cellname'})
-set(h_init(1).edit_croplength,'callback',{@init_update_field,h_init,'croplength'})
-set(h_init(1).edit_cropwidth,'callback',{@init_update_field,h_init,'cropwidth'})
-set(h_init(1).edit_youngs,'callback',{@init_update_field,h_init,'youngs'})
-set(h_init(1).edit_poisson,'callback',{@init_update_field,h_init,'poisson'})
-set(h_init(1).edit_area_factor,'callback',{@init_update_field,h_init,'area_factor'})
-set(h_init(1).edit_scale_factor,'callback',{@init_update_field,h_init,'scale_factor'})
+set(h_init.edit_fps,'callback',{@init_update_field,h_init,'fps'})
+set(h_init.edit_conversion,'callback',{@init_update_field,h_init,'conversion'})
+set(h_init.edit_nframes,'callback',{@init_update_field,h_init,'nframes'})
+set(h_init.edit_cellname,'callback',{@init_update_field,h_init,'cellname'})
+set(h_init.edit_croplength,'callback',{@init_update_field,h_init,'croplength'})
+set(h_init.edit_cropwidth,'callback',{@init_update_field,h_init,'cropwidth'})
+set(h_init.edit_youngs,'callback',{@init_update_field,h_init,'youngs'})
+set(h_init.edit_poisson,'callback',{@init_update_field,h_init,'poisson'})
+set(h_init.edit_area_factor,'callback',{@init_update_field,h_init,'area_factor'})
+set(h_init.edit_scale_factor,'callback',{@init_update_field,h_init,'scale_factor'})
 
 %assign callbacks to checkbox fields
-set(h_init(1).checkbox_rotate,'callback',{@init_update_field,h_init,'rotate'})
-set(h_init(1).checkbox_bin,'callback',{@init_update_bin,h_init});
+set(h_init.checkbox_rotate,'callback',{@init_update_field,h_init,'rotate'})
+set(h_init.checkbox_bin,'callback',{@init_update_bin,h_init});
 
 %if there are already files on the stack, make the other panels visible too
 %and show parameters
@@ -327,15 +337,16 @@ if ~isempty(getappdata(0,'tfm_init_user_filenamestack'))                        
     tfm_init_user_outline2y=getappdata(0,'tfm_init_user_outline2y');
     tfm_init_user_outline3x=getappdata(0,'tfm_init_user_outline3x');
     tfm_init_user_outline3y=getappdata(0,'tfm_init_user_outline3y');
+	tfm_init_use_parallel=getappdata(0,'use_parallel');
     
     %change display strings and values
     %put video files into listbox
-    set(h_init(1).listbox_display,'String',tfm_init_user_filenamestack);
+    set(h_init.listbox_display,'String',tfm_init_user_filenamestack);
     %select item in listbox
-    set(h_init(1).listbox_display,'Value',tfm_init_user_counter);
+    set(h_init.listbox_display,'Value',tfm_init_user_counter);
     
     %display 1st frame of new video
-    axes(h_init(1).axes_curr);
+    axes(h_init.axes_curr);
     imshow(tfm_init_user_preview_frame1{tfm_init_user_counter});hold on;
     plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
     plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
@@ -343,7 +354,7 @@ if ~isempty(getappdata(0,'tfm_init_user_filenamestack'))                        
     hold off;
     
     %     %display 1st bf frame
-    %     axes(h_init(1).axes_bf);
+    %     axes(h_init.axes_bf);
     %     imshow(tfm_init_user_bf_preview_frame1{tfm_init_user_counter});hold on;
     %     plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
     %     plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
@@ -352,101 +363,117 @@ if ~isempty(getappdata(0,'tfm_init_user_filenamestack'))                        
     
     %check if bf stack is empty
     if isempty(tfm_init_user_bf_filenamestack)
-        axes(h_init(1).axes_bf)
+        axes(h_init.axes_bf)
         imshow([]);
-        set(h_init(1).axes_bf,'visible','off');
+        set(h_init.axes_bf,'visible','off');
     else
-        set(h_init(1).axes_bf,'visible','on');
-        axes(h_init(1).axes_bf);
+        set(h_init.axes_bf,'visible','on');
+        axes(h_init.axes_bf);
         imshow(tfm_init_user_bf_preview_frame1{1});hold on;
         plot(tfm_init_user_outline1x{1},tfm_init_user_outline1y{1},'r','LineWidth',2);
         plot(tfm_init_user_outline2x{1},tfm_init_user_outline2y{1},'b','LineWidth',2);
         plot(tfm_init_user_outline3x{1},tfm_init_user_outline3y{1},'g','LineWidth',2);
         hold off;
-        set(h_init(1).text_bf_whichvidname,'String',tfm_init_user_bf_filenamestack{1,1});
+        set(h_init.text_bf_whichvidname,'String',tfm_init_user_bf_filenamestack{1,1});
     end
     
     %display new settings
-    set(h_init(1).edit_fps,'String',num2str(tfm_init_user_framerate{tfm_init_user_counter}));                               %framerate
-    set(h_init(1).edit_conversion,'String',num2str(tfm_init_user_conversion{tfm_init_user_counter}));                       %conversion
-    set(h_init(1).edit_nframes,'String',num2str(tfm_init_user_Nframes{tfm_init_user_counter}));                             %number of frames
-    set(h_init(1).edit_cellname,'String',tfm_init_user_cellname{tfm_init_user_counter});                                    %cellname
-    set(h_init(1).text_whichvidname,'String',[tfm_init_user_filenamestack{1,tfm_init_user_counter},' (showing 1st frame)']);%name of video
-    %set(h_init(1).text_bf_whichvidname,'String',[tfm_init_user_bf_filenamestack{1,tfm_init_user_counter}]);
-    set(h_init(1).text_whichvid,'String',[num2str(tfm_init_user_counter),'/',num2str(tfm_init_user_Nfiles)]);               %which video (i/N)
-    set(h_init(1).edit_area_factor,'String',num2str(tfm_init_user_area_factor));                                            %mask parameters
-    set(h_init(1).edit_scale_factor,'String',num2str(tfm_init_user_scale_factor{tfm_init_user_counter}));
-    set(h_init(1).edit_croplength,'String',num2str(tfm_init_user_croplength));
-    set(h_init(1).edit_cropwidth,'String',num2str(tfm_init_user_cropwidth));
-    set(h_init(1).edit_youngs,'String',num2str(tfm_init_user_E{tfm_init_user_counter}));
-    set(h_init(1).edit_poisson,'String',num2str(tfm_init_user_nu{tfm_init_user_counter}));
+    set(h_init.edit_fps,'String',num2str(tfm_init_user_framerate{tfm_init_user_counter}));                               %framerate
+    set(h_init.edit_conversion,'String',num2str(tfm_init_user_conversion{tfm_init_user_counter}));                       %conversion
+    set(h_init.edit_nframes,'String',num2str(tfm_init_user_Nframes{tfm_init_user_counter}));                             %number of frames
+    set(h_init.edit_cellname,'String',tfm_init_user_cellname{tfm_init_user_counter});                                    %cellname
+    set(h_init.text_whichvidname,'String',[tfm_init_user_filenamestack{1,tfm_init_user_counter},' (showing 1st frame)']);%name of video
+    %set(h_init.text_bf_whichvidname,'String',[tfm_init_user_bf_filenamestack{1,tfm_init_user_counter}]);
+    set(h_init.text_whichvid,'String',[num2str(tfm_init_user_counter),'/',num2str(tfm_init_user_Nfiles)]);               %which video (i/N)
+    set(h_init.edit_area_factor,'String',num2str(tfm_init_user_area_factor));                                            %mask parameters
+    set(h_init.edit_scale_factor,'String',num2str(tfm_init_user_scale_factor{tfm_init_user_counter}));
+    set(h_init.edit_croplength,'String',num2str(tfm_init_user_croplength));
+    set(h_init.edit_cropwidth,'String',num2str(tfm_init_user_cropwidth));
+    set(h_init.edit_youngs,'String',num2str(tfm_init_user_E{tfm_init_user_counter}));
+    set(h_init.edit_poisson,'String',num2str(tfm_init_user_nu{tfm_init_user_counter}));
     
     
     %set/change properties
     %if tif or avi or folder, user needs to edit edits; disable nframes
     if strcmp(tfm_init_user_vidext{1,tfm_init_user_counter},'.tif') || strcmp(tfm_init_user_vidext{1,tfm_init_user_counter},'.avi') || strcmp(tfm_init_user_vidext{1,tfm_init_user_counter},'none')
-        set(h_init(1).edit_fps,'Enable','on');          %enable framerate edit
-        set(h_init(1).edit_conversion,'Enable','on');   %enable conversion edit
+        set(h_init.edit_fps,'Enable','on');          %enable framerate edit
+        set(h_init.edit_conversion,'Enable','on');   %enable conversion edit
     else
-        set(h_init(1).edit_fps,'Enable','off');         %disable framerate edit
-        set(h_init(1).edit_conversion,'Enable','off');  %disable conversion edit
+        set(h_init.edit_fps,'Enable','off');         %disable framerate edit
+        set(h_init.edit_conversion,'Enable','off');  %disable conversion edit
     end
-    set(h_init(1).edit_nframes,'Enable','off');         %disable Nframes edit
+    set(h_init.edit_nframes,'Enable','off');         %disable Nframes edit
     %forwards and backwards buttons enable/disable
     if tfm_init_user_counter==tfm_init_user_Nfiles      %if current vid is the last on stack
-        set(h_init(1).button_forwards,'Enable','off');  %disable forwards
+        set(h_init.button_forwards,'Enable','off');  %disable forwards
     else
-        set(h_init(1).button_forwards,'Enable','on');   %enable forwards
+        set(h_init.button_forwards,'Enable','on');   %enable forwards
     end
     if tfm_init_user_counter==1                         %if current vid is the first on stack
-        set(h_init(1).button_backwards,'Enable','off'); %disable backwards
+        set(h_init.button_backwards,'Enable','off'); %disable backwards
     else
-        set(h_init(1).button_backwards,'Enable','on');  %enable backwards
+        set(h_init.button_backwards,'Enable','on');  %enable backwards
     end
     %panels, button, listbox
-    set(h_init(1).panel_vid,'Visible','on');        %show video panel
-    set(h_init(1).subpanel_vid,'Visible','on');        %show video panel
-    set(h_init(1).panel_list,'Visible','on');       %show list panel
-    set(h_init(1).button_ok,'Visible','on');        %show button panel
-    set(h_init(1).button_ok_strln,'Visible','on');        %show button panel
-    set(h_init(1).checkbox_bleach,'Visible','on');        %show bleach checkbox
-    set(h_init(1).checkbox_denoise,'Visible','on');        %show noise checkbox
-    set(h_init(1).checkbox_trim,'Visible','on');
-    set(h_init(1).checkbox_rotate,'Visible','on');
-    set(h_init(1).checkbox_cropmask,'Visible','on');
-    set(h_init(1).checkbox_crop,'Visible','on');
-    set(h_init(1).checkbox_bin,'Visible','on');
-    set(h_init(1).menu_bin,'Visible','on');
-    set(h_init(1).listbox_display,'Enable','off');  %disable listbox editing
+    set(h_init.panel_vid,'Visible','on');        %show video panel
+    set(h_init.subpanel_vid,'Visible','on');        %show video panel
+    set(h_init.panel_list,'Visible','on');       %show list panel
+    set(h_init.button_ok,'Visible','on');        %show button panel
+    set(h_init.button_ok_strln,'Visible','on');        %show button panel
+    set(h_init.checkbox_bleach,'Visible','on');        %show bleach checkbox
+    set(h_init.checkbox_denoise,'Visible','on');        %show noise checkbox
+    set(h_init.checkbox_trim,'Visible','on');
+    set(h_init.checkbox_rotate,'Visible','on');
+    set(h_init.checkbox_cropmask,'Visible','on');
+    set(h_init.checkbox_crop,'Visible','on');
+    set(h_init.checkbox_bin,'Visible','on');
+    set(h_init.menu_bin,'Visible','on');
+    set(h_init.listbox_display,'Enable','off');  %disable listbox editing
 else %turn off panels
-    set(h_init(1).panel_vid,'Visible','off');       %hide video panel
-    set(h_init(1).subpanel_vid,'Visible','off');       %hide video panel
-    set(h_init(1).panel_list,'Visible','off');      %hide list panel
-    set(h_init(1).button_ok,'Visible','off');       %hide ok button
-    set(h_init(1).button_ok_strln,'Visible','off');       %hide ok button
-    set(h_init(1).checkbox_bleach,'Visible','off');        %hide bleach checkbox
-    set(h_init(1).checkbox_denoise,'Visible','off');        %hide noise checkbox
-    set(h_init(1).checkbox_rotate,'Visible','off');
-    set(h_init(1).checkbox_cropmask,'Visible','off');
-    set(h_init(1).checkbox_crop,'Visible','off');
-    set(h_init(1).checkbox_bin,'Visible','off');
-    set(h_init(1).menu_bin,'Visible','off');
+    set(h_init.panel_vid,'Visible','off');       %hide video panel
+    set(h_init.subpanel_vid,'Visible','off');       %hide video panel
+    set(h_init.panel_list,'Visible','off');      %hide list panel
+    set(h_init.button_ok,'Visible','off');       %hide ok button
+    set(h_init.button_ok_strln,'Visible','off');       %hide ok button
+    set(h_init.checkbox_bleach,'Visible','off');        %hide bleach checkbox
+    set(h_init.checkbox_denoise,'Visible','off');        %hide noise checkbox
+    set(h_init.checkbox_rotate,'Visible','off');
+    set(h_init.checkbox_cropmask,'Visible','off');
+    set(h_init.checkbox_crop,'Visible','off');
+    set(h_init.checkbox_bin,'Visible','off');
+    set(h_init.menu_bin,'Visible','off');
+	
+	if isempty(getappdata(0,'TFMChannel'))
+ 		setappdata(0,'TFMChannel',1); % MH 11Oct2020 Otherwise TFMChannel defaults to []
+	end
 end
 
 tfm_init_user_strln = false;
 setappdata(0,'tfm_init_user_strln',tfm_init_user_strln);
 
 %make figure visible
-set(h_init(1).fig,'visible','on');
+set(h_init.fig,'visible','on');
+%movegui(h_init.fig,'north');
 
 %move main window to the side
-movegui(h_main(1).fig,'west')
+% movegui(h_main.fig,'west')
+% MH put the panel to the left of the main window
+%  [left bottom width height]
+fp = get(h_init.fig,'Position');
+set(h_main.fig,'Units','pixels');
+ap = get(h_main.fig,'Position');
+set(h_main.fig,'Position',[fp(1)-ap(3) fp(2)+fp(4)-ap(4) ap(3) ap(4)]);
+
+% initialize status bar
+sb=statusbar(h_init.fig,'Ready');
+sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
 
 %profile viewer
 %userTiming= getappdata(0,'userTiming');
 %userTiming.init{1} = tic;
 %setappdata(0,'userTiming',userTiming);
 
+%% callback for the "Add TFM Video" button
 function init_push_readvid(hObject, eventdata, h_init)
 
 %profile on
@@ -454,9 +481,9 @@ function init_push_readvid(hObject, eventdata, h_init)
 %reads in a series of videos
 
 %disable figure during calculation
-enableDisableFig(h_init(1).fig,0);
+enableDisableFig(h_init.fig,0);
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_init(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_init.fig,1));
 
 %error catching loop
 try
@@ -496,19 +523,23 @@ try
     tfm_init_user_binary3=getappdata(0,'tfm_init_user_binary3');
     tfm_init_user_rotate=getappdata(0,'tfm_init_user_rotate');
     multichannelczi=getappdata(0,'multichannelczi');
+	tfm_init_use_parallel=getappdata(0,'use_parallel');
+	
     
     
     if isempty(tfm_init_user_pathnamestack)
-        tfm_init_user_pathnamestack{1} = cd;
+        tfm_init_user_pathnamestack{1} = pwd;
     end
     
     %load video files: filename: 1xN cell w. strings; pathname string
-    [filename,pathname] = uigetfile({'*.czi';'*.tif';'*.avi'},'Select Beads videos',tfm_init_user_pathnamestack{1},'MultiSelect','on');
-    %really a file or did user press cancel?
+	[filename,pathname] = uigetfile({'*.*','All Files';'*.czi','Zeiss microscope videos (.czi)';'*.tif*','TIFF image stacks (.tif)';'*.avi','AVI video files (.avi)'},...
+		'Select Video Files',tfm_init_user_pathnamestack{1},'MultiSelect','on');
+	%really a file or did user press cancel?
     if isequal(filename,0)
         return;
     end
     filename = cellstr(filename);
+	%setappdata(0,'userFilePath',pathname);
     
     %look if there already files on the image stack
     Nfiles0=size(tfm_init_user_filenamestack,2);
@@ -524,7 +555,7 @@ try
     end
     
     %put video files into listbox
-    set(h_init(1).listbox_display,'String',tfm_init_user_filenamestack);
+    set(h_init.listbox_display,'String',tfm_init_user_filenamestack);
     
     %new number of files
     tfm_init_user_Nfiles=size(tfm_init_user_filenamestack,2);
@@ -542,8 +573,9 @@ try
     mask_count = 0;
     
     % check for masks
+	% MH: this test does not actually detect masks. NEED FIX
     for ivid = 1:tfm_init_user_Nfiles
-        if isequal(exist([tfm_init_user_pathnamestack{ivid},tfm_init_user_filenamestack{ivid},'/Mask/',tfm_init_user_filenamestack{ivid},'_mask.mat'],'file'),2)
+        if isequal(exist(fullfile(tfm_init_user_pathnamestack{ivid},tfm_init_user_filenamestack{ivid},'Mask',tfm_init_user_filenamestack{ivid},'_mask.mat'),'file'),2)
             mask_found(ivid) = 1;
             mask_count = mask_count+1;
         end
@@ -558,14 +590,19 @@ try
     end
     
     % prompt user to select channels
+	%  use the first selected video to determine multichannel and size of
+	%  images. ASSUME all videos have same size/channels
     if strcmp(tfm_init_user_vidext{1,Nfiles0+1},'.czi')
         %use bioformats for import
-        [~,reader]=evalc('bfGetReader([tfm_init_user_pathnamestack{1,Nfiles0+1},tfm_init_user_filenamestack{1,Nfiles0+1},tfm_init_user_vidext{1,Nfiles0+1}]);');
-        
+% 		[~,reader]=evalc('bfGetReader([tfm_init_user_pathnamestack{1,Nfiles0+1},tfm_init_user_filenamestack{1,Nfiles0+1},tfm_init_user_vidext{1,Nfiles0+1}]);');
+        t = fullfile(tfm_init_user_pathnamestack{1,Nfiles0+1},[tfm_init_user_filenamestack{1,Nfiles0+1},tfm_init_user_vidext{1,Nfiles0+1}]);
+        reader = bfGetReader(t);
+
         omeMeta = reader.getMetadataStore();
         Nchannels = omeMeta.getChannelCount(0);
         if Nchannels > 1
             multichannelczi = true;
+            fprintf('This appears to be a multi-channel CZI file, with %d channels',Nchannels);
         else
             multichannelczi = false;
         end
@@ -611,8 +648,13 @@ try
                 channelEmission = omeMeta.getChannelEmissionWavelength(0,cNum);
                 channelExcitation = omeMeta.getChannelExcitationWavelength(0,cNum);
                 rectangle(cur_ax, 'Position',[0 0 1 1],'FaceColor',[channelColor.getRed()/255 channelColor.getGreen()/255 channelColor.getBlue()/255]);
-                str1 = 'Excitation (nm): ' + string(channelEmission.value);
-                str2 = 'Emission (nm): ' + string(channelExcitation.value);
+                if ~isempty(channelEmission)
+                    str1 = 'Excitation (nm): ' + string(channelEmission.value);
+                    str2 = 'Emission (nm): ' + string(channelExcitation.value);
+                else
+                    str1 =  'Excitation (nm): ' ;
+                    str2 =  'Emission (nm): ' ;
+                end
                 annotation('textbox',[0.02+blocklength+0.01 i*blockheight+(i+1)*vspace+blockheight-textheight textlength textheight], 'String', str1, 'Color',ptcolor, 'FitBoxToText', 'on', 'LineStyle', 'none');
                 annotation('textbox',[0.02+blocklength+0.01 i*blockheight+(i+1)*vspace+textheight textlength textheight], 'String', str2, 'Color',ptcolor, 'FitBoxToText', 'on', 'LineStyle', 'none');
                 TFM_buttons{i+1,1} = uicontrol(TFM_bg,'Style','radiobutton','Position',[15 i*buttonspace+(i+1)*vspace_pixels-10 20 20],'HandleVisibility','on','BackgroundColor',pcolor);
@@ -627,35 +669,44 @@ try
             selectChannel.fig.Visible='on';
             waitfor(selectChannel.fig);
         end
-    end
+	end
+	
+	tstartMH = tic;
+	fprintf(1,'CXS-TFM: Start TFM Video Scan\n')
+	
     %loop over vids and extract first frame data
     for j = 1:size(filename,2)
         if strcmp(tfm_init_user_vidext{1,Nfiles0+j},'.czi')
+            fprintf(1,'CXS-TFM: Examining CZI format TFM video... (%d)',Nfiles0+j);
             TFMChannel = getappdata(0,'TFMChannel');
             BFChannel = getappdata(0,'BFChannel');
             
             %use bioformats for import
-            [~,reader]=evalc('bfGetReader([tfm_init_user_pathnamestack{1,Nfiles0+j},tfm_init_user_filenamestack{1,Nfiles0+j},tfm_init_user_vidext{1,Nfiles0+j}]);');
+%             [~,reader]=evalc('bfGetReader([tfm_init_user_pathnamestack{1,Nfiles0+j},tfm_init_user_filenamestack{1,Nfiles0+j},tfm_init_user_vidext{1,Nfiles0+j}]);');
+			reader = bfGetReader(fullfile(tfm_init_user_pathnamestack{1,Nfiles0+j},[tfm_init_user_filenamestack{1,Nfiles0+j},tfm_init_user_vidext{1,Nfiles0+j}]));
             omeMeta = reader.getMetadataStore();
             
             N=omeMeta.getPlaneCount(0)/Nchannels; %number of frames
             m = omeMeta.getPixelsSizeY(0).getValue(); %height in pixels
             n = omeMeta.getPixelsSizeX(0).getValue(); %width in pixels
+
+
             %save display image in variable
             display_frame = TFMChannel;
-            if get(h_init(1).checkbox_trim, 'value')
+            if get(h_init.checkbox_trim, 'value')
                 display_frame = display_frame + Nchannels;
             end
-            [~,image]=evalc('bfGetPlane(reader, display_frame);');
-            %convert to grey
-            if ndims(image) == 3
-                image=rgb2gray(image);
-            end
-            image=normalise(image);
-            image=im2uint8(image);
-            
-            %save 1st frame in display
-            tfm_init_user_preview_frame1{Nfiles0+j}=normalise(image);
+%             [~,image]=evalc('bfGetPlane(reader, display_frame);'); %MH again with the evalc
+            image = bfGetPlane(reader, display_frame);
+             %convert to grey
+%              if ndims(image) == 3
+%                  image=rgb2gray(image);
+%              end
+%              image=normalise(image);
+%              image=im2uint8(image);
+%              
+%              %save 1st frame in display
+%              tfm_init_user_preview_frame1{Nfiles0+j}=normalise(image);
             
             %if BF channel was also included, also load BF first frame and set BF filename info
             if BFChannel <= Nchannels
@@ -663,27 +714,31 @@ try
                 tfm_init_user_bf_filenamestack{1,Nfiles0+j} = tfm_init_user_filenamestack{1,Nfiles0+j};
                 tfm_init_user_bf_vidext{1,Nfiles0+j} = tfm_init_user_vidext{1,Nfiles0+j};
                 display_frame_bf = BFChannel;
-                if get(h_init(1).checkbox_trim, 'value')
+                if get(h_init.checkbox_trim, 'value')
                     display_frame_bf = display_frame_bf + Nchannels;
                 end
-                [~,image]=evalc('bfGetPlane(reader, display_frame_bf);');
+%                 [~,image1]=evalc('bfGetPlane(reader, display_frame_bf);');
+				image = bfGetPlane(reader, display_frame_bf);
+				
                 %convert to grey
                 if ndims(image) == 3
                     image=rgb2gray(image);
                 end
                 image=normalise(image);
                 image=im2uint8(image);
-                
-                %save 1st frame in display
-                tfm_init_user_bf_preview_frame1{Nfiles0+j}=normalise(image);
+                 
+%                 %save 1st frame in display
+                 tfm_init_user_bf_preview_frame1{Nfiles0+j}=normalise(image1);
+				
                 tfm_init_user_Nframes_bf{Nfiles0+j}=N;
-                if get(h_init(1).checkbox_trim, 'value')
+                if get(h_init.checkbox_trim, 'value')
                     tfm_init_user_Nframes_bf{Nfiles0+j}=N-1;
                 end
             end
             
             
         elseif strcmp(tfm_init_user_vidext{1,Nfiles0+j},'.tif')
+            fprintf(1,'CXS-TFM: Examining TIFF format TFM video...');
             if exist('multichannelczi','var') == 0
                 multichannelczi = false;
             end
@@ -694,64 +749,93 @@ try
             
             % initialize image stack
             display_image = 1;
-            if get(h_init(1).checkbox_trim, 'value')
+            if get(h_init.checkbox_trim, 'value')
                 display_image = 2; %read past first frame
             end
             TifLink.setDirectory(display_image);
-            image1 = TifLink.read();
+            image = TifLink.read();
             
-            m = size(image1,1);
-            n = size(image1,2);
+            m = size(image,1);
+            n = size(image,2);
             
-            %convert to grey
-            if ndims(image1) == 3
-                image1=rgb2gray(image1);
-            end
-            image1=normalise(image1);
-            image1=im2uint8(image1);
-            
-            TifLink.close();
-            
-            %save 1st frame in display
-            tfm_init_user_preview_frame1{Nfiles0+j}=normalise(image1);
+			TifLink.close();
+
+%              %convert to grey
+%              if ndims(image1) == 3
+%                  image1=rgb2gray(image1);
+%              end
+%              image1=normalise(image1);
+%              image1=im2uint8(image1);
+%              
+%              %save 1st frame in display
+%              tfm_init_user_preview_frame1{Nfiles0+j}=normalise(image1);
+			
         elseif strcmp(tfm_init_user_vidext{1,Nfiles0+j},'.avi')
+            fprintf(1,'CXS-TFM: Examining AVI format TFM video...');
             if exist('multichannelczi','var') == 0
                 multichannelczi = false;
             end
             
-            videoObj = VideoReader([tfm_init_user_pathnamestack{1,Nfiles0+j},tfm_init_user_filenamestack{1,Nfiles0+j},tfm_init_user_vidext{1,Nfiles0+j}]);
-            N = videoObj.NumberOfFrames;
+            videoObj = VideoReader([tfm_init_user_pathnamestack{1,Nfiles0+j},tfm_init_user_filenamestack{1,Nfiles0+j},tfm_init_user_vidext{1,Nfiles0+j}]); %#ok<TNMLP>
+            N = videoObj.NumFrames;
             
             %initialize image stack
             display_frame = 1;
-            if get(h_init(1).checkbox_trim, 'value')
+            if get(h_init.checkbox_trim, 'value')
                 display_frame = 2; %read past first frame
             end
-            image1 = read(videoObj,display_frame);
-            m = size(image1,1);
-            n = size(image1,2);
+            image = read(videoObj,display_frame);
+            m = size(image,1);
+            n = size(image,2);
             
-            %convert to grey
-            if ndims(image1) == 3
-                image1=rgb2gray(image1);
-            end
-            image1=normalise(image1);
-            image1=im2uint8(image1);
-            
-            %save 1st frame in display
-            tfm_init_user_preview_frame1{Nfiles0+j}=normalise(image1);
-        end
-        if get(h_init(1).checkbox_trim, 'value')
-            N = N-1;
-        end
+%             %convert to grey
+%             if ndims(image1) == 3
+%                 image1=rgb2gray(image1);
+%             end
+%             image1=normalise(image1);
+%             image1=im2uint8(image1);
+%             
+%             %save 1st frame in display
+%             tfm_init_user_preview_frame1{Nfiles0+j}=normalise(image1);
+		end
+		
+		
+		%convert extracted image to grey
+		if ndims(image) == 3
+			image=rgb2gray(image);
+		end
+		image=normalise(image);
+		image=im2uint8(image);
+
+		%save 1st frame in display
+		tfm_init_user_preview_frame1{Nfiles0+j}=image;
+
+		if get(h_init.checkbox_trim, 'value')
+			N = N-1;
+		end
+		
+        fprintf(1,' done.\n');
+ 		fprintf(1,'CXS-TFM: End TFM video check and first frame load at %.02f s\n',toc(tstartMH));
+		
         %if czi: read metadata, else put the values to NaN;
         if strcmp(tfm_init_user_vidext{1,Nfiles0+j},'.czi')
             %conversion factor px-> um
-            voxelSizeX = double(omeMeta.getPixelsPhysicalSizeX(0).value()); % in ?m %prev: getValue, no double
+            voxelSizeX = double(omeMeta.getPixelsPhysicalSizeX(0).value());
+            % get framerate
+            td=zeros(1,N);
+            for k=0:N-1
+                td(k+1)=double(omeMeta.getPlaneDeltaT(0,k).value());
+            end
+            if mean(diff(td)) > 0
+                fps = round(10*1/mean(diff(td)))/10;
+            else
+                fps = 30; % default
+                fprintf(1,'Unable to get framerate from metadata\n');
+            end
             
             %for later use:
             tfm_init_user_conversion{Nfiles0+j}=voxelSizeX;
-            tfm_init_user_framerate{Nfiles0+j}=0;
+            tfm_init_user_framerate{Nfiles0+j}=fps;
             tfm_init_user_Nframes{Nfiles0+j}=N;
             
             tfm_init_user_imsize_m{Nfiles0+j}=m;
@@ -791,59 +875,60 @@ try
         tfm_init_user_outline3y{Nfiles0+j}=[];
         tfm_init_user_binary1{Nfiles0+j}=[];
         tfm_init_user_binary3{Nfiles0+j}=[];
-    end
+	end
+	
     %set area factor to 3
     if isempty(tfm_init_user_area_factor)
         tfm_init_user_area_factor=3;
     end
     
     %turn on panels
-    set(h_init(1).panel_list,'Visible','on');
-    set(h_init(1).panel_vid,'Visible','on');
-    set(h_init(1).subpanel_vid,'Visible','on');
-    set(h_init(1).button_ok,'Visible','on');
-    set(h_init(1).button_ok_strln,'Visible','on');
-    set(h_init(1).checkbox_bleach,'Visible','on');        %show bleach checkbox
-    set(h_init(1).checkbox_denoise,'Visible','on');        %show noise checkbox
-    set(h_init(1).checkbox_trim,'Visible','on');
-    set(h_init(1).checkbox_rotate,'Visible','on');
-    set(h_init(1).checkbox_cropmask,'Visible','on');
-    set(h_init(1).checkbox_crop,'Visible','on');
-    set(h_init(1).checkbox_bin,'Visible','on');
-    set(h_init(1).menu_bin,'Visible','on');
+    set(h_init.panel_list,'Visible','on');
+    set(h_init.panel_vid,'Visible','on');
+    set(h_init.subpanel_vid,'Visible','on');
+    set(h_init.button_ok,'Visible','on');
+    set(h_init.button_ok_strln,'Visible','on');
+    set(h_init.checkbox_bleach,'Visible','on');        %show bleach checkbox
+    set(h_init.checkbox_denoise,'Visible','on');        %show noise checkbox
+    set(h_init.checkbox_trim,'Visible','on');
+    set(h_init.checkbox_rotate,'Visible','on');
+    set(h_init.checkbox_cropmask,'Visible','on');
+    set(h_init.checkbox_crop,'Visible','on');
+    set(h_init.checkbox_bin,'Visible','on');
+    set(h_init.menu_bin,'Visible','on');
     
     %set para in boxes for 1st video: depending on file extension: enable
     %editing of boxes for fps, conversion
-    set(h_init(1).edit_fps,'String',num2str(tfm_init_user_framerate{1}));
-    set(h_init(1).edit_conversion,'String',num2str(tfm_init_user_conversion{1}));
-    if strcmp(tfm_init_user_vidext{1,1},'.tif') || strcmp(tfm_init_user_vidext{1,1},'.avi') || strcmp(tfm_init_user_vidext{1,1},'none')
-        set(h_init(1).edit_fps,'Enable','on');
-        set(h_init(1).edit_conversion,'Enable','on');
-    else
-        set(h_init(1).edit_fps,'Enable','off');
-        set(h_init(1).edit_conversion,'Enable','off');
-    end
+    set(h_init.edit_fps,'String',num2str(tfm_init_user_framerate{1}));
+    set(h_init.edit_conversion,'String',num2str(tfm_init_user_conversion{1}));
+    %if strcmp(tfm_init_user_vidext{1,1},'.tif') || strcmp(tfm_init_user_vidext{1,1},'.avi') || strcmp(tfm_init_user_vidext{1,1},'none')
+        set(h_init.edit_fps,'Enable','on');
+        set(h_init.edit_conversion,'Enable','on');
+    %else
+    %    set(h_init.edit_fps,'Enable','off');
+    %    set(h_init.edit_conversion,'Enable','off');
+    %end
     
-    set(h_init(1).edit_nframes,'String',num2str(tfm_init_user_Nframes{1}));
-    set(h_init(1).edit_nframes,'Enable','off');
+    set(h_init.edit_nframes,'String',num2str(tfm_init_user_Nframes{1}));
+    set(h_init.edit_nframes,'Enable','off');
     
-    set(h_init(1).edit_cellname,'String',tfm_init_user_cellname{1});
-    set(h_init(1).edit_area_factor,'String',num2str(tfm_init_user_area_factor));
-    set(h_init(1).edit_scale_factor,'String',num2str(tfm_init_user_scale_factor{1}));
-    set(h_init(1).text_whichvidname,'String',[tfm_init_user_filenamestack{1,1},' (showing 1st frame)']);
+    set(h_init.edit_cellname,'String',tfm_init_user_cellname{1});
+    set(h_init.edit_area_factor,'String',num2str(tfm_init_user_area_factor));
+    set(h_init.edit_scale_factor,'String',num2str(tfm_init_user_scale_factor{1}));
+    set(h_init.text_whichvidname,'String',[tfm_init_user_filenamestack{1,1},' (showing 1st frame)']);
     
     %set default crop parameters here
     tfm_init_user_croplength=200;
     tfm_init_user_cropwidth=85;
     
-    set(h_init(1).edit_croplength,'String',num2str(tfm_init_user_croplength));
-    set(h_init(1).edit_cropwidth,'String',num2str(tfm_init_user_cropwidth));
-    set(h_init(1).edit_youngs,'String',num2str(tfm_init_user_E{1}));
-    set(h_init(1).edit_poisson,'String',num2str(tfm_init_user_nu{1}));
+    set(h_init.edit_croplength,'String',num2str(tfm_init_user_croplength));
+    set(h_init.edit_cropwidth,'String',num2str(tfm_init_user_cropwidth));
+    set(h_init.edit_youngs,'String',num2str(tfm_init_user_E{1}));
+    set(h_init.edit_poisson,'String',num2str(tfm_init_user_nu{1}));
     
     % check for previous mask
     if strcmp(answer,'Yes')
-        parfor ivid = 1:tfm_init_user_Nfiles
+        parfor (ivid = 1:tfm_init_user_Nfiles,tfm_init_use_parallel)
             % if mask exists
             if mask_found(ivid) == 1
                 % load masks and draw outlines
@@ -901,7 +986,7 @@ try
     end
     
     %set frame1 of 1st video
-    axes(h_init(1).axes_curr);
+    axes(h_init.axes_curr);
     imshow(tfm_init_user_preview_frame1{1});hold on;
     plot(tfm_init_user_outline1x{1},tfm_init_user_outline1y{1},'r','LineWidth',2);
     plot(tfm_init_user_outline2x{1},tfm_init_user_outline2y{1},'b','LineWidth',2);
@@ -911,40 +996,40 @@ try
     %set frame1 of bf video
     %check if bf stack is empty
     if isempty(tfm_init_user_bf_filenamestack)
-        axes(h_init(1).axes_bf)
+        axes(h_init.axes_bf)
         imshow([]);
-        set(h_init(1).axes_bf,'visible','off');
+        set(h_init.axes_bf,'visible','off');
     else
-        set(h_init(1).axes_bf,'visible','on');
-        axes(h_init(1).axes_bf);
+        set(h_init.axes_bf,'visible','on');
+        axes(h_init.axes_bf);
         imshow(tfm_init_user_bf_preview_frame1{1});hold on;
         plot(tfm_init_user_outline1x{1},tfm_init_user_outline1y{1},'r','LineWidth',2);
         plot(tfm_init_user_outline2x{1},tfm_init_user_outline2y{1},'b','LineWidth',2);
         plot(tfm_init_user_outline3x{1},tfm_init_user_outline3y{1},'g','LineWidth',2);
         hold off;
-        set(h_init(1).text_bf_whichvidname,'String',tfm_init_user_bf_filenamestack{1,1});
+        set(h_init.text_bf_whichvidname,'String',tfm_init_user_bf_filenamestack{1,1});
     end
     
     %select item in listbox
-    set(h_init(1).listbox_display,'Value',1);
+    set(h_init.listbox_display,'Value',1);
     
     %update text (x/N)
-    set(h_init(1).text_whichvid,'String',[num2str(1),'/',num2str(tfm_init_user_Nfiles)]);
+    set(h_init.text_whichvid,'String',[num2str(1),'/',num2str(tfm_init_user_Nfiles)]);
     
     
     %forwards and backwards buttons enable/disable
     if 1==tfm_init_user_Nfiles %if current vid is the last on stack
-        set(h_init(1).button_forwards,'Enable','off');  %disable forwards
+        set(h_init.button_forwards,'Enable','off');  %disable forwards
     else
-        set(h_init(1).button_forwards,'Enable','on');   %enable forwards
+        set(h_init.button_forwards,'Enable','on');   %enable forwards
     end                     %if current vid is the first on stack
-    set(h_init(1).button_backwards,'Enable','off'); %disable backwards
+    set(h_init.button_backwards,'Enable','off'); %disable backwards
     
     %disable bf plot if no videos loaded
     if isempty(tfm_init_user_bf_filenamestack)
-        set(h_init(1).axes_bf,'Visible','off');
+        set(h_init.axes_bf,'Visible','off');
     else
-        set(h_init(1).axes_bf,'Visible','on');
+        set(h_init.axes_bf,'Visible','on');
     end
     
     %initiate counter for going through all videos
@@ -992,14 +1077,14 @@ try
     setappdata(0,'multichannelczi',multichannelczi);
     
     %update statusbar
-    sb=statusbar(h_init(1).fig,'Import - Done !');
+    sb=statusbar(h_init.fig,'Import - Done !');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     
     %grey out back button
-    set(h_init(1).button_backwards,'Enable','off');
+    set(h_init.button_backwards,'Enable','off');
     
     %grey out listbox
-    set(h_init(1).listbox_display,'Enable','off');
+    set(h_init.listbox_display,'Enable','off');
     
 catch errorObj
     % If there is a problem, we display the error message
@@ -1008,17 +1093,17 @@ catch errorObj
     %if there is an error, and there are no files on the stack, do not
     %display anything
     if isempty(getappdata(0,'tfm_init_user_filenamestack'))
-        set(h_init(1).panel_vid,'Visible','off');
-        set(h_init(1).subpanel_vid,'Visible','off');
-        set(h_init(1).panel_list,'Visible','off');
-        set(h_init(1).button_ok,'Visible','off');
-        set(h_init(1).button_ok_strln,'Visible','off');
-        set(h_init(1).checkbox_bleach,'Visible','off');        %hide bleach checkbox
-        set(h_init(1).checkbox_denoise,'Visible','off');        %hide noise checkbox
-        set(h_init(1).checkbox_trim,'Visible','off');
-        set(h_init(1).checkbox_crop,'Visible','off');
-        set(h_init(1).checkbox_bin,'Visible','off');
-        set(h_init(1).menu_bin,'Visible','off');
+        set(h_init.panel_vid,'Visible','off');
+        set(h_init.subpanel_vid,'Visible','off');
+        set(h_init.panel_list,'Visible','off');
+        set(h_init.button_ok,'Visible','off');
+        set(h_init.button_ok_strln,'Visible','off');
+        set(h_init.checkbox_bleach,'Visible','off');        %hide bleach checkbox
+        set(h_init.checkbox_denoise,'Visible','off');        %hide noise checkbox
+        set(h_init.checkbox_trim,'Visible','off');
+        set(h_init.checkbox_crop,'Visible','off');
+        set(h_init.checkbox_bin,'Visible','off');
+        set(h_init.menu_bin,'Visible','off');
     end
     
     %profile viewer
@@ -1034,6 +1119,8 @@ catch errorObj
     
 end
 
+
+%% closeFig
 function closeFig(hObject, eventdata, selectChannel, Nchannels, TFM_buttons, bf_buttons)
 %determine which channels have been selected
 TFMChannel = 1;
@@ -1056,12 +1143,14 @@ setappdata(0,'TFMChannel',TFMChannel);
 setappdata(0,'BFChannel',BFChannel);
 close(selectChannel.fig);
 
+
+%% the 'Add images folder' button
 function init_push_readfolder(hObject, eventdata, h_init)
 %disable figure during calculation
-enableDisableFig(h_init(1).fig,0);
+enableDisableFig(h_init.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_init(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_init.fig,1));
 
 
 %%error catching loop
@@ -1105,7 +1194,7 @@ try
     name = inputdlg('How do you want to call this vid?');
     
     %look if there already files on the image stack
-    Nfiles0=size(tfm_init_user_filenamestack,2);
+    Nfiles0 = size(tfm_init_user_filenamestack,2);
     
     %add new files and paths to stacks
     tfm_init_user_filenamestack{1,Nfiles0+1}=name{1};
@@ -1114,15 +1203,15 @@ try
     tfm_init_user_rotate(Nfiles0+1)=true;
     
     %put video files into listbox
-    set(h_init(1).listbox_display,'String',tfm_init_user_filenamestack);
+    set(h_init.listbox_display,'String',tfm_init_user_filenamestack);
     
     %new number of files
     tfm_init_user_Nfiles=size(tfm_init_user_filenamestack,2);
     
     %update statusbar
-    sb=statusbar(h_init(1).fig,'Importing... ');
+    sb=statusbar(h_init.fig,'Importing... ');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
-    sb=statusbar(h_tfm(1).fig,['Calculating regularization: video ',num2str(current_vid),'/',num2str(tfm_init_user_Nfiles),'... ',num2str(floor(100*(current_vid-1)/tfm_init_user_Nfiles)), '%% done']);
+    %sb=statusbar(h_tfm.fig,['Calculating regularization: video ',num2str(current_vid),'/',num2str(tfm_init_user_Nfiles),'... ',num2str(floor(100*(current_vid-1)/tfm_init_user_Nfiles)), '%% done']);
     
     
     %create folder for saving the stuff
@@ -1144,8 +1233,8 @@ try
     
     for i = 1:N
         %update statusbar
-        %sb=statusbar(h_init(1).fig,'Importing... ');
-        sb=statusbar(h_init(1).fig,['Importing... video  ',num2str(i),'/',num2str(N),'... ',num2str(floor(100*(i-1)/h_init)), '%% done']);
+        %sb=statusbar(h_init.fig,'Importing... ');
+        sb=statusbar(h_init.fig,['Importing video ',num2str(i),'/',num2str(N),'... ',num2str(floor(100*(i-1)/h_init)), '%% done']);
         sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
         
         
@@ -1177,7 +1266,9 @@ try
     tfm_init_user_imsize_m{Nfiles0+1}=m;
     tfm_init_user_imsize_n{Nfiles0+1}=n;
     tfm_init_user_cellname{Nfiles0+1}='cellname1';
-    if isempty(tfm_init_user_area_factor)         tfm_init_user_area_factor=3;     end
+    if isempty(tfm_init_user_area_factor)
+        tfm_init_user_area_factor=3;
+    end
     tfm_init_user_outline1x{Nfiles0+1}=NaN;
     tfm_init_user_outline1y{Nfiles0+1}=NaN;
     tfm_init_user_outline2x{Nfiles0+1}=NaN;
@@ -1188,43 +1279,43 @@ try
     tfm_init_user_binary3{Nfiles0+1}=NaN;
     
     %update statusbar
-    sb=statusbar(h_init(1).fig,'Import - Done !');
+    sb=statusbar(h_init.fig,'Import - Done !');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     
     %turn on panels
-    set(h_init(1).panel_list,'Visible','on');
-    set(h_init(1).panel_vid,'Visible','on');
-    set(h_init(1).subpanel_vid,'Visible','on');
-    set(h_init(1).checkbox_bleach,'Visible','on');        %show bleach checkbox
-    set(h_init(1).checkbox_denoise,'Visible','on');        %show noise checkbox
-    set(h_init(1).checkbox_crop,'Visible','on');        %show noise checkbox
-    set(h_init(1).checkbox_bin,'Visible','on');        %show noise checkbox
-    set(h_init(1).menu_bin,'Visible','on');
-    set(h_init(1).button_ok,'Visible','on');
-    set(h_init(1).button_ok_strln,'Visible','on');
+    set(h_init.panel_list,'Visible','on');
+    set(h_init.panel_vid,'Visible','on');
+    set(h_init.subpanel_vid,'Visible','on');
+    set(h_init.checkbox_bleach,'Visible','on');        %show bleach checkbox
+    set(h_init.checkbox_denoise,'Visible','on');        %show noise checkbox
+    set(h_init.checkbox_crop,'Visible','on');        %show noise checkbox
+    set(h_init.checkbox_bin,'Visible','on');        %show noise checkbox
+    set(h_init.menu_bin,'Visible','on');
+    set(h_init.button_ok,'Visible','on');
+    set(h_init.button_ok_strln,'Visible','on');
     
     %set para in boxes for 1st video
     %set para in boxes for 1st video: depending on file extension: enable
     %editing of boxes for fps, conversion
-    set(h_init(1).edit_fps,'String',num2str(tfm_init_user_framerate{1}));
-    set(h_init(1).edit_conversion,'String',num2str(tfm_init_user_conversion{1}));
+    set(h_init.edit_fps,'String',num2str(tfm_init_user_framerate{1}));
+    set(h_init.edit_conversion,'String',num2str(tfm_init_user_conversion{1}));
     if strcmp(tfm_init_user_vidext{1,1},'.tif') || strcmp(tfm_init_user_vidext{1,1},'.avi') || strcmp(tfm_init_user_vidext{1,1},'none')
-        set(h_init(1).edit_fps,'Enable','on');
-        set(h_init(1).edit_conversion,'Enable','on');
+        set(h_init.edit_fps,'Enable','on');
+        set(h_init.edit_conversion,'Enable','on');
     else
-        set(h_init(1).edit_fps,'Enable','off');
-        set(h_init(1).edit_conversion,'Enable','of');
+        set(h_init.edit_fps,'Enable','off');
+        set(h_init.edit_conversion,'Enable','of');
     end
-    set(h_init(1).edit_nframes,'String',num2str(tfm_init_user_Nframes{1}));
-    set(h_init(1).edit_nframes,'Enable','off');
+    set(h_init.edit_nframes,'String',num2str(tfm_init_user_Nframes{1}));
+    set(h_init.edit_nframes,'Enable','off');
     
-    set(h_init(1).edit_cellname,'String',tfm_init_user_cellname{1});
-    set(h_init(1).edit_area_factor,'String',num2str(tfm_init_user_area_factor));
-    set(h_init(1).text_whichvidname,'String',[tfm_init_user_filenamestack{1,1},' (showing 1st frame)']);
-    set(h_init(1).text_bf_whichvidname,'String',[tfm_init_user_bf_filenamestack{1,1}]);
+    set(h_init.edit_cellname,'String',tfm_init_user_cellname{1});
+    set(h_init.edit_area_factor,'String',num2str(tfm_init_user_area_factor));
+    set(h_init.text_whichvidname,'String',[tfm_init_user_filenamestack{1,1},' (showing 1st frame)']);
+    set(h_init.text_bf_whichvidname,'String',[tfm_init_user_bf_filenamestack{1,1}]);
     
     %set frame1 of 1st video
-    axes(h_init(1).axes_curr);
+    axes(h_init.axes_curr);
     imshow(tfm_init_user_preview_frame1{1});hold on;
     plot(tfm_init_user_outline1x{1},tfm_init_user_outline1y{1},'r','LineWidth',2);
     plot(tfm_init_user_outline2x{1},tfm_init_user_outline2y{1},'b','LineWidth',2);
@@ -1232,18 +1323,18 @@ try
     hold off;
     
     %update text (x/N)
-    set(h_init(1).text_whichvid,'String',[num2str(1),'/',num2str(tfm_init_user_Nfiles)]);
+    set(h_init.text_whichvid,'String',[num2str(1),'/',num2str(tfm_init_user_Nfiles)]);
     
     %if only one vid file: grey out forward button
     if tfm_init_user_Nfiles==1
-        set(h_init(1).button_forwards,'Enable','off');
+        set(h_init.button_forwards,'Enable','off');
         %enable ok button for czi
-        set(h_init(1).button_ok,'Enable','on');
-        set(h_init(1).button_ok_strln,'Enable','on');
+        set(h_init.button_ok,'Enable','on');
+        set(h_init.button_ok_strln,'Enable','on');
     else
-        set(h_init(1).button_forwards,'Enable','on');
+        set(h_init.button_forwards,'Enable','on');
     end
-    set(h_init(1).button_backwards,'Enable','off'); %disable backwards
+    set(h_init.button_backwards,'Enable','off'); %disable backwards
     
     
     %initiate counter for going through all videos
@@ -1275,10 +1366,10 @@ try
     setappdata(0,'tfm_init_user_rotate',tfm_init_user_rotate);
     
     %grey out back button
-    set(h_init(1).button_backwards,'Enable','off');
+    set(h_init.button_backwards,'Enable','off');
     
     %grey out listbox
-    set(h_init(1).listbox_display,'Enable','off');
+    set(h_init.listbox_display,'Enable','off');
     
 catch errorObj
     % If there is a problem, we display the error message
@@ -1288,34 +1379,36 @@ catch errorObj
     %display anything
     if ~isempty(getappdata(0,'tfm_init_user_filenamestack'))
         %cancel grey out everything
-        set(get(h_init(1).uipanel1,'Children'),'Enable','on');
-        set(get(h_init(1).panel_list,'Children'),'Enable','on');
-        set(h_init(1).text_whichvid,'Enable','on');
-        set(h_init(1).text3,'Enable','on');
-        set(h_init(1).text4,'Enable','on');
-        set(h_init(1).text5,'Enable','on');
-        set(h_init(1).text_whichvidname,'Enable','on');
-        set(h_init(1).text_bf_whichvidname,'Enable','on');
-        set(h_init(1).edit_fps,'Enable','on');
-        set(h_init(1).edit_conversion,'Enable','on');
-        set(h_init(1).edit_nframes,'Enable','on');
+        set(get(h_init.uipanel1,'Children'),'Enable','on');
+        set(get(h_init.panel_list,'Children'),'Enable','on');
+        set(h_init.text_whichvid,'Enable','on');
+        set(h_init.text3,'Enable','on');
+        set(h_init.text4,'Enable','on');
+        set(h_init.text5,'Enable','on');
+        set(h_init.text_whichvidname,'Enable','on');
+        set(h_init.text_bf_whichvidname,'Enable','on');
+        set(h_init.edit_fps,'Enable','on');
+        set(h_init.edit_conversion,'Enable','on');
+        set(h_init.edit_nframes,'Enable','on');
         
         %grey out listbox
-        set(h_init(1).listbox_display,'Enable','off');
+        set(h_init.listbox_display,'Enable','off');
     else
-        set(h_init(1).panel_list,'Visible','off');
-        set(h_init(1).panel_vid,'Visible','off');
-        set(h_init(1).subpanel_vid,'Visible','off');
-        set(h_init(1).button_ok,'Enable','off');
-        set(h_init(1).button_ok_strln,'Enable','off');
-        set(h_init(1).checkbox_bleach,'Visible','off');        %hide bleach checkbox
-        set(h_init(1).checkbox_denoise,'Visible','off');        %hide noise checkbox
-        set(h_init(1).checkbox_crop,'Visible','off');        %hide noise checkbox
-        set(h_init(1).checkbox_bin,'Visible','off');        %hide noise checkbox
-        set(h_init(1).menu_bin,'Visible','off');
+        set(h_init.panel_list,'Visible','off');
+        set(h_init.panel_vid,'Visible','off');
+        set(h_init.subpanel_vid,'Visible','off');
+        set(h_init.button_ok,'Enable','off');
+        set(h_init.button_ok_strln,'Enable','off');
+        set(h_init.checkbox_bleach,'Visible','off');        %hide bleach checkbox
+        set(h_init.checkbox_denoise,'Visible','off');        %hide noise checkbox
+        set(h_init.checkbox_crop,'Visible','off');        %hide noise checkbox
+        set(h_init.checkbox_bin,'Visible','off');        %hide noise checkbox
+        set(h_init.menu_bin,'Visible','off');
     end
 end
 
+
+%% the 'Add BF videos' button
 function init_push_readbf(hObject, eventdata, h_init)
 
 try
@@ -1348,9 +1441,13 @@ try
     tfm_init_user_outline3x=getappdata(0,'tfm_init_user_outline3x');
     tfm_init_user_outline3y=getappdata(0,'tfm_init_user_outline3y');
     multichannelczi=getappdata(0,'multichannelczi');
+	tfm_init_use_parallel=getappdata(0,'use_parallel');
+	
+	
     
     %load in bf images
-    [filename_bf,pathname_bf]=uigetfile({'*.tif';'*.czi';'*.avi'},'Select bf videos',tfm_init_user_pathnamestack{1},'MultiSelect','on');
+    [filename_bf,pathname_bf]=uigetfile({'*.*','All Files';'*.czi','Zeiss microscope videos (.czi)';'*.tif*','TIFF image stacks (.tif)';'*.avi','AVI video files (.avi)'},...
+        'Select BF videos',tfm_init_user_pathnamestack{1},'MultiSelect','on');
     
     %really a file or did user press cancel?
     if isequal(filename_bf,0)
@@ -1387,16 +1484,19 @@ try
         answer = questdlg([num2str(mask_count),'/',num2str(tfm_init_user_Nfiles),' pre-drawn masks were detected in the image folders. Do you wish to use these masks?'],'Masks Detected','Yes','No','No');
     else
         answer = 'No';
-    end
-    
+	end
+
+ 	tstartMH = tic;
+     fprintf(1,'CXS-TFM: Start BF Video Import\n')
+	
     %Loop over vids and save preview frames
     for j=1:size(filename_bf,2)
         %update statusbar
         if size(filename_bf,2)==1
-            sb=statusbar(h_init(1).fig,'Importing... ');
+            sb=statusbar(h_init.fig,'Importing... ');
             sb.getComponent(0).setForeground(java.awt.Color.red);
         else
-            sb=statusbar(h_init(1).fig,['Importing... ',num2str(floor(100*(j-1)/size(filename_bf,2))), '%% done']);
+            sb=statusbar(h_init.fig,['Importing... ',num2str(floor(100*(j-1)/size(filename_bf,2))), '%% done']);
             sb.getComponent(0).setForeground(java.awt.Color.red);
         end
         
@@ -1406,14 +1506,17 @@ try
                 rmdir(['vars_DO_NOT_DELETE/',tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j}],'s')
             end
             mkdir(['vars_DO_NOT_DELETE/',tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j}])
-        end
-        
+		end
+		
+
         if strcmp(tfm_init_user_bf_vidext{1,Nfiles0_bf+j},'.czi')
-            [~,data]=evalc('bfopen([tfm_init_user_bf_pathnamestack{1,Nfiles0_bf+j},tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},tfm_init_user_bf_vidext{1,Nfiles0_bf+j}])');
+			fprintf(1,'CXS-TFM: Open BF CZI file...\n');
+%             [~,data]=evalc('bfopen([tfm_init_user_bf_pathnamestack{1,Nfiles0_bf+j},tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},tfm_init_user_bf_vidext{1,Nfiles0_bf+j}])');
+			data = bfopen(fullfile(tfm_init_user_bf_pathnamestack{1,Nfiles0_bf+j},[tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},tfm_init_user_bf_vidext{1,Nfiles0_bf+j}]));
             
             %--------
             %USE TO ADAPT TO MULTICHANNEL CZI files
-            % check for image  and channel stack
+            % check for image and channel stack
             info = data{1, 1}{1, 2};
             Nchannels = 1;
             channels = extractAfter(info, 'C=');
@@ -1431,11 +1534,12 @@ try
             TFMChannel = getappdata(0, 'TFMChannel');
             %save images in variable
             start_frame = 0;
-            if get(h_init(1).checkbox_trim, 'value')
+			if get(h_init.checkbox_trim, 'value')
                 start_frame = 1;
             end
-            parfor i = start_frame:N-1
-                index = TFMChannel + Nchannels*i;
+            fprintf(1,' Convert images to greyscale\n');
+            parfor (i = start_frame:N-1,tfm_init_use_parallel)
+                index = TFMChannel + Nchannels*i
                 imagei=images{index,1};
                 %convert to grey
                 if ndims(imagei) == 3
@@ -1455,6 +1559,7 @@ try
             image1_raw=image_stack(:,:,1);
             
         elseif strcmp(tfm_init_user_bf_vidext{1,Nfiles0_bf+j},'.tif')
+ 			fprintf(1,'CXS-TFM: Open BF TIFF file...\n');
             InfoImage=imfinfo([tfm_init_user_bf_pathnamestack{1,Nfiles0_bf+j},tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},tfm_init_user_bf_vidext{1,Nfiles0_bf+j}]);
             bit=InfoImage.BitDepth;
             N = numel(InfoImage);
@@ -1467,11 +1572,12 @@ try
             n = size(imagei,2);
             image_stack = zeros(m,n,N,'uint8');
             end_frame = N;
-            if get(h_init(1).checkbox_trim, 'value')
+            if get(h_init.checkbox_trim, 'value')
                 end_frame = N-1;
                 TifLink.read(); %read past first frame
                 image_stack = zeros(m,n,N-1,'uint8');
             end
+            fprintf(1,' Convert images to greyscale\n');
             for i=1:end_frame
                 TifLink.setDirectory(i);
                 imagei=TifLink.read();
@@ -1490,8 +1596,9 @@ try
             image1_raw=image_stack(:,:,1);
             
         elseif strcmp(tfm_init_user_bf_vidext{1,Nfiles0_bf+j},'.avi')
+			fprintf(1,'CXS-TFM: Open BF AVI file...\n');
             videoObj = VideoReader([tfm_init_user_bf_pathnamestack{1,Nfiles0_bf+j},tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},tfm_init_user_bf_vidext{1,Nfiles0_bf+j}]);
-            N = videoObj.NumberOfFrames;
+            N = videoObj.NumFrames;
             
             %initialize image stack
             imagei = read(videoObj,1);
@@ -1499,12 +1606,13 @@ try
             n = size(imagei,2);
             image_stack = zeros(m,n,N,'uint8');
             num_frames = N;
-            if get(h_init(1).checkbox_trim, 'value')
+            if get(h_init.checkbox_trim, 'value')
                 num_frames = N-1;
                 image_stack = zeros(m,n,N-1,'uint8');
             end
-            parfor i=1:num_frames
-                if get(h_init(1).checkbox_trim, 'value')
+            fprintf(1,' Convert images to greyscale\n');
+            parfor (i=1:num_frames,tfm_init_use_parallel)
+                if get(h_init.checkbox_trim, 'value')
                     imagei=read(videoObj, i+1);
                 else
                     imagei=read(videoObj, i);
@@ -1526,10 +1634,12 @@ try
         %save frames to preview stack
         tfm_init_user_bf_preview_frame1{Nfiles0_bf+j}=image1_raw;
         tfm_init_user_Nframes_bf{Nfiles0_bf+j}=size(image_stack,3);
-    end
+    end	
     
+ 	fprintf(1,'CXS-TFM: End BF video import and save at %.02f s\n',toc(tstartMH));
+	
     %update statusbar
-    sb=statusbar(h_init(1).fig,'Import - Done !');
+    sb=statusbar(h_init.fig,'Import - Done !');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     
     %set area factor to 3
@@ -1597,7 +1707,7 @@ try
     end
     
     %set preview of 1st video
-    axes(h_init(1).axes_curr);
+    axes(h_init.axes_curr);
     imshow(tfm_init_user_preview_frame1{tfm_init_user_counter});hold on;
     plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
     plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
@@ -1606,24 +1716,24 @@ try
     
     %set preview of bf video
     if isempty(tfm_init_user_bf_filenamestack)
-        axes(h_init(1).axes_bf);
+        axes(h_init.axes_bf);
         imshow([]);
-        set(h_init(1).axes_bf,'visible','off');
-        set(h_init(1).text_bf_whichvidname,'string',[]);
+        set(h_init.axes_bf,'visible','off');
+        set(h_init.text_bf_whichvidname,'string',[]);
     elseif size(tfm_init_user_bf_filenamestack,2) < tfm_init_user_counter
-        axes(h_init(1).axes_bf);
+        axes(h_init.axes_bf);
         imshow([]);
-        set(h_init(1).axes_bf,'visible','off');
-        set(h_init(1).text_bf_whichvidname,'string',[]);
+        set(h_init.axes_bf,'visible','off');
+        set(h_init.text_bf_whichvidname,'string',[]);
     elseif size(tfm_init_user_bf_filenamestack,2) >= tfm_init_user_counter
-        set(h_init(1).axes_bf,'Visible','on');
-        axes(h_init(1).axes_bf);
+        set(h_init.axes_bf,'Visible','on');
+        axes(h_init.axes_bf);
         imshow(tfm_init_user_bf_preview_frame1{tfm_init_user_counter});hold on;
         plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
         plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
         plot(tfm_init_user_outline3x{tfm_init_user_counter},tfm_init_user_outline3y{tfm_init_user_counter},'g','LineWidth',2);
         hold off;
-        set(h_init(1).text_bf_whichvidname,'string',[tfm_init_user_bf_filenamestack{tfm_init_user_counter}]);
+        set(h_init.text_bf_whichvidname,'string',[tfm_init_user_bf_filenamestack{tfm_init_user_counter}]);
     end
     
     %save
@@ -1635,8 +1745,8 @@ try
     setappdata(0,'tfm_init_user_major',tfm_init_user_major)
     setappdata(0,'tfm_init_user_minor',tfm_init_user_minor)
     setappdata(0,'tfm_init_user_angle',tfm_init_user_angle);
-    setappdata(0,'tfm_init_user_ratio',tfm_init_user_ratio)
-    setappdata(0,'tfm_init_user_area',tfm_init_user_area)
+    setappdata(0,'tfm_init_user_ratio',tfm_init_user_ratio);
+    setappdata(0,'tfm_init_user_area',tfm_init_user_area);
     setappdata(0,'tfm_init_user_area_ellipse',tfm_init_user_area_ellipse)
     setappdata(0,'tfm_init_user_binary1',tfm_init_user_binary1)
     setappdata(0,'tfm_init_user_outline1x',tfm_init_user_outline1x)
@@ -1688,7 +1798,7 @@ try
     tfm_init_user_binary3=getappdata(0,'tfm_init_user_binary3');
     tfm_init_user_rotate=getappdata(0,'tfm_init_user_rotate');
     %get selected item in listbox
-    index=get(h_init(1).listbox_display,'Value');
+    index=get(h_init.listbox_display,'Value');
     
     %to which video does it jump next?
     if index==tfm_init_user_Nfiles
@@ -1758,17 +1868,17 @@ try
     %         end
     
     
-    set(h_init(1).listbox_display,'String',tfm_init_user_filenamestack);
+    set(h_init.listbox_display,'String',tfm_init_user_filenamestack);
     
     if ~isempty(tfm_init_user_filenamestack)
         %look at vid counter
         tfm_init_user_counter=index_next;
         
         %select item in listbox
-        set(h_init(1).listbox_display,'Value',tfm_init_user_counter);
+        set(h_init.listbox_display,'Value',tfm_init_user_counter);
         
         %display 1st frame of new video
-        axes(h_init(1).axes_curr);
+        axes(h_init.axes_curr);
         imshow(tfm_init_user_preview_frame1{1,tfm_init_user_counter});hold on;
         plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
         plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
@@ -1776,75 +1886,75 @@ try
         hold off;
         
         %display new settings
-        set(h_init(1).edit_fps,'String',num2str(tfm_init_user_framerate{tfm_init_user_counter}));
-        set(h_init(1).edit_conversion,'String',num2str(tfm_init_user_conversion{tfm_init_user_counter}));
-        set(h_init(1).edit_nframes,'String',num2str(tfm_init_user_Nframes{tfm_init_user_counter}));
-        set(h_init(1).edit_nframes,'Enable','off');
-        set(h_init(1).edit_cellname,'String',tfm_init_user_cellname{tfm_init_user_counter});
-        set(h_init(1).edit_youngs,'String',num2str(tfm_init_user_E{tfm_init_user_counter}));
-        set(h_init(1).edit_poisson,'String',num2str(tfm_init_user_nu{tfm_init_user_counter}));
-        set(h_init(1).edit_scale_factor,'String',num2str(tfm_init_user_scale_factor{tfm_init_user_counter}));
-        set(h_init(1).text_whichvidname,'String',[tfm_init_user_filenamestack{1,tfm_init_user_counter},' (showing 1st frame)']);
-        %set(h_init(1).text_bf_whichvidname,'String',[tfm_init_user_bf_filenamestack{1,tfm_init_user_counter}]);
-        set(h_init(1).checkbox_rotate,'value',tfm_init_user_rotate(tfm_init_user_counter));
+        set(h_init.edit_fps,'String',num2str(tfm_init_user_framerate{tfm_init_user_counter}));
+        set(h_init.edit_conversion,'String',num2str(tfm_init_user_conversion{tfm_init_user_counter}));
+        set(h_init.edit_nframes,'String',num2str(tfm_init_user_Nframes{tfm_init_user_counter}));
+        set(h_init.edit_nframes,'Enable','off');
+        set(h_init.edit_cellname,'String',tfm_init_user_cellname{tfm_init_user_counter});
+        set(h_init.edit_youngs,'String',num2str(tfm_init_user_E{tfm_init_user_counter}));
+        set(h_init.edit_poisson,'String',num2str(tfm_init_user_nu{tfm_init_user_counter}));
+        set(h_init.edit_scale_factor,'String',num2str(tfm_init_user_scale_factor{tfm_init_user_counter}));
+        set(h_init.text_whichvidname,'String',[tfm_init_user_filenamestack{1,tfm_init_user_counter},' (showing 1st frame)']);
+        %set(h_init.text_bf_whichvidname,'String',[tfm_init_user_bf_filenamestack{1,tfm_init_user_counter}]);
+        set(h_init.checkbox_rotate,'value',tfm_init_user_rotate(tfm_init_user_counter));
         if strcmp(tfm_init_user_vidext{1,tfm_init_user_counter},'.tif') || strcmp(tfm_init_user_vidext{1,tfm_init_user_counter},'.avi') || strcmp(tfm_init_user_vidext{1,tfm_init_user_counter},'none')
-            set(h_init(1).edit_fps,'Enable','on');
-            set(h_init(1).edit_conversion,'Enable','on');
+            set(h_init.edit_fps,'Enable','on');
+            set(h_init.edit_conversion,'Enable','on');
         else
-            set(h_init(1).edit_fps,'Enable','off');
-            set(h_init(1).edit_conversion,'Enable','of');
+            set(h_init.edit_fps,'Enable','off');
+            set(h_init.edit_conversion,'Enable','of');
         end
         
         %update text (x/N)
-        set(h_init(1).text_whichvid,'String',[num2str(tfm_init_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
+        set(h_init.text_whichvid,'String',[num2str(tfm_init_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
         
         if tfm_init_user_counter==1
-            set(h_init(1).button_backwards,'Enable','off');
+            set(h_init.button_backwards,'Enable','off');
         else
-            set(h_init(1).button_backwards,'Enable','on');
+            set(h_init.button_backwards,'Enable','on');
         end
         if tfm_init_user_counter==tfm_init_user_Nfiles
-            set(h_init(1).button_forwards,'Enable','off');
+            set(h_init.button_forwards,'Enable','off');
         else
-            set(h_init(1).button_forwards,'Enable','on');
+            set(h_init.button_forwards,'Enable','on');
         end
         
         %grey out listbox
-        set(h_init(1).listbox_display,'Enable','off');
+        set(h_init.listbox_display,'Enable','off');
         
         %display bf frame
         if isempty(tfm_init_user_bf_filenamestack)
-            axes(h_init(1).axes_bf);
+            axes(h_init.axes_bf);
             imshow([]);
-            set(h_init(1).axes_bf,'visible','off');
-            set(h_init(1).text_bf_whichvidname,'string',[]);
+            set(h_init.axes_bf,'visible','off');
+            set(h_init.text_bf_whichvidname,'string',[]);
         elseif size(tfm_init_user_bf_filenamestack,2) < tfm_init_user_counter
-            axes(h_init(1).axes_bf);
+            axes(h_init.axes_bf);
             imshow([]);
-            set(h_init(1).axes_bf,'visible','off');
-            set(h_init(1).text_bf_whichvidname,'string',[]);
+            set(h_init.axes_bf,'visible','off');
+            set(h_init.text_bf_whichvidname,'string',[]);
         elseif size(tfm_init_user_bf_filenamestack,2) >= tfm_init_user_counter
-            set(h_init(1).axes_bf,'visible','on');
-            axes(h_init(1).axes_bf);
+            set(h_init.axes_bf,'visible','on');
+            axes(h_init.axes_bf);
             imshow(tfm_init_user_bf_preview_frame1{tfm_init_user_counter});hold on;
             plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
             plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
             plot(tfm_init_user_outline3x{tfm_init_user_counter},tfm_init_user_outline3y{tfm_init_user_counter},'g','LineWidth',2);
             hold off;
-            set(h_init(1).text_bf_whichvidname,'string',[tfm_init_user_bf_filenamestack{tfm_init_user_counter}]);
+            set(h_init.text_bf_whichvidname,'string',[tfm_init_user_bf_filenamestack{tfm_init_user_counter}]);
         end
         
     else %hide panels etc
-        set(h_init(1).panel_list,'Visible','off');
-        set(h_init(1).panel_vid,'Visible','off');
-        set(h_init(1).subpanel_vid,'Visible','off');
-        set(h_init(1).button_ok,'Visible','off');
-        set(h_init(1).button_ok_strln,'Visible','off');
-        set(h_init(1).checkbox_denoise,'Visible','off');
-        set(h_init(1).checkbox_bleach,'Visible','off');
-        set(h_init(1).checkbox_crop,'Visible','off');
-        set(h_init(1).checkbox_bin,'Visible','off');
-        set(h_init(1).menu_bin,'Visible','off');
+        set(h_init.panel_list,'Visible','off');
+        set(h_init.panel_vid,'Visible','off');
+        set(h_init.subpanel_vid,'Visible','off');
+        set(h_init.button_ok,'Visible','off');
+        set(h_init.button_ok_strln,'Visible','off');
+        set(h_init.checkbox_denoise,'Visible','off');
+        set(h_init.checkbox_bleach,'Visible','off');
+        set(h_init.checkbox_crop,'Visible','off');
+        set(h_init.checkbox_bin,'Visible','off');
+        set(h_init.menu_bin,'Visible','off');
         tfm_init_user_counter=1;
     end
     
@@ -1875,8 +1985,8 @@ try
     setappdata(0,'tfm_init_user_major',tfm_init_user_major)
     setappdata(0,'tfm_init_user_minor',tfm_init_user_minor)
     setappdata(0,'tfm_init_user_angle',tfm_init_user_angle);
-    setappdata(0,'tfm_init_user_ratio',tfm_init_user_ratio)
-    setappdata(0,'tfm_init_user_area',tfm_init_user_area)
+    setappdata(0,'tfm_init_user_ratio',tfm_init_user_ratio);
+    setappdata(0,'tfm_init_user_area',tfm_init_user_area);
     setappdata(0,'tfm_init_user_area_ellipse',tfm_init_user_area_ellipse)
     setappdata(0,'tfm_init_user_outline1x',tfm_init_user_outline1x)
     setappdata(0,'tfm_init_user_outline1y',tfm_init_user_outline1y)
@@ -1890,12 +2000,14 @@ catch errorObj
     errordlg(getReport(errorObj,'extended','hyperlinks','off'));
 end
 
+
+%% The ">" button ????
 function init_push_forwards(hObject, eventdata, h_init)
 %disable figure during calculation
-enableDisableFig(h_init(1).fig,0);
+enableDisableFig(h_init.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_init(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_init.fig,1));
 
 
 try
@@ -1932,22 +2044,22 @@ try
     %look at vid counter
     if tfm_init_user_counter<tfm_init_user_Nfiles
         %save settings
-        tfm_init_user_framerate{tfm_init_user_counter}=str2double(get(h_init(1).edit_fps,'String'));
-        tfm_init_user_conversion{tfm_init_user_counter}=str2double(get(h_init(1).edit_conversion,'String'));
-        tfm_init_user_cellname{tfm_init_user_counter}=get(h_init(1).edit_cellname,'String');
-        tfm_init_user_area_factor=str2double(get(h_init(1).edit_area_factor,'String'));
-        tfm_init_user_scale_factor{tfm_init_user_counter}=str2double(get(h_init(1).edit_scale_factor,'String'));
-        tfm_init_user_E{tfm_init_user_counter}=str2double(get(h_init(1).edit_youngs,'String'));
-        tfm_init_user_nu{tfm_init_user_counter}=str2double(get(h_init(1).edit_poisson,'String'));
+        tfm_init_user_framerate{tfm_init_user_counter}=str2double(get(h_init.edit_fps,'String'));
+        tfm_init_user_conversion{tfm_init_user_counter}=str2double(get(h_init.edit_conversion,'String'));
+        tfm_init_user_cellname{tfm_init_user_counter}=get(h_init.edit_cellname,'String');
+        tfm_init_user_area_factor=str2double(get(h_init.edit_area_factor,'String'));
+        tfm_init_user_scale_factor{tfm_init_user_counter}=str2double(get(h_init.edit_scale_factor,'String'));
+        tfm_init_user_E{tfm_init_user_counter}=str2double(get(h_init.edit_youngs,'String'));
+        tfm_init_user_nu{tfm_init_user_counter}=str2double(get(h_init.edit_poisson,'String'));
         
         %go to video before
         tfm_init_user_counter=tfm_init_user_counter+1;
         
         %select item in listbox
-        set(h_init(1).listbox_display,'Value',tfm_init_user_counter);
+        set(h_init.listbox_display,'Value',tfm_init_user_counter);
         
         %display 1st frame of new video
-        axes(h_init(1).axes_curr);
+        axes(h_init.axes_curr);
         imshow(tfm_init_user_preview_frame1{tfm_init_user_counter}); hold on;
         plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
         plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
@@ -1955,66 +2067,66 @@ try
         hold off;
         
         %display new settings
-        set(h_init(1).edit_fps,'String',num2str(tfm_init_user_framerate{tfm_init_user_counter}));
-        set(h_init(1).edit_conversion,'String',num2str(tfm_init_user_conversion{tfm_init_user_counter}));
-        set(h_init(1).edit_nframes,'String',num2str(tfm_init_user_Nframes{tfm_init_user_counter}));
-        set(h_init(1).edit_nframes,'Enable','off');
-        %set(h_init(1).edit_area_factor,'String',num2str(tfm_init_user_area_factor));
-        set(h_init(1).edit_scale_factor,'String',num2str(tfm_init_user_scale_factor{tfm_init_user_counter}));
-        set(h_init(1).edit_cellname,'String',tfm_init_user_cellname{tfm_init_user_counter});
-        set(h_init(1).text_whichvidname,'String',[tfm_init_user_filenamestack{1,tfm_init_user_counter},' (showing 1st frame)']);
-        %set(h_init(1).text_bf_whichvidname,'String',[tfm_init_user_bf_filenamestack{1,tfm_init_user_counter}]);
-        set(h_init(1).edit_youngs,'String',num2str(tfm_init_user_E{tfm_init_user_counter}));
-        set(h_init(1).edit_poisson,'String',num2str(tfm_init_user_nu{tfm_init_user_counter}));
-        set(h_init(1).checkbox_rotate,'value',tfm_init_user_rotate(tfm_init_user_counter));
+        set(h_init.edit_fps,'String',num2str(tfm_init_user_framerate{tfm_init_user_counter}));
+        set(h_init.edit_conversion,'String',num2str(tfm_init_user_conversion{tfm_init_user_counter}));
+        set(h_init.edit_nframes,'String',num2str(tfm_init_user_Nframes{tfm_init_user_counter}));
+        set(h_init.edit_nframes,'Enable','off');
+        %set(h_init.edit_area_factor,'String',num2str(tfm_init_user_area_factor));
+        set(h_init.edit_scale_factor,'String',num2str(tfm_init_user_scale_factor{tfm_init_user_counter}));
+        set(h_init.edit_cellname,'String',tfm_init_user_cellname{tfm_init_user_counter});
+        set(h_init.text_whichvidname,'String',[tfm_init_user_filenamestack{1,tfm_init_user_counter},' (showing 1st frame)']);
+        %set(h_init.text_bf_whichvidname,'String',[tfm_init_user_bf_filenamestack{1,tfm_init_user_counter}]);
+        set(h_init.edit_youngs,'String',num2str(tfm_init_user_E{tfm_init_user_counter}));
+        set(h_init.edit_poisson,'String',num2str(tfm_init_user_nu{tfm_init_user_counter}));
+        set(h_init.checkbox_rotate,'value',tfm_init_user_rotate(tfm_init_user_counter));
         if strcmp(tfm_init_user_vidext{1,tfm_init_user_counter},'.tif') || strcmp(tfm_init_user_vidext{1,tfm_init_user_counter},'.avi') || strcmp(tfm_init_user_vidext{1,tfm_init_user_counter},'none')
-            set(h_init(1).edit_fps,'Enable','on');
-            set(h_init(1).edit_conversion,'Enable','on');
+            set(h_init.edit_fps,'Enable','on');
+            set(h_init.edit_conversion,'Enable','on');
         else
-            set(h_init(1).edit_fps,'Enable','off');
-            set(h_init(1).edit_conversion,'Enable','off');
+            set(h_init.edit_fps,'Enable','off');
+            set(h_init.edit_conversion,'Enable','off');
         end
         
         %display bf frame
         if isempty(tfm_init_user_bf_filenamestack)
-            axes(h_init(1).axes_bf);
+            axes(h_init.axes_bf);
             imshow([]);
-            set(h_init(1).axes_bf,'visible','off');
-            set(h_init(1).text_bf_whichvidname,'string',[]);
+            set(h_init.axes_bf,'visible','off');
+            set(h_init.text_bf_whichvidname,'string',[]);
         elseif size(tfm_init_user_bf_filenamestack,2) < tfm_init_user_counter
-            axes(h_init(1).axes_bf);
+            axes(h_init.axes_bf);
             imshow([]);
-            set(h_init(1).axes_bf,'visible','off');
-            set(h_init(1).text_bf_whichvidname,'string',[]);
+            set(h_init.axes_bf,'visible','off');
+            set(h_init.text_bf_whichvidname,'string',[]);
         elseif size(tfm_init_user_bf_filenamestack,2) >= tfm_init_user_counter
-            set(h_init(1).axes_bf,'visible','on');
-            axes(h_init(1).axes_bf);
+            set(h_init.axes_bf,'visible','on');
+            axes(h_init.axes_bf);
             imshow(tfm_init_user_bf_preview_frame1{tfm_init_user_counter});hold on;
             plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
             plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
             plot(tfm_init_user_outline3x{tfm_init_user_counter},tfm_init_user_outline3y{tfm_init_user_counter},'g','LineWidth',2);
             hold off;
-            set(h_init(1).text_bf_whichvidname,'string',[tfm_init_user_bf_filenamestack{tfm_init_user_counter}]);
+            set(h_init.text_bf_whichvidname,'string',[tfm_init_user_bf_filenamestack{tfm_init_user_counter}]);
         end
         
         %update text (x/N)
-        set(h_init(1).text_whichvid,'String',[num2str(tfm_init_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
+        set(h_init.text_whichvid,'String',[num2str(tfm_init_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
     end
     
     if tfm_init_user_counter==tfm_init_user_Nfiles
         %grey out back button
-        set(h_init(1).button_forwards,'Enable','off');
-        set(h_init(1).button_backwards,'Enable','on');
+        set(h_init.button_forwards,'Enable','off');
+        set(h_init.button_backwards,'Enable','on');
         %enable ok button
-        set(h_init(1).button_ok,'Enable','on');
-        set(h_init(1).button_ok_strln,'Enable','on');
+        set(h_init.button_ok,'Enable','on');
+        set(h_init.button_ok_strln,'Enable','on');
     else
-        set(h_init(1).button_forwards,'Enable','on');
-        set(h_init(1).button_backwards,'Enable','on');
+        set(h_init.button_forwards,'Enable','on');
+        set(h_init.button_backwards,'Enable','on');
     end
     
     %grey out listbox
-    set(h_init(1).listbox_display,'Enable','off');
+    set(h_init.listbox_display,'Enable','off');
     
     %store everything for shared use
     setappdata(0,'tfm_init_user_filenamestack',tfm_init_user_filenamestack)
@@ -2041,10 +2153,10 @@ end
 
 function init_push_backwards(hObject, eventdata, h_init)
 %disable figure during calculation
-enableDisableFig(h_init(1).fig,0);
+enableDisableFig(h_init.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_init(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_init.fig,1));
 
 
 try
@@ -2081,22 +2193,22 @@ try
     %look at vid counter
     if tfm_init_user_counter>1
         %save settings
-        tfm_init_user_framerate{tfm_init_user_counter}=str2double(get(h_init(1).edit_fps,'String'));
-        tfm_init_user_conversion{tfm_init_user_counter}=str2double(get(h_init(1).edit_conversion,'String'));
-        tfm_init_user_cellname{tfm_init_user_counter}=get(h_init(1).edit_cellname,'String');
-        tfm_init_user_area_factor=str2double(get(h_init(1).edit_area_factor,'String'));
-        tfm_init_user_scale_factor{tfm_init_user_counter}=str2double(get(h_init(1).edit_scale_factor,'String'));
-        tfm_init_user_E{tfm_init_user_counter}=str2double(get(h_init(1).edit_youngs,'String'));
-        tfm_init_user_nu{tfm_init_user_counter}=str2double(get(h_init(1).edit_poisson,'String'));
+        tfm_init_user_framerate{tfm_init_user_counter}=str2double(get(h_init.edit_fps,'String'));
+        tfm_init_user_conversion{tfm_init_user_counter}=str2double(get(h_init.edit_conversion,'String'));
+        tfm_init_user_cellname{tfm_init_user_counter}=get(h_init.edit_cellname,'String');
+        tfm_init_user_area_factor=str2double(get(h_init.edit_area_factor,'String'));
+        tfm_init_user_scale_factor{tfm_init_user_counter}=str2double(get(h_init.edit_scale_factor,'String'));
+        tfm_init_user_E{tfm_init_user_counter}=str2double(get(h_init.edit_youngs,'String'));
+        tfm_init_user_nu{tfm_init_user_counter}=str2double(get(h_init.edit_poisson,'String'));
         
         %go to video before
         tfm_init_user_counter=tfm_init_user_counter-1;
         
         %select item in listbox
-        set(h_init(1).listbox_display,'Value',tfm_init_user_counter);
+        set(h_init.listbox_display,'Value',tfm_init_user_counter);
         
         %display 1st frame of new video
-        axes(h_init(1).axes_curr);
+        axes(h_init.axes_curr);
         imshow(tfm_init_user_preview_frame1{tfm_init_user_counter}); hold on;
         plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
         plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
@@ -2104,62 +2216,62 @@ try
         hold off;
         
         %display new settings
-        set(h_init(1).edit_fps,'String',num2str(tfm_init_user_framerate{tfm_init_user_counter}));
-        set(h_init(1).edit_conversion,'String',num2str(tfm_init_user_conversion{tfm_init_user_counter}));
-        set(h_init(1).edit_nframes,'String',num2str(tfm_init_user_Nframes{tfm_init_user_counter}));
-        %set(h_init(1).edit_area_factor,'String',num2str(tfm_init_user_area_factor));
-        set(h_init(1).edit_scale_factor,'String',num2str(tfm_init_user_scale_factor{tfm_init_user_counter}));
-        set(h_init(1).edit_nframes,'Enable','off');
-        set(h_init(1).edit_cellname,'String',tfm_init_user_cellname{tfm_init_user_counter});
-        set(h_init(1).edit_youngs,'String',num2str(tfm_init_user_E{tfm_init_user_counter}));
-        set(h_init(1).edit_poisson,'String',num2str(tfm_init_user_nu{tfm_init_user_counter}));
-        set(h_init(1).text_whichvidname,'String',[tfm_init_user_filenamestack{1,tfm_init_user_counter},' (showing 1st frame)']);
-        %set(h_init(1).text_bf_whichvidname,'String',[tfm_init_user_bf_filenamestack{1,tfm_init_user_counter}]);
-        set(h_init(1).checkbox_rotate,'value',tfm_init_user_rotate(tfm_init_user_counter));
+        set(h_init.edit_fps,'String',num2str(tfm_init_user_framerate{tfm_init_user_counter}));
+        set(h_init.edit_conversion,'String',num2str(tfm_init_user_conversion{tfm_init_user_counter}));
+        set(h_init.edit_nframes,'String',num2str(tfm_init_user_Nframes{tfm_init_user_counter}));
+        %set(h_init.edit_area_factor,'String',num2str(tfm_init_user_area_factor));
+        set(h_init.edit_scale_factor,'String',num2str(tfm_init_user_scale_factor{tfm_init_user_counter}));
+        set(h_init.edit_nframes,'Enable','off');
+        set(h_init.edit_cellname,'String',tfm_init_user_cellname{tfm_init_user_counter});
+        set(h_init.edit_youngs,'String',num2str(tfm_init_user_E{tfm_init_user_counter}));
+        set(h_init.edit_poisson,'String',num2str(tfm_init_user_nu{tfm_init_user_counter}));
+        set(h_init.text_whichvidname,'String',[tfm_init_user_filenamestack{1,tfm_init_user_counter},' (showing 1st frame)']);
+        %set(h_init.text_bf_whichvidname,'String',[tfm_init_user_bf_filenamestack{1,tfm_init_user_counter}]);
+        set(h_init.checkbox_rotate,'value',tfm_init_user_rotate(tfm_init_user_counter));
         if strcmp(tfm_init_user_vidext{1,tfm_init_user_counter},'.tif') || strcmp(tfm_init_user_vidext{1,tfm_init_user_counter},'.avi') || strcmp(tfm_init_user_vidext{1,tfm_init_user_counter},'none')
-            set(h_init(1).edit_fps,'Enable','on');
-            set(h_init(1).edit_conversion,'Enable','on');
+            set(h_init.edit_fps,'Enable','on');
+            set(h_init.edit_conversion,'Enable','on');
         else
-            set(h_init(1).edit_fps,'Enable','off');
-            set(h_init(1).edit_conversion,'Enable','of');
+            set(h_init.edit_fps,'Enable','off');
+            set(h_init.edit_conversion,'Enable','of');
         end
         
         %display bf frame
         if isempty(tfm_init_user_bf_filenamestack)
-            axes(h_init(1).axes_bf);
+            axes(h_init.axes_bf);
             imshow([]);
-            set(h_init(1).axes_bf,'visible','off');
-            set(h_init(1).text_bf_whichvidname,'string',[]);
+            set(h_init.axes_bf,'visible','off');
+            set(h_init.text_bf_whichvidname,'string',[]);
         elseif size(tfm_init_user_bf_filenamestack,2) < tfm_init_user_counter
-            axes(h_init(1).axes_bf);
+            axes(h_init.axes_bf);
             imshow([]);
-            set(h_init(1).axes_bf,'visible','off');
-            set(h_init(1).text_bf_whichvidname,'string',[]);
+            set(h_init.axes_bf,'visible','off');
+            set(h_init.text_bf_whichvidname,'string',[]);
         elseif size(tfm_init_user_bf_filenamestack,2) >= tfm_init_user_counter
-            set(h_init(1).axes_bf,'visible','on');
-            axes(h_init(1).axes_bf);
+            set(h_init.axes_bf,'visible','on');
+            axes(h_init.axes_bf);
             imshow(tfm_init_user_bf_preview_frame1{tfm_init_user_counter});hold on;
             plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
             plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
             plot(tfm_init_user_outline3x{tfm_init_user_counter},tfm_init_user_outline3y{tfm_init_user_counter},'g','LineWidth',2);
             hold off;
-            set(h_init(1).text_bf_whichvidname,'string',[tfm_init_user_bf_filenamestack{tfm_init_user_counter}]);
+            set(h_init.text_bf_whichvidname,'string',[tfm_init_user_bf_filenamestack{tfm_init_user_counter}]);
         end
         
         %update text (x/N)
-        set(h_init(1).text_whichvid,'String',[num2str(tfm_init_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
+        set(h_init.text_whichvid,'String',[num2str(tfm_init_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
     end
     
     if tfm_init_user_counter==1
-        set(h_init(1).button_backwards,'Enable','off');
-        set(h_init(1).button_forwards,'Enable','on');
+        set(h_init.button_backwards,'Enable','off');
+        set(h_init.button_forwards,'Enable','on');
     else
-        set(h_init(1).button_backwards,'Enable','on');
-        set(h_init(1).button_forwards,'Enable','on');
+        set(h_init.button_backwards,'Enable','on');
+        set(h_init.button_forwards,'Enable','on');
     end
     
     %grey out listbox
-    set(h_init(1).listbox_display,'Enable','off');
+    set(h_init.listbox_display,'Enable','off');
     
     %store everything for shared use
     setappdata(0,'tfm_init_user_filenamestack',tfm_init_user_filenamestack)
@@ -2187,10 +2299,10 @@ end
 function init_push_load(hObject, eventdata, h_init)
 
 %disable figure during calculation
-enableDisableFig(h_init(1).fig,0);
+enableDisableFig(h_init.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_init(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_init.fig,1));
 try
     %load shared
     tfm_init_user_counter=getappdata(0,'tfm_init_user_counter');
@@ -2232,14 +2344,14 @@ try
     tfm_init_user_binary1{tfm_init_user_counter}=var.mask;
     
     %read new mask parameters
-    tfm_init_user_conversion{tfm_init_user_counter}=str2double(get(h_init(1).edit_conversion,'String'));
-    tfm_init_user_croplength=str2double(get(h_init(1).edit_croplength,'String'));
-    tfm_init_user_cropwidth=str2double(get(h_init(1).edit_cropwidth,'String'));
-    tfm_init_user_E{tfm_init_user_counter}=str2double(get(h_init(1).edit_youngs,'String'));
-    tfm_init_user_nu{tfm_init_user_counter}=str2double(get(h_init(1).edit_poisson,'String'));
-    tfm_init_user_area_factor=str2double(get(h_init(1).edit_area_factor,'String'));
-    tfm_init_user_scale_factor{tfm_init_user_counter}=str2double(get(h_init(1).edit_scale_factor,'String'));
-    tfm_init_user_cropcheck=get(h_init(1).checkbox_cropmask,'Value');
+    tfm_init_user_conversion{tfm_init_user_counter}=str2double(get(h_init.edit_conversion,'String'));
+    tfm_init_user_croplength=str2double(get(h_init.edit_croplength,'String'));
+    tfm_init_user_cropwidth=str2double(get(h_init.edit_cropwidth,'String'));
+    tfm_init_user_E{tfm_init_user_counter}=str2double(get(h_init.edit_youngs,'String'));
+    tfm_init_user_nu{tfm_init_user_counter}=str2double(get(h_init.edit_poisson,'String'));
+    tfm_init_user_area_factor=str2double(get(h_init.edit_area_factor,'String'));
+    tfm_init_user_scale_factor{tfm_init_user_counter}=str2double(get(h_init.edit_scale_factor,'String'));
+    tfm_init_user_cropcheck=get(h_init.checkbox_cropmask,'Value');
     
     %corresponding outline
     %calculate initial ellipse
@@ -2294,8 +2406,8 @@ try
     end
     
     %display preview w. outlines
-    cla(h_init(1).axes_curr)
-    axes(h_init(1).axes_curr)
+    cla(h_init.axes_curr)
+    axes(h_init.axes_curr)
     imshow(tfm_init_user_preview_frame1{tfm_init_user_counter});hold on;
     plot(x,y,'r','LineWidth',2);
     plot(xn,yn,'b','LineWidth',2);
@@ -2318,16 +2430,16 @@ try
     
     %display bf frame
     if isempty(tfm_init_user_bf_filenamestack)
-        axes(h_init(1).axes_bf);
+        axes(h_init.axes_bf);
         imshow([]);
-        set(h_init(1).axes_bf,'visible','off');
+        set(h_init.axes_bf,'visible','off');
     elseif size(tfm_init_user_bf_filenamestack) < tfm_init_user_counter
-        axes(h_init(1).axes_bf);
+        axes(h_init.axes_bf);
         imshow([]);
-        set(h_init(1).axes_bf,'visible','off');
+        set(h_init.axes_bf,'visible','off');
     elseif size(tfm_init_user_bf_filenamestack) >= tfm_init_user_counter
-        set(h_init(1).axes_bf,'visible','on');
-        axes(h_init(1).axes_bf);
+        set(h_init.axes_bf,'visible','on');
+        axes(h_init.axes_bf);
         imshow(tfm_init_user_bf_preview_frame1{tfm_init_user_counter});hold on;
         plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
         plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
@@ -2340,8 +2452,8 @@ try
     setappdata(0,'tfm_init_user_major',tfm_init_user_major)
     setappdata(0,'tfm_init_user_minor',tfm_init_user_minor)
     setappdata(0,'tfm_init_user_angle',tfm_init_user_angle);
-    setappdata(0,'tfm_init_user_ratio',tfm_init_user_ratio)
-    setappdata(0,'tfm_init_user_area',tfm_init_user_area)
+    setappdata(0,'tfm_init_user_ratio',tfm_init_user_ratio);
+    setappdata(0,'tfm_init_user_area',tfm_init_user_area);
     setappdata(0,'tfm_init_user_area_ellipse',tfm_init_user_area_ellipse)
     setappdata(0,'tfm_init_user_outline1x',tfm_init_user_outline1x)
     setappdata(0,'tfm_init_user_outline1y',tfm_init_user_outline1y)
@@ -2365,13 +2477,13 @@ end
 function init_push_draw(hObject, eventdata, h_init)
 
 %disable figure during calculation
-enableDisableFig(h_init(1).fig,0);
+enableDisableFig(h_init.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_init(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_init.fig,1));
 
 try
-    sb=statusbar(h_init(1).fig,'Please wait... ');
+    sb=statusbar(h_init.fig,'Please wait... ');
     sb.getComponent(0).setForeground(java.awt.Color.red);
     
     %load shared
@@ -2405,13 +2517,13 @@ try
     
     %check if bf frame loaded
     if isempty(tfm_init_user_bf_filenamestack)
-        sb=statusbar(h_init(1).fig,'No bf image loaded. Use "Draw from new image"');
+        sb=statusbar(h_init.fig,'No bf image loaded. Use "Draw from new image"');
         sb.getComponent(0).setForeground(java.awt.Color.red);
     elseif size(tfm_init_user_bf_filenamestack,2) < tfm_init_user_counter
-        sb=statusbar(h_init(1).fig,'No bf image loaded. Use "Draw from new image"');
+        sb=statusbar(h_init.fig,'No bf image loaded. Use "Draw from new image"');
         sb.getComponent(0).setForeground(java.awt.Color.red);
     elseif isempty(tfm_init_user_bf_filenamestack{tfm_init_user_counter})
-        sb=statusbar(h_init(1).fig,'No bf image loaded. Use "Draw from new image"');
+        sb=statusbar(h_init.fig,'No bf image loaded. Use "Draw from new image"');
         sb.getComponent(0).setForeground(java.awt.Color.red);
     elseif size(tfm_init_user_bf_filenamestack,2) >= tfm_init_user_counter
         
@@ -2421,6 +2533,7 @@ try
         cellimage=tfm_init_user_bf_preview_frame1{tfm_init_user_counter};
         cellimage_enh=imadjust(cellimage,stretchlim(cellimage),[]);
         imshow(cellimage_enh);hold on;
+		title('Draw mask on image using mouse clicks');
         
         %user drawn polynom conc
         hFH=impoly;
@@ -2434,14 +2547,14 @@ try
         tfm_init_user_binary1{tfm_init_user_counter}=bmask;
         
         %read new mask parameters
-        tfm_init_user_conversion{tfm_init_user_counter}=str2double(get(h_init(1).edit_conversion,'String'));
-        tfm_init_user_croplength=str2double(get(h_init(1).edit_croplength,'String'));
-        tfm_init_user_cropwidth=str2double(get(h_init(1).edit_cropwidth,'String'));
-        tfm_init_user_E{tfm_init_user_counter}=str2double(get(h_init(1).edit_youngs,'String'));
-        tfm_init_user_nu{tfm_init_user_counter}=str2double(get(h_init(1).edit_poisson,'String'));
-        tfm_init_user_area_factor=str2double(get(h_init(1).edit_area_factor,'String'));
-        tfm_init_user_scale_factor{tfm_init_user_counter}=str2double(get(h_init(1).edit_scale_factor,'String'));
-        tfm_init_user_cropcheck=get(h_init(1).checkbox_cropmask,'Value');
+        tfm_init_user_conversion{tfm_init_user_counter}=str2double(get(h_init.edit_conversion,'String'));
+        tfm_init_user_croplength=str2double(get(h_init.edit_croplength,'String'));
+        tfm_init_user_cropwidth=str2double(get(h_init.edit_cropwidth,'String'));
+        tfm_init_user_E{tfm_init_user_counter}=str2double(get(h_init.edit_youngs,'String'));
+        tfm_init_user_nu{tfm_init_user_counter}=str2double(get(h_init.edit_poisson,'String'));
+        tfm_init_user_area_factor=str2double(get(h_init.edit_area_factor,'String'));
+        tfm_init_user_scale_factor{tfm_init_user_counter}=str2double(get(h_init.edit_scale_factor,'String'));
+        tfm_init_user_cropcheck=get(h_init.checkbox_cropmask,'Value');
         
         %corresponding outline
         %calculate initial ellipse
@@ -2500,7 +2613,7 @@ try
         tfm_init_user_minor(tfm_init_user_counter)=2*b;
         tfm_init_user_angle(tfm_init_user_counter)=s(1).Orientation;
         tfm_init_user_ratio(tfm_init_user_counter)=a/(b+eps);
-        tfm_init_user_area(tfm_init_user_counter)=s(1).Area
+        tfm_init_user_area(tfm_init_user_counter)=s(1).Area;
         tfm_init_user_area_ellipse(tfm_init_user_counter)=an*bn*pi;
         
         %save outlines
@@ -2511,8 +2624,8 @@ try
         tfm_init_user_outline2y{tfm_init_user_counter}=yn;
         
         %display preview w. outlines
-        cla(h_init(1).axes_curr)
-        axes(h_init(1).axes_curr)
+        cla(h_init.axes_curr)
+        axes(h_init.axes_curr)
         imshow(tfm_init_user_preview_frame1{tfm_init_user_counter});hold on;
         plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
         plot(xn,yn,'b','LineWidth',2);
@@ -2520,8 +2633,8 @@ try
         hold off;
         
         %display bf preview w/ outlines
-        cla(h_init(1).axes_bf)
-        axes(h_init(1).axes_bf)
+        cla(h_init.axes_bf)
+        axes(h_init.axes_bf)
         imshow(cellimage);hold on;
         plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
         plot(xn,yn,'b','Linewidth',2);
@@ -2529,7 +2642,10 @@ try
         hold off;
         
     end
-    
+        
+    sb=statusbar(h_init.fig,'Mask saved.');
+    sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
+	
     %save
     setappdata(0,'tfm_init_user_bf_filenamestack',tfm_init_user_bf_filenamestack)
     setappdata(0,'tfm_init_user_bf_pathnamestack',tfm_init_user_bf_pathnamestack)
@@ -2540,8 +2656,8 @@ try
     setappdata(0,'tfm_init_user_major',tfm_init_user_major)
     setappdata(0,'tfm_init_user_minor',tfm_init_user_minor)
     setappdata(0,'tfm_init_user_major',tfm_init_user_angle);
-    setappdata(0,'tfm_init_user_ratio',tfm_init_user_ratio)
-    setappdata(0,'tfm_init_user_area',tfm_init_user_area)
+    setappdata(0,'tfm_init_user_ratio',tfm_init_user_ratio);
+    setappdata(0,'tfm_init_user_area',tfm_init_user_area);
     setappdata(0,'tfm_init_user_area_ellipse',tfm_init_user_area_ellipse)
     setappdata(0,'tfm_init_user_outline1x',tfm_init_user_outline1x)
     setappdata(0,'tfm_init_user_outline1y',tfm_init_user_outline1y)
@@ -2559,16 +2675,20 @@ try
 catch errorObj
     % If there is a problem, we display the error message
     errordlg(getReport(errorObj,'extended','hyperlinks','off'));
+	statusbar(h_init.fig,'Problem with Mask!');
 end
 
 function init_push_draw_new(hObject, eventdata, h_init)
 %disable figure during calculation
-enableDisableFig(h_init(1).fig,0);
+enableDisableFig(h_init.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_init(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_init.fig,1));
+
+fprintf(1,'CXS-TFM: Start Draw Mask\n');
+
 try
-    sb=statusbar(h_init(1).fig,'Please wait... ');
+    sb=statusbar(h_init.fig,'Please wait... ');
     sb.getComponent(0).setForeground(java.awt.Color.red);
     
     %load shared
@@ -2616,11 +2736,16 @@ try
     tfm_init_user_bf_pathnamestack{tfm_init_user_counter}=pathname;
     tfm_init_user_bf_vidext{tfm_init_user_counter}=ext;
     
+    sb=statusbar(h_init.fig,'Importing image for mask drawing...');
+    sb.getComponent(0).setForeground(java.awt.Color.red);
     
+     fprintf(1,'CXS-TFM: Import image for mask...\n');
+     timpstartMH = tic;
     %check format and load:
     if strcmp(ext,'.czi')
         %use bioformats for import
-        [~,data]=evalc('bfopen([pathname,filename{1,1}]);');
+%         [~,data]=evalc('bfopen([pathname,filename{1,1}]);');
+		data=bfopen([pathname,filename{1,1}]);
         
         %imagedata
         images=data{1,1}; %images
@@ -2651,10 +2776,15 @@ try
     tfm_init_user_bf_preview_frame1{tfm_init_user_counter}=cellimage;
     
     %2.open image in figure, and let user draw
+	sb=statusbar(h_init.fig,'Draw mask on image:');
+    sb.getComponent(0).setForeground(java.awt.Color.red);
+    fprintf(1,'CXS-TFM: Draw mask on image:\n');
+	
     %show in new fig
     hf=figure;
     cellimage_enh=imadjust(cellimage,stretchlim(cellimage),[]);
     imshow(cellimage_enh);hold on;
+	title('Draw mask using mouse clicks')
     
     %user drawn polynom conc
     hFH=impoly;
@@ -2668,14 +2798,14 @@ try
     tfm_init_user_binary1{tfm_init_user_counter}=bmask;
     
     %read new mask parameters
-    tfm_init_user_conversion{tfm_init_user_counter}=str2double(get(h_init(1).edit_conversion,'String'));
-    tfm_init_user_croplength=str2double(get(h_init(1).edit_croplength,'String'));
-    tfm_init_user_cropwidth=str2double(get(h_init(1).edit_cropwidth,'String'));
-    tfm_init_user_E{tfm_init_user_counter}=str2double(get(h_init(1).edit_youngs,'String'));
-    tfm_init_user_nu{tfm_init_user_counter}=str2double(get(h_init(1).edit_poisson,'String'));
-    tfm_init_user_area_factor=str2double(get(h_init(1).edit_area_factor,'String'));
-    tfm_init_user_scale_factor{tfm_init_user_counter}=str2double(get(h_init(1).edit_scale_factor,'String'));
-    tfm_init_user_cropcheck=get(h_init(1).checkbox_cropmask,'Value');
+    tfm_init_user_conversion{tfm_init_user_counter}=str2double(get(h_init.edit_conversion,'String'));
+    tfm_init_user_croplength=str2double(get(h_init.edit_croplength,'String'));
+    tfm_init_user_cropwidth=str2double(get(h_init.edit_cropwidth,'String'));
+    tfm_init_user_E{tfm_init_user_counter}=str2double(get(h_init.edit_youngs,'String'));
+    tfm_init_user_nu{tfm_init_user_counter}=str2double(get(h_init.edit_poisson,'String'));
+    tfm_init_user_area_factor=str2double(get(h_init.edit_area_factor,'String'));
+    tfm_init_user_scale_factor{tfm_init_user_counter}=str2double(get(h_init.edit_scale_factor,'String'));
+    tfm_init_user_cropcheck=get(h_init.checkbox_cropmask,'Value');
     
     %corresponding outline
     %calculate initial ellipse
@@ -2745,8 +2875,8 @@ try
     tfm_init_user_outline2y{tfm_init_user_counter}=yn;
     
     %display preview w. outlines
-    cla(h_init(1).axes_curr)
-    axes(h_init(1).axes_curr)
+    cla(h_init.axes_curr)
+    axes(h_init.axes_curr)
     imshow(tfm_init_user_preview_frame1{tfm_init_user_counter});hold on;
     plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
     plot(xn,yn,'b','LineWidth',2);
@@ -2754,8 +2884,8 @@ try
     hold off;
     
     %display bf preview w/ outlines
-    cla(h_init(1).axes_bf)
-    axes(h_init(1).axes_bf)
+    cla(h_init.axes_bf)
+    axes(h_init.axes_bf)
     imshow(cellimage);hold on;
     plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
     plot(xn,yn,'b','Linewidth',2);
@@ -2772,8 +2902,8 @@ try
     setappdata(0,'tfm_init_user_major',tfm_init_user_major)
     setappdata(0,'tfm_init_user_minor',tfm_init_user_minor)
     setappdata(0,'tfm_init_user_angle',tfm_init_user_angle);
-    setappdata(0,'tfm_init_user_ratio',tfm_init_user_ratio)
-    setappdata(0,'tfm_init_user_area',tfm_init_user_area)
+    setappdata(0,'tfm_init_user_ratio',tfm_init_user_ratio);
+    setappdata(0,'tfm_init_user_area',tfm_init_user_area);
     setappdata(0,'tfm_init_user_area_ellipse',tfm_init_user_area_ellipse)
     setappdata(0,'tfm_init_user_outline1x',tfm_init_user_outline1x)
     setappdata(0,'tfm_init_user_outline1y',tfm_init_user_outline1y)
@@ -2787,21 +2917,26 @@ try
     setappdata(0,'tfm_init_user_nu',tfm_init_user_nu)
     setappdata(0,'tfm_init_user_area_factor',tfm_init_user_area_factor)
     setappdata(0,'tfm_init_user_scale_factor',tfm_init_user_scale_factor)
+	    
+    sb=statusbar(h_init.fig,'Mask saved.');
+    sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     
 catch errorObj
     % If there is a problem, we display the error message
     errordlg(getReport(errorObj,'extended','hyperlinks','off'));
 end
 
+
+%% The "Auto-Draw" button
 function init_push_auto_draw(hObject, eventdata, h_init)
 
 %profile on
 
 %disable figure during calculation
-enableDisableFig(h_init(1).fig,0);
+enableDisableFig(h_init.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_init(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_init.fig,1));
 
 try
     %load shared data
@@ -2833,29 +2968,30 @@ try
     tfm_init_user_nu=getappdata(0,'tfm_init_user_nu');
     
     %read new mask parameters
-    tfm_init_user_conversion{tfm_init_user_counter}=str2double(get(h_init(1).edit_conversion,'String'));
-    tfm_init_user_croplength=str2double(get(h_init(1).edit_croplength,'String'));
-    tfm_init_user_cropwidth=str2double(get(h_init(1).edit_cropwidth,'String'));
-    tfm_init_user_E{tfm_init_user_counter}=str2double(get(h_init(1).edit_youngs,'String'));
-    tfm_init_user_nu{tfm_init_user_counter}=str2double(get(h_init(1).edit_poisson,'String'));
-    tfm_init_user_area_factor=str2double(get(h_init(1).edit_area_factor,'String'));
-    tfm_init_user_scale_factor{tfm_init_user_counter}=str2double(get(h_init(1).edit_scale_factor,'String'));
-    tfm_init_user_cropcheck=get(h_init(1).checkbox_cropmask,'value');
+    tfm_init_user_conversion{tfm_init_user_counter}=str2double(get(h_init.edit_conversion,'String'));
+    tfm_init_user_croplength=str2double(get(h_init.edit_croplength,'String'));
+    tfm_init_user_cropwidth=str2double(get(h_init.edit_cropwidth,'String'));
+    tfm_init_user_E{tfm_init_user_counter}=str2double(get(h_init.edit_youngs,'String'));
+    tfm_init_user_nu{tfm_init_user_counter}=str2double(get(h_init.edit_poisson,'String'));
+    tfm_init_user_area_factor=str2double(get(h_init.edit_area_factor,'String'));
+    tfm_init_user_scale_factor{tfm_init_user_counter}=str2double(get(h_init.edit_scale_factor,'String'));
+    tfm_init_user_cropcheck=get(h_init.checkbox_cropmask,'value');
     
     
     %check if bf images loaded
     if isempty(tfm_init_user_bf_filenamestack)
-        sb = statusbar(h_init(1).fig,'No bf images loaded');
+        sb = statusbar(h_init.fig,'No bright field images loaded');
         sb.getComponent(0).setForeground(java.awt.Color.red);
     else
         
-        axes(h_init(1).axes_curr)
+        axes(h_init.axes_curr)
+        fprintf(1,' Finding cell outlines on %d video files...\n',tfm_init_user_Nfiles)
         
         %auto-draw cell outlines
         for ivid=1:tfm_init_user_Nfiles
             
             %status bar
-            sb = statusbar(h_init(1).fig,['Calculating outlines... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)),'%% done']);
+            sb = statusbar(h_init.fig,sprintf('Finding cell outlines... %d/%d',ivid,tfm_init_user_Nfiles));
             sb.getComponent(0).setForeground(java.awt.Color.red);
             
             %check for bf image
@@ -2864,12 +3000,12 @@ try
             elseif ~isempty(tfm_init_user_bf_filenamestack{ivid})
                 
                 %show next images
-                cla(h_init(1).axes_bf)
-                axes(h_init(1).axes_bf)
+                cla(h_init.axes_bf)
+                axes(h_init.axes_bf)
                 imshow(tfm_init_user_bf_preview_frame1{ivid});hold on;
                 
-                cla(h_init(1).axes_curr)
-                axes(h_init(1).axes_curr)
+                cla(h_init.axes_curr)
+                axes(h_init.axes_curr)
                 
                 pxscaling = 1.8;%1.8 was initial default value || adapt for image quality
                 %enhance contrast
@@ -2887,7 +3023,7 @@ try
                 imshow(I_filt)
                 
                 %find edges
-                [~,threshold] = edge(I_filt,'canny')
+                [~,threshold] = edge(I_filt,'canny');
                 BW = edge(I_filt,'canny',[0.001 0.5]);%[.02,.3]);
                 imshow(BW)
                 
@@ -2922,10 +3058,12 @@ try
                 %BW=bwselect(BW,c,r,8);
                 
                 %Select cell to outline manually
-                axes(h_init(1).axes_curr)
-                enableDisableFig(h_init(1).axes_curr,1);
-                BW5=bwselect(BW4,8);
-                enableDisableFig(h_init(1).axes_curr,0);
+                axes(h_init.axes_curr)
+                enableDisableFig(h_init.axes_curr,1);
+                statusbar(h_init.fig,'Double-click on the shape to confirm the cell outline');
+                fprintf(1,'  Double-click on the shape to confirm the cell outline\n')
+                BW5=bwselect(BW4,8); % this requires the user to double-click on the image
+                enableDisableFig(h_init.axes_curr,0);
                 
                 
                 
@@ -2962,7 +3100,7 @@ try
                     tfm_init_user_outline1y{ivid}=[];
                 end
                 
-                axes(h_init(1).axes_bf)
+                axes(h_init.axes_bf);
                 plot(tfm_init_user_outline1x{ivid},tfm_init_user_outline1y{ivid},'r','LineWidth',2);
                 hold off;
                 
@@ -2970,13 +3108,13 @@ try
         end
         
         
-        sb=statusbar(h_init(1).fig,'Done !');
+        sb=statusbar(h_init.fig,'Done !');
         sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
         
         %calculate cell dimensions
         for ivid=1:tfm_init_user_Nfiles
             
-            sb = statusbar(h_init(1).fig,['Calculating cell dimensions... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)),'%% done']);
+            sb = statusbar(h_init.fig,sprintf('Calculating cell dimensions... %d/%d',ivid,tfm_init_user_Nfiles));
             sb.getComponent(0).setForeground(java.awt.Color.red);
             
             %check if outline exists
@@ -3026,7 +3164,7 @@ try
                     tfm_init_user_outline3x{ivid}=x_mask;
                     tfm_init_user_outline3y{ivid}=y_mask;
                 else
-                    tfm_init_user_binary3{ivid}=logical(ones(size(image,1),size(image,2)));
+                    tfm_init_user_binary3{ivid}=true(size(image,1),size(image,2));
                     tfm_init_user_outline3x{ivid}=[];
                     tfm_init_user_outline3y{ivid}=[];
                 end
@@ -3048,12 +3186,12 @@ try
             
         end
         
-        sb=statusbar(h_init(1).fig,'Done !');
+        sb=statusbar(h_init.fig,'Done !');
         sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
         
         %display tfm preview w/ outlines
-        cla(h_init(1).axes_curr)
-        axes(h_init(1).axes_curr)
+        cla(h_init.axes_curr)
+        axes(h_init.axes_curr)
         imshow(tfm_init_user_preview_frame1{tfm_init_user_counter});hold on;
         plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
         plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
@@ -3061,8 +3199,8 @@ try
         hold off;
         
         %display bf preview w/ outlines
-        cla(h_init(1).axes_bf)
-        axes(h_init(1).axes_bf)
+        cla(h_init.axes_bf)
+        axes(h_init.axes_bf)
         imshow(tfm_init_user_bf_preview_frame1{tfm_init_user_counter});hold on;
         plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
         plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
@@ -3083,8 +3221,8 @@ try
     setappdata(0,'tfm_init_user_major',tfm_init_user_major)
     setappdata(0,'tfm_init_user_minor',tfm_init_user_minor)
     setappdata(0,'tfm_init_user_minor',tfm_init_user_minor);
-    setappdata(0,'tfm_init_user_ratio',tfm_init_user_ratio)
-    setappdata(0,'tfm_init_user_area',tfm_init_user_area)
+    setappdata(0,'tfm_init_user_ratio',tfm_init_user_ratio);
+    setappdata(0,'tfm_init_user_area',tfm_init_user_area);
     setappdata(0,'tfm_init_user_area_ellipse',tfm_init_user_area_ellipse)
     setappdata(0,'tfm_init_user_croplength',tfm_init_user_croplength)
     setappdata(0,'tfm_init_user_cropwidth',tfm_init_user_cropwidth)
@@ -3093,20 +3231,22 @@ try
     setappdata(0,'tfm_init_user_area_factor',tfm_init_user_area_factor)
     setappdata(0,'tfm_init_user_scale_factor',tfm_init_user_scale_factor)
     
-catch
+catch errorObj
     %     % If there is a problem, we display the error message
+    getReport(errorObj,'extended','hyperlinks','on')
     errordlg(getReport(errorObj,'extended','hyperlinks','on'));
     
 end
 
 %profile viewer
 
+
 function init_push_update(hObject, eventdata, h_init)
 %disable figure during calculation
-enableDisableFig(h_init(1).fig,0);
+enableDisableFig(h_init.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_init(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_init.fig,1));
 try
     %load shared
     tfm_init_user_Nfiles=getappdata(0,'tfm_init_user_Nfiles');
@@ -3131,15 +3271,15 @@ try
     tfm_init_user_scale_factor=getappdata(0,'tfm_init_user_scale_factor');
     tfm_init_user_E=getappdata(0,'tfm_init_user_E');
     tfm_init_user_nu=getappdata(0,'tfm_init_user_nu');
-    tfm_init_user_cropcheck=get(h_init(1).checkbox_cropmask,'Value');
+    tfm_init_user_cropcheck=get(h_init.checkbox_cropmask,'Value');
     %read mask parameters
-    tfm_init_user_conversion{tfm_init_user_counter}=str2double(get(h_init(1).edit_conversion,'String'));
-    tfm_init_user_croplength=str2double(get(h_init(1).edit_croplength,'String'));
-    tfm_init_user_cropwidth=str2double(get(h_init(1).edit_cropwidth,'String'));
-    tfm_init_user_E{tfm_init_user_counter}=str2double(get(h_init(1).edit_youngs,'String'));
-    tfm_init_user_nu{tfm_init_user_counter}=str2double(get(h_init(1).edit_poisson,'String'));
-    tfm_init_user_area_factor=str2double(get(h_init(1).edit_area_factor,'String'));
-    tfm_init_user_scale_factor{tfm_init_user_counter}=str2double(get(h_init(1).edit_scale_factor,'String'));
+    tfm_init_user_conversion{tfm_init_user_counter}=str2double(get(h_init.edit_conversion,'String'));
+    tfm_init_user_croplength=str2double(get(h_init.edit_croplength,'String'));
+    tfm_init_user_cropwidth=str2double(get(h_init.edit_cropwidth,'String'));
+    tfm_init_user_E{tfm_init_user_counter}=str2double(get(h_init.edit_youngs,'String'));
+    tfm_init_user_nu{tfm_init_user_counter}=str2double(get(h_init.edit_poisson,'String'));
+    tfm_init_user_area_factor=str2double(get(h_init.edit_area_factor,'String'));
+    tfm_init_user_scale_factor{tfm_init_user_counter}=str2double(get(h_init.edit_scale_factor,'String'));
     tfm_init_user_rotate=getappdata(0,'tfm_init_user_rotate');
     
     %loop over all videos
@@ -3213,8 +3353,8 @@ try
     end
     
     %display preview w. outlines
-    cla(h_init(1).axes_curr)
-    axes(h_init(1).axes_curr)
+    cla(h_init.axes_curr)
+    axes(h_init.axes_curr)
     imshow(tfm_init_user_preview_frame1{tfm_init_user_counter});hold on;
     plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
     plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
@@ -3222,8 +3362,8 @@ try
     hold off;
     
     %display bf preview w/ outlines
-    cla(h_init(1).axes_bf)
-    axes(h_init(1).axes_bf)
+    cla(h_init.axes_bf)
+    axes(h_init.axes_bf)
     imshow(tfm_init_user_bf_preview_frame1{tfm_init_user_counter});hold on;
     plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
     plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
@@ -3231,82 +3371,85 @@ try
     hold off;
     
     %save
-    setappdata(0,'tfm_init_user_area_factor',tfm_init_user_area_factor)
-    setappdata(0,'tfm_init_user_scale_factor',tfm_init_user_scale_factor)
-    setappdata(0,'tfm_init_user_binary3',tfm_init_user_binary3)
-    setappdata(0,'tfm_init_user_major',tfm_init_user_major)
-    setappdata(0,'tfm_init_user_minor',tfm_init_user_minor)
-    setappdata(0,'tfm_init_user_ratio',tfm_init_user_ratio)
-    setappdata(0,'tfm_init_user_area',tfm_init_user_area)
-    setappdata(0,'tfm_init_user_area_ellipse',tfm_init_user_area_ellipse)
-    setappdata(0,'tfm_init_user_outline1x',tfm_init_user_outline1x)
-    setappdata(0,'tfm_init_user_outline1y',tfm_init_user_outline1y)
-    setappdata(0,'tfm_init_user_outline2x',tfm_init_user_outline2x)
-    setappdata(0,'tfm_init_user_outline2y',tfm_init_user_outline2y)
-    setappdata(0,'tfm_init_user_outline3x',tfm_init_user_outline3x)
-    setappdata(0,'tfm_init_user_outline3y',tfm_init_user_outline3y)
-    setappdata(0,'tfm_init_user_croplength',tfm_init_user_croplength)
-    setappdata(0,'tfm_init_user_cropwidth',tfm_init_user_cropwidth)
-    setappdata(0,'tfm_init_user_E',tfm_init_user_E)
-    setappdata(0,'tfm_init_user_nu',tfm_init_user_nu)
+    setappdata(0,'tfm_init_user_area_factor',tfm_init_user_area_factor);
+    setappdata(0,'tfm_init_user_scale_factor',tfm_init_user_scale_factor);
+    setappdata(0,'tfm_init_user_binary3',tfm_init_user_binary3);
+    setappdata(0,'tfm_init_user_major',tfm_init_user_major);
+    setappdata(0,'tfm_init_user_minor',tfm_init_user_minor);
+    setappdata(0,'tfm_init_user_ratio',tfm_init_user_ratio);
+    setappdata(0,'tfm_init_user_area',tfm_init_user_area);
+    setappdata(0,'tfm_init_user_area_ellipse',tfm_init_user_area_ellipse);
+    setappdata(0,'tfm_init_user_outline1x',tfm_init_user_outline1x);
+    setappdata(0,'tfm_init_user_outline1y',tfm_init_user_outline1y);
+    setappdata(0,'tfm_init_user_outline2x',tfm_init_user_outline2x);
+    setappdata(0,'tfm_init_user_outline2y',tfm_init_user_outline2y);
+    setappdata(0,'tfm_init_user_outline3x',tfm_init_user_outline3x);
+    setappdata(0,'tfm_init_user_outline3y',tfm_init_user_outline3y);
+    setappdata(0,'tfm_init_user_croplength',tfm_init_user_croplength);
+    setappdata(0,'tfm_init_user_cropwidth',tfm_init_user_cropwidth);
+    setappdata(0,'tfm_init_user_E',tfm_init_user_E);
+    setappdata(0,'tfm_init_user_nu',tfm_init_user_nu);
     
 catch errorObj
     % If there is a problem, we display the error message
     errordlg(getReport(errorObj,'extended','hyperlinks','off'));
 end
 
+
+%% callback for all edit fields
 function init_update_field(hObject, eventdata, h_init, field)
 %disable fig
-enableDisableFig(h_init(1).fig,0);
+enableDisableFig(h_init.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_init(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_init.fig,1));
 try
     
     %load, update, and save shared para
     tfm_init_user_counter=getappdata(0,'tfm_init_user_counter');
     if strcmp(field, 'fps')
         tfm_init_user_framerate=getappdata(0, 'tfm_init_user_framerate');
-        tfm_init_user_framerate{tfm_init_user_counter} = str2double(get(h_init(1).edit_fps,'String'));
+        tfm_init_user_framerate{tfm_init_user_counter} = str2double(get(h_init.edit_fps,'String'));
         setappdata(0, 'tfm_init_user_framerate', tfm_init_user_framerate);
     elseif strcmp(field, 'conversion')
         tfm_init_user_conversion=getappdata(0, 'tfm_init_user_conversion');
-        tfm_init_user_conversion{tfm_init_user_counter} = str2double(get(h_init(1).edit_conversion,'String'));
+        tfm_init_user_conversion{tfm_init_user_counter} = str2double(get(h_init.edit_conversion,'String'));
         setappdata(0, 'tfm_init_user_conversion', tfm_init_user_conversion)
     elseif strcmp(field, 'nframes')
         tfm_init_user_Nframes=getappdata(0, 'tfm_init_user_Nframes');
-        tfm_init_user_Nframes{tfm_init_user_counter} = str2double(get(h_init(1).edit_nframes,'String'));
+        tfm_init_user_Nframes{tfm_init_user_counter} = str2double(get(h_init.edit_nframes,'String'));
         setappdata(0, 'tfm_init_user_Nframes', tfm_init_user_Nframes)
     elseif strcmp(field, 'cellname')
         tfm_init_user_cellname=getappdata(0, 'tfm_init_user_cellname');
-        tfm_init_user_cellname{tfm_init_user_counter} = get(h_init(1).edit_cellname,'String');
+        tfm_init_user_cellname{tfm_init_user_counter} = get(h_init.edit_cellname,'String');
         setappdata(0, 'tfm_init_user_cellname', tfm_init_user_cellname)
     elseif strcmp(field, 'croplength')
-        tfm_init_user_croplength = str2double(get(h_init(1).edit_croplength,'String'));
+        tfm_init_user_croplength = str2double(get(h_init.edit_croplength,'String'));
         setappdata(0, 'tfm_init_user_croplength', tfm_init_user_croplength)
     elseif strcmp(field, 'cropwidth')
-        tfm_init_user_cropwidth = str2double(get(h_init(1).edit_cropwidth,'String'));
+        tfm_init_user_cropwidth = str2double(get(h_init.edit_cropwidth,'String'));
         setappdata(0, 'tfm_init_user_cropwidth', tfm_init_user_cropwidth)
     elseif strcmp(field, 'youngs')
         tfm_init_user_E=getappdata(0, 'tfm_init_user_E');
-        tfm_init_user_E{tfm_init_user_counter} = get(h_init(1).edit_youngs,'String');
+        tfm_init_user_E{tfm_init_user_counter} = get(h_init.edit_youngs,'String');
         setappdata(0, 'tfm_init_user_E', tfm_init_user_E)
     elseif strcmp(field, 'poisson')
         tfm_init_user_nu=getappdata(0, 'tfm_init_user_nu');
-        tfm_init_user_nu{tfm_init_user_counter} = get(h_init(1).edit_poisson,'String');
+        tfm_init_user_nu{tfm_init_user_counter} = get(h_init.edit_poisson,'String');
         setappdata(0, 'tfm_init_user_nu', tfm_init_user_nu)
     elseif strcmp(field, 'area_factor')
-        tfm_init_user_area_factor = get(h_init(1).edit_area_factor,'String');
+        tfm_init_user_area_factor = get(h_init.edit_area_factor,'String');
         setappdata(0, 'tfm_init_user_area_factor', tfm_init_user_area_factor)
     elseif strcmp(field, 'scale_factor')
         tfm_init_user_scale_factor=getappdata(0, 'tfm_init_user_scale_factor');
-        tfm_init_user_scale_factor{tfm_init_user_counter} = get(h_init(1).edit_scale_factor,'String');
+        tfm_init_user_scale_factor{tfm_init_user_counter} = get(h_init.edit_scale_factor,'String');
         setappdata(0, 'tfm_init_user_scale_factor', tfm_init_user_scale_factor)
     elseif strcmp(field, 'rotate')
         tfm_init_user_rotate=getappdata(0, 'tfm_init_user_rotate');
-        tfm_init_user_rotate(tfm_init_user_counter) = get(h_init(1).checkbox_rotate,'value');
+        tfm_init_user_rotate(tfm_init_user_counter) = get(h_init.checkbox_rotate,'value');
         setappdata(0, 'tfm_init_user_rotate', tfm_init_user_rotate)
     end
+    fprintf(1,'CXS-TFM: Updated analysis info.\n')
     
 catch errorObj
     % If there is a problem, we display the error message
@@ -3316,7 +3459,7 @@ end
 function init_update_bin(~, ~, h_init)
 
 %if checkbox is true, warn that no sarcomere analysis is possible
-if get(h_init(1).checkbox_bin,'Value')
+if get(h_init.checkbox_bin,'Value')
     tfm_gui_call_piv_flag = getappdata(0,'tfm_gui_call_piv_flag');
     if ~tfm_gui_call_piv_flag
         
@@ -3346,44 +3489,62 @@ else
     setappdata(0, 'IntraX_sarco_possible',true);
 end
 
+
+%% Callback for the "OK (streamlined)" button
 function init_push_ok_strln(hObject, eventdata, h_init,h_main)
 
-figuresize=[80,350];
-screensize=get(0,'ScreenSize');
-xpos = ceil((screensize(3)-figuresize(2))/2);
-ypos = ceil((screensize(4)-figuresize(1))/2);
-%create figure
-disablesarcoWarning.fig=figure(...
-    'position',[xpos, ypos, figuresize(2), figuresize(1)],...
-    'units','pixels',...
-    'renderer','OpenGL',...
-    'MenuBar','none',...
-    'PaperPositionMode','auto',...
-    'Name','Warning',...
-    'NumberTitle','off',...
-    'Resize','off',...
-    'Color','w',...
-    'Visible','off');
-annotation('textbox',[0.1 0.1 0.8 0.8], 'String', {'Warning: The analysis will proceed with default parameters', '(unless changed in the code) and only stop once at the end', 'of the beads displacement step, and then at the results panel.'}, 'FitBoxToText', 'on', 'LineStyle', 'none');
-disablesarcoWarning.fig.Visible='on';
-waitfor(disablesarcoWarning.fig);
+% figuresize=[80,500];
+% screensize=get(0,'ScreenSize');
+% xpos = ceil((screensize(3)-figuresize(2))/2);
+% ypos = ceil((screensize(4)-figuresize(1))/2);
+% %create figure
+% disablesarcoWarning.fig=figure(...
+%     'position',[xpos, ypos, figuresize(2), figuresize(1)],...
+%     'units','pixels',...
+%     'renderer','OpenGL',...
+%     'MenuBar','none',...
+%     'PaperPositionMode','auto',...
+%     'Name','Warning',...
+%     'NumberTitle','off',...
+%     'Resize','off',...
+%     'Color','w',...
+%     'Visible','off');
+% annotation('textbox',[0.1 0.1 0.8 0.8], 'String', {'Warning: The analysis will proceed with default parameters', '(unless changed in the code) and only stop once at the end', 'of the beads displacement step, and then at the results panel.','Close to proceed'}, 'FitBoxToText', 'on', 'LineStyle', 'none');
+% disablesarcoWarning.fig.Visible='on';
+% waitfor(disablesarcoWarning.fig);
 
-tfm_init_user_strln = true;
-setappdata(0,'tfm_init_user_strln',tfm_init_user_strln);
-init_push_ok(hObject, eventdata, h_init,h_main);
+% confirm that the user wants to do the streamlined analysis
+rspns = questdlg('Do you want to perform the analysis with the default parameters?',...
+    'Confirm Streamline','OK','Cancel','OK');
 
+switch rspns
+    case 'OK'
+        tfm_init_user_strln = true;
+        setappdata(0,'tfm_init_user_strln',tfm_init_user_strln);
+        init_push_ok(hObject, eventdata, h_init,h_main);
+        fprintf(1,'CXS-TFM: Streamlined analysis selected.\n')
+
+    case 'Cancel'
+        fprintf(1,'CXS-TFM: Streamlined analysis cancelled.\n')
+end
+
+
+
+%% Callback for the "OK" button
 function init_push_ok(hObject, eventdata, h_init,h_main)
-
+fprintf('CXS-TFM: Processing images...\n');
 %profile on
 %userTiming= getappdata(0,'userTiming');
 %userTiming.init{2} = toc(userTiming.init{1});
 %userTiming.init2piv{1} = tic;
 
+tstartMH = tic;
+
 %disable figure during calculation
-enableDisableFig(h_init(1).fig,0);
+enableDisableFig(h_init.fig,0);
 
 %turn back on in the end
-%clean1=onCleanup(@()enableDisableFig(h_init(1).fig,1));
+%clean1=onCleanup(@()enableDisableFig(h_init.fig,1));
 
 try
     
@@ -3426,6 +3587,9 @@ try
     tfm_init_user_binary3=getappdata(0,'tfm_init_user_binary3');
     tfm_init_user_rotate=getappdata(0,'tfm_init_user_rotate');
     multichannelczi = getappdata(0,'multichannelczi');
+	tfm_init_use_parallel=getappdata(0,'use_parallel');
+    path_to_templates = getappdata(0,'path_to_templates');
+	
     
     %compatibility with sarcomere analysis
     if isempty(tfm_gui_call_piv_flag)
@@ -3442,22 +3606,22 @@ try
     %loop over vids, and extract data
     for j=1:tfm_init_user_Nfiles
         %update statusbar
-        if tfm_init_user_Nfiles==1
-            sb=statusbar(h_init(1).fig,'Importing... ');
-            sb.getComponent(0).setForeground(java.awt.Color.red);
-        else
-            sb=statusbar(h_init(1).fig,['Importing... ',num2str(floor(100*(j-1)/tfm_init_user_Nfiles)), '%% done']);
-            sb.getComponent(0).setForeground(java.awt.Color.red);
-        end
+        sb=statusbar(h_init.fig,sprintf('Importing %d/%d video files...',j,tfm_init_user_Nfiles));
+        sb.getComponent(0).setForeground(java.awt.Color.red);
         
         %check format, load and save:
         if strcmp(tfm_init_user_vidext{1,j},'.czi')
+            fprintf('CXS-TFM: Importing TFM CZI file...\n');
             %use bioformats for import
-            [~,data]=evalc('bfopen([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]);');
+%             [~,data]=evalc('bfopen([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]);');
+			data = bfopen([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]);
+            fprintf('CXS-TFM: Process metadata\n');
             metadata = data{1, 2};
-            tincrement=str2double(metadata.get('Global Information|Image|T|Interval|Increment #1'));
-            tfm_init_user_framerate{j}=1/tincrement;
-            set(h_init(1).edit_fps,'String',num2str(tfm_init_user_framerate{j}));
+            tincrement = str2double(metadata.get('Global Information|Image|T|Interval|Increment #1'));
+            if tincrement > 0
+                tfm_init_user_framerate{j}=1/tincrement;
+                set(h_init.edit_fps,'String',num2str(tfm_init_user_framerate{j}));
+            end
             % check for image stack
             info = data{1, 1}{1, 2};
             Nchannels = 1;
@@ -3482,10 +3646,10 @@ try
             TFMChannel = getappdata(0, 'TFMChannel');
             %save images in variable
             start_frame = 0;
-            if get(h_init(1).checkbox_trim, 'value')
+            if get(h_init.checkbox_trim, 'value')
                 start_frame = 1;
             end
-            parfor i = start_frame:N-1
+            parfor (i = start_frame:N-1,tfm_init_use_parallel)
                 index = TFMChannel + Nchannels*i;
                 imagei=images{index,1};
                 %convert to grey
@@ -3506,10 +3670,12 @@ try
             
             BFChannel = getappdata(0, 'BFChannel');
             if multichannelczi && BFChannel <= Nchannels %also load bf frames
-                [~,data]=evalc('bfopen([tfm_init_user_bf_pathnamestack{1,j},tfm_init_user_bf_filenamestack{1,j},tfm_init_user_bf_vidext{1,j}]);');
+                fprintf('CXS-TFM: Load BF image frames\n');
+               %[~,data]=evalc('bfopen([tfm_init_user_bf_pathnamestack{1,j},tfm_init_user_bf_filenamestack{1,j},tfm_init_user_bf_vidext{1,j}]);');
+% 				data = bfopen([tfm_init_user_bf_pathnamestack{1,j},tfm_init_user_bf_filenamestack{1,j},tfm_init_user_bf_vidext{1,j}]);
                 images=data{1,1}; %images
                 image_stack = zeros(m,n,N,'uint8');
-                parfor ifr = start_frame:N-1
+                parfor (ifr = start_frame:N-1,tfm_init_use_parallel)
                     index = BFChannel + Nchannels*ifr;
                     imagei=images{index,1}; %i+1*Nchannels no longer needed as long as nuclear stain goes first
                     %convert to grey
@@ -3529,6 +3695,7 @@ try
             end
             
         elseif strcmp(tfm_init_user_vidext{1,j},'.tif')
+            fprintf('CXS-TFM: Importing TFM TIFF file...\n');
             InfoImage=imfinfo([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]);
             N=length(InfoImage);
             %bit=InfoImage.BitDepth;
@@ -3541,7 +3708,7 @@ try
             n = size(imagei,2);
             image_stack = zeros(m,n,N,'uint8');
             end_frame = N;
-            if get(h_init(1).checkbox_trim, 'value')
+            if get(h_init.checkbox_trim, 'value')
                 end_frame = N-1;
                 TifLink.read(); %read past first frame
                 image_stack = zeros(m,n,N-1,'uint8');
@@ -3564,8 +3731,10 @@ try
             save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,j},'/image_stack.mat'],'image_stack','-v7.3');
             
         elseif strcmp(tfm_init_user_vidext{1,j},'.avi')
+            fprintf('CXS-TFM: Importing TFM AVI file...\n');
+
             videoObj = VideoReader([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]);
-            N = videoObj.NumberOfFrames;
+            N = videoObj.NumFrames;
             
             %initialize image stack
             imagei = read(videoObj,1);
@@ -3573,12 +3742,12 @@ try
             n = size(imagei,2);
             image_stack = zeros(m,n,N,'uint8');
             num_frames = N;
-            if get(h_init(1).checkbox_trim, 'value')
+            if get(h_init.checkbox_trim, 'value')
                 num_frames = N-1;
                 image_stack = zeros(m,n,N-1,'uint8');
             end
-            parfor i=1:num_frames
-                if get(h_init(1).checkbox_trim, 'value')
+            parfor (i=1:num_frames,tfm_init_use_parallel)
+                if get(h_init.checkbox_trim, 'value')
                     imagei=read(videoObj, i+1);
                 else
                     imagei=read(videoObj, i);
@@ -3595,31 +3764,35 @@ try
             save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,j},'/image_stack.mat'],'image_stack','-v7.3')
         end
         tfm_init_user_Nframes{j} = N;
-        if get(h_init(1).checkbox_trim, 'value')
+        if get(h_init.checkbox_trim, 'value')
             tfm_init_user_Nframes{j} = N - 1;
         end
     end
     
     %save settings for current frame
-    tfm_init_user_framerate{tfm_init_user_counter}=str2double(get(h_init(1).edit_fps,'String'));
-    tfm_init_user_conversion{tfm_init_user_counter}=str2double(get(h_init(1).edit_conversion,'String'));
-    tfm_init_user_cellname{tfm_init_user_counter}=get(h_init(1).edit_cellname,'String');
-    tfm_init_user_area_factor=str2double(get(h_init(1).edit_area_factor,'String'));
+    tfm_init_user_framerate{tfm_init_user_counter}=str2double(get(h_init.edit_fps,'String'));
+    tfm_init_user_conversion{tfm_init_user_counter}=str2double(get(h_init.edit_conversion,'String'));
+    tfm_init_user_cellname{tfm_init_user_counter}=get(h_init.edit_cellname,'String');
+    tfm_init_user_area_factor=str2double(get(h_init.edit_area_factor,'String'));
     
     % set ncorr parameters
     tfm_init_user_subset_rad = 30;
-    tfm_init_user_spacing_coeff = 10;%default for TFM with 40x obj
+    tfm_init_user_spacing_coeff = 10; %default for TFM with 40x obj
     if ~tfm_gui_call_piv_flag
-        tfm_init_user_spacing_coeff = 5;%default for IntraX
+        tfm_init_user_spacing_coeff = 5; %default for IntraX
         tfm_gui_call_piv_flag = true;
     end
     
-    %first check: has user entered all the necessary info: fps,
-    %conversion
+    %first check: has user entered all the necessary info: fps, conversion
+    % MH This needs to be checked; does not set all GUI logic when user
+    %  tries to fix it.
     for ivid=1:tfm_init_user_Nfiles
-        if ~isempty(find(isnan([tfm_init_user_framerate{:}]))) || ~isempty(find(isnan([tfm_init_user_conversion{:}])))
+        if any(isnan([tfm_init_user_framerate{:}])) || any(isnan([tfm_init_user_conversion{:}]))
             errordlg('Please enter all the necessary values: frames per second and Conversion.','Error');
-            enableDisableFig(h_init(1).fig,1)
+            fprintf(1,'Error: Some video parameters are not valid.\n')
+            enableDisableFig(h_init.fig,1);
+            set(h_init.edit_fps,'Enable','on'); % MH I added these lines but not sure it is enough
+            set(h_init.edit_conversion,'Enable','on');
             return;
         end
         
@@ -3633,11 +3806,11 @@ try
     end
     
     % crop videos
-    if get(h_init(1).checkbox_crop,'Value')
+    if get(h_init.checkbox_crop,'Value')
         %read crop parameters
-        tfm_init_user_croplength=str2double(get(h_init(1).edit_croplength,'String'));
-        tfm_init_user_cropwidth=str2double(get(h_init(1).edit_cropwidth,'String'));
-        tfm_init_user_area_factor=str2double(get(h_init(1).edit_area_factor,'String'));
+        tfm_init_user_croplength=str2double(get(h_init.edit_croplength,'String'));
+        tfm_init_user_cropwidth=str2double(get(h_init.edit_cropwidth,'String'));
+        tfm_init_user_area_factor=str2double(get(h_init.edit_area_factor,'String'));
         
         % initialize rot_crop stacks
         bead_vid_crop = cell(tfm_init_user_Nfiles,1);
@@ -3648,12 +3821,12 @@ try
         for ivid = 1:tfm_init_user_Nfiles
             
             % status bar
-            sb = statusbar(h_init(1).fig,['Cropping videos... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)),'%% done']);
+            sb = statusbar(h_init.fig,['Cropping videos... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)),'%% done']);
             sb.getComponent(0).setForeground(java.awt.Color.red);
             
             % read mask parameters
-            tfm_init_user_conversion{ivid}=str2double(get(h_init(1).edit_conversion,'String'));
-            tfm_init_user_scale_factor{ivid}=str2double(get(h_init(1).edit_scale_factor,'String'));
+            tfm_init_user_conversion{ivid}=str2double(get(h_init.edit_conversion,'String'));
+            tfm_init_user_scale_factor{ivid}=str2double(get(h_init.edit_scale_factor,'String'));
             
             % get stack info
             %info = imfinfo([tfm_init_user_pathnamestack{ivid},tfm_init_user_filenamestack{ivid},'.tif']);
@@ -3751,7 +3924,7 @@ try
             crop_out_h = size(imcrop(bf_vid(:,:,1),[xmin ymin crop_length crop_width]),1);
             crop_vid = zeros(crop_out_h,crop_out_w,N_frames);
             crop_vid = im2uint8(crop_vid);
-            parfor i = 1:bf_N_frames
+            parfor (i = 1:bf_N_frames,tfm_init_use_parallel)
                 crop_vid(:,:,i) = imcrop(bf_vid(:,:,i),[xmin ymin crop_length crop_width]);
             end
             bf_vid_crop{ivid} = crop_vid;
@@ -3789,7 +3962,7 @@ try
             
             % save new .mat files
             image_stack = zeros(size(bead_vid_crop{ivid}));
-            parfor i = 1:N_frames
+            parfor (i = 1:N_frames,tfm_init_use_parallel)
                 imagei = normalise(bead_vid_crop{ivid}(:,:,i));
                 image_stack(:,:,i) = imagei;
                 % save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{ivid},'_cropped','/image',num2str(i),'.mat'],'imagei','-v7.3')
@@ -3797,7 +3970,7 @@ try
             save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{ivid},'_cropped','/image_stack.mat'],'image_stack','-v7.3')
             % save new bf .mat files
             image_stack = zeros(size(bf_vid_crop{ivid}));
-            parfor i = 1:bf_N_frames
+            parfor (i = 1:bf_N_frames,tfm_init_use_parallel)
                 imagei = normalise(bf_vid_crop{ivid}(:,:,i));
                 image_stack(:,:,i) = imagei;
                 % save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{ivid},'_cropped','/image',num2str(i),'.mat'],'imagei','-v7.3')
@@ -3815,7 +3988,7 @@ try
         end
         
         %update statusbar
-        sb=statusbar(h_init(1).fig,'Saving cropped videos...');
+        sb=statusbar(h_init.fig,'Saving cropped videos...');
         sb.getComponent(0).setForeground(java.awt.Color.red);
         
         % for loop for saving/overwriting
@@ -3886,10 +4059,10 @@ try
     end
     
     % bin videos
-    if get(h_init(1).checkbox_bin,'Value')
+    if get(h_init.checkbox_bin,'Value')
         
         % get bin parameters
-        if get(h_init(1).menu_bin,'Value') == 1
+        if get(h_init.menu_bin,'Value') == 1
             bin_scale = .5;
         else
             bin_scale = .25;
@@ -3900,11 +4073,13 @@ try
         bf_vid_bin = cell(tfm_init_user_Nfiles,1);
         mask_bin = cell(tfm_init_user_Nfiles,1);
         
+		fprintf(1,'CXS-TFM: Start video downsampling\n');
+		
         % for loop over videos
         for ivid = 1:tfm_init_user_Nfiles
             
             % status bar
-            sb = statusbar(h_init(1).fig,['Binning videos... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)),'%% done']);
+            sb = statusbar(h_init.fig,['Binning videos... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)),'%% done']);
             sb.getComponent(0).setForeground(java.awt.Color.red);
             
             % get stack info
@@ -3991,7 +4166,7 @@ try
             
             % save new .mat files
             image_stack = zeros(size(bead_vid_bin{ivid}));
-            parfor i = 1:N_frames
+            parfor (i = 1:N_frames,tfm_init_use_parallel)
                 imagei = normalise(bead_vid_bin{ivid}(:,:,i));
                 image_stack(:,:,i) = imagei;
                 % save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{ivid},'_cropped','/image',num2str(i),'.mat'],'imagei','-v7.3')
@@ -3999,7 +4174,7 @@ try
             save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{ivid},'_binned','/image_stack.mat'],'image_stack','-v7.3')
             % save new bf .mat files
             image_stack = zeros(size(bf_vid_bin{ivid}));
-            parfor i = 1:bf_N_frames
+            parfor (i = 1:bf_N_frames,tfm_init_use_parallel)
                 imagei = normalise(bf_vid_bin{ivid}(:,:,i));
                 image_stack(:,:,i) = imagei;
                 % save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{ivid},'_cropped','/image',num2str(i),'.mat'],'imagei','-v7.3')
@@ -4010,10 +4185,12 @@ try
             bead_vid = [];
             bf_vid = [];
             image_stack = [];
-        end
+		end
+		
+		fprintf(1,'CXS-TFM: End image downsampling at %.02f s\n',toc(tstartMH));
         
         %update statusbar
-        sb=statusbar(h_init(1).fig,'Saving binned videos...');
+        sb=statusbar(h_init.fig,'Saving binned videos...');
         sb.getComponent(0).setForeground(java.awt.Color.red);
         
         % for loop for saving/overwriting
@@ -4092,16 +4269,16 @@ try
     end
     
     %bleaching correction
-    if get(h_init(1).checkbox_bleach, 'Value')
+    if get(h_init.checkbox_bleach, 'Value')
         for ivid=1:tfm_init_user_Nfiles
-            sb=statusbar(h_init(1).fig,['Bleaching correction... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '%% done']);
+            sb=statusbar(h_init.fig,['Bleaching correction... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '%% done']);
             sb.getComponent(0).setForeground(java.awt.Color.red);
             
             % load image stack
             s = load(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,ivid},'/image_stack.mat'],'image_stack');
             
             %put video on 3d stack
-            parfor ifr=1:tfm_init_user_Nframes{ivid}
+            parfor (ifr=1:tfm_init_user_Nframes{ivid},tfm_init_use_parallel)
                 %current image
                 %s=load(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,ivid},'/image',num2str(ifr),'.mat'],'imagei');
                 im_curr=s.image_stack(:,:,ifr);
@@ -4110,8 +4287,9 @@ try
                 ThreeD(:,:,ifr)=im_curr;
             end
             
+            % THIS ONLY WORKS ON MAC??
             %start miji
-            path=cd;
+            path=pwd;
             %start fiji
             addpath('/Applications/Fiji.app/scripts/');
             evalc('Miji(false);');
@@ -4151,22 +4329,22 @@ try
     end
     
     %kalman denoising
-    if get(h_init(1).checkbox_denoise, 'Value')
+    if get(h_init.checkbox_denoise, 'Value')
         gain=0.8;
         percentvar=.05;
-        parfor ivid=1:tfm_init_user_Nfiles %parfor
+        parfor (ivid=1:tfm_init_user_Nfiles,tfm_init_use_parallel)
             %deleted for parfor
-            %sb=statusbar(h_init(1).fig,['Denoising... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '%% done']);
+            %sb=statusbar(h_init.fig,['Denoising... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '%% done']);
             %sb.getComponent(0).setForeground(java.awt.Color.red);
-            disp(['Denoizing video #',num2str(ivid)])
+            fprintf(1,'CXS-TFM: Denoizing video #%d\n',ivid)
             if tfm_init_user_Nframes{ivid} > 11
-                folder=['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,ivid}];
+                folder=fullfile('vars_DO_NOT_DELETE',tfm_init_user_filenamestack{1,ivid});
                 N=tfm_init_user_Nframes{ivid};
                 Kalman_Stack_Filter_modified(folder,N,gain,percentvar,0);
                 % tfm_init_user_Nframes{ivid}=tfm_init_user_Nframes{ivid}-10; % New filter does not delete frames
             end
             if tfm_init_user_Nframes_bf{ivid} > 11
-                folder=['vars_DO_NOT_DELETE/',tfm_init_user_bf_filenamestack{1,ivid}];
+                folder=fullfile('vars_DO_NOT_DELETE',tfm_init_user_bf_filenamestack{1,ivid});
                 N=tfm_init_user_Nframes_bf{ivid};
                 Kalman_Stack_Filter_modified(folder,N,gain,percentvar,1)
                 % tfm_init_user_Nframes_bf{ivid}=tfm_init_user_Nframes_bf{ivid}-10; % New filter does not delete frames
@@ -4174,13 +4352,17 @@ try
         end
     end
     
-    %copy master excel file
-    masterfile = [tfm_init_user_pathnamestack{1},'/Batch_Results.xlsx'];
-    copyfile('Master_DO_NOT_EDIT.xlsx',masterfile);
-    
+    %copy master excel file % nothing better than a hard-coded filename...
+    masterfile = [tfm_init_user_pathnamestack{1},'/Batch_Results.xlsx',];
+    if isdeployed
+        copyfile(fullfile(path_to_templates,'Master_DO_NOT_EDIT.xlsx'),masterfile,'f');
+    else
+        copyfile('Master_DO_NOT_EDIT.xlsx',masterfile,'f');
+    end
+
     %save micro data & save mask
     for ivid=1:tfm_init_user_Nfiles
-        sb=statusbar(h_init(1).fig,['Saving... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '%% done']);
+        sb=statusbar(h_init.fig,['Saving... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '%% done']);
         sb.getComponent(0).setForeground(java.awt.Color.red);
         %create folder with same name as vid. & mask folder
         if ~isequal(exist([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},filesep,'Results'], 'dir'),7)
@@ -4193,7 +4375,11 @@ try
         
         %copy excel file to new result file
         newfile=[tfm_init_user_pathnamestack{1,ivid},'/',tfm_init_user_filenamestack{1,ivid},'/Results/',tfm_init_user_filenamestack{1,ivid},'.xlsx'];
-        copyfile(['Sample_DO_NOT_EDIT.xlsx'],newfile);
+        if isdeployed
+            copyfile(fullfile(path_to_templates,'Sample_DO_NOT_EDIT.xlsx'),newfile,'f');
+        else
+            copyfile('Sample_DO_NOT_EDIT.xlsx',newfile);
+        end
         
         %write microscope data to excel file
         A = {tfm_init_user_framerate{ivid},tfm_init_user_conversion{ivid},tfm_init_user_Nframes{ivid},tfm_init_user_cellname{ivid}};
@@ -4223,15 +4409,15 @@ try
         save([tfm_init_user_pathnamestack{1,ivid},'/',tfm_init_user_filenamestack{1,ivid},'/Mask/',tfm_init_user_filenamestack{ivid},'_mask.mat'],'mask','-v7.3');%num2str(ivid) change to filename
     end
     %update statusbar
-    sb=statusbar(h_init(1).fig,'Saving - Done !');
+    sb=statusbar(h_init.fig,'Saving - Done !');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     
     %generate masks for further analysis based on outline 2
     tfm_init_user_binary2=cell(1,tfm_init_user_Nfiles);
-    sb=statusbar(h_init(1).fig,['Calculating ellipse areas... ']);%,num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '%% done']);
+    sb=statusbar(h_init.fig,['Calculating ellipse areas... ']);%,num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '%% done']);
     sb.getComponent(0).setForeground(java.awt.Color.red);
-    parfor ivid=1:tfm_init_user_Nfiles
-        %             sb=statusbar(h_init(1).fig,['Calculating ellipse areas... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '%% done']);
+    parfor (ivid=1:tfm_init_user_Nfiles,tfm_init_use_parallel)
+        %             sb=statusbar(h_init.fig,['Calculating ellipse areas... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '%% done']);
         %             sb.getComponent(0).setForeground(java.awt.Color.red);
         image=tfm_init_user_preview_frame1{ivid};
         if isempty(tfm_init_user_binary1{ivid})
@@ -4246,7 +4432,7 @@ try
     
     
     %update statusbar
-    sb=statusbar(h_init(1).fig,'Done !');
+    sb=statusbar(h_init.fig,'Done !');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     
     
@@ -4288,11 +4474,13 @@ catch errorObj
     
 end
 
+fprintf(1,'CXS-TFM: Initialization complete.\n')
+
 %enable
-enableDisableFig(h_init(1).fig,1);
+enableDisableFig(h_init.fig,1);
 
 %close window
-close(h_init(1).fig);
+close(h_init.fig);
 
 % % send notif
 % myMessage='Initialization finished';
@@ -4305,11 +4493,13 @@ close(h_init(1).fig);
 
 
 %change main windows 2. button status
-set(h_main(1).button_piv,'Enable','on');
-set(h_main(1).button_init,'ForegroundColor',[0 .5 0]);
+set(h_main.button_piv,'Enable','on');
+set(h_main.button_init,'ForegroundColor',[0 .5 0]);
 
 %move main window to center
-movegui(h_main(1).fig,'center')
+movegui(h_main.fig,'center')
+figure(h_main.fig)
+
 
 %Streamlining
 if tfm_init_user_strln

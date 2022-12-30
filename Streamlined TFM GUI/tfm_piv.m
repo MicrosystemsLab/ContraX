@@ -26,31 +26,34 @@
 % version 1.0 written by O. Schwab: oschwab@stanford.edu
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-function tfm_piv(h_main)
 %main function for the displacement window of beads gui
+function tfm_piv(h_main)
+fprintf(1,'\n');
+fprintf(1,'CXS-TFM: PIV Module\n');
 
 tfm_init_user_strln=getappdata(0,'tfm_init_user_strln');
 tfm_gui_call_piv_flag=getappdata(0,'tfm_gui_call_piv_flag');
 %userTiming= getappdata(0,'userTiming');
 %userTiming.init2piv{2} = toc(userTiming.init2piv{1});
 
-%create new window for displacement
-%fig size
-figsize=[450,800];
-%get screen size
+%warning('off','MATLAB:prnRenderer:opengl');
+
+% create new window for displacement
+% fig size [height, width]
+figsize=[470,800];
+% get screen size  [left bottom width height]
 screensize = get(0,'ScreenSize');
-%position fig on center of screen
+% position fig on center of screen
 xpos = ceil((screensize(3)-figsize(2))/2);
 ypos = ceil((screensize(4)-figsize(1))/2);
-%create fig; invisible at first
-h_piv(1).fig=figure(...
+% create fig; invisible at first
+h_piv.fig=figure(...
     'position',[xpos, ypos, figsize(2), figsize(1)],...
     'units','pixels',...
     'renderer','OpenGL',...
     'MenuBar','none',...
     'PaperPositionMode','auto',...
-    'Name','Beads Displacements',...
+    'Name','ContraX Displacements',...
     'NumberTitle','off',...
     'Resize','off',...
     'Color',[.2,.2,.2],...
@@ -61,194 +64,195 @@ pcolor = [.2 .2 .2];
 ptcolor = [1 1 1];
 bcolor = [.3 .3 .3];
 btcolor = [1 1 1];
-h_piv(1).ForegroundColor = ptcolor;
-h_piv(1).BackgroundColor = pcolor;
+h_piv.ForegroundColor = ptcolor;
+h_piv.BackgroundColor = pcolor;
+fontsizeA = 10;
 
 %create uipanel for ncorr
 %uipanel:
-h_piv(1).panel_ncorr = uipanel('Parent',h_piv(1).fig,'Title','Ncorr','units','pixels','Position',[20,140,760,300]);
-h_piv(1).panel_ncorr.ForegroundColor = ptcolor;
-h_piv(1).panel_ncorr.BackgroundColor = pcolor;
+h_piv.panel_ncorr = uipanel('Parent',h_piv.fig,'Title','Ncorr','units','pixels','Position',[20,140,760,300]);
+h_piv.panel_ncorr.ForegroundColor = ptcolor;
+h_piv.panel_ncorr.BackgroundColor = pcolor;
 %axes:
-h_piv(1).axes_ncorr = axes('Parent',h_piv(1).panel_ncorr,'Units', 'pixels','Position',[250,5,500,280]);
+h_piv.axes_ncorr = axes('Parent',h_piv.panel_ncorr,'Units', 'pixels','Position',[250,5,500,280]);
 %uipanel: analysis settings
-h_piv(1).panel_analysis = uipanel('Parent',h_piv(1).panel_ncorr,'Title','Analysis Settings','units','pixels','Position',[5,170,240,115],'BorderType','none');
-h_piv(1).panel_analysis.ForegroundColor = ptcolor;
-h_piv(1).panel_analysis.BackgroundColor = pcolor;
+h_piv.panel_analysis = uipanel('Parent',h_piv.panel_ncorr,'Title','Analysis Settings','units','pixels','Position',[5,170,240,115],'BorderType','none');
+h_piv.panel_analysis.ForegroundColor = ptcolor;
+h_piv.panel_analysis.BackgroundColor = pcolor;
 %analysis settings: text: radius
-h_piv(1).text_analysis_radius = uicontrol('Parent',h_piv(1).panel_analysis,'style','text','position',[5,80,100,15],'string','subset radius','HorizontalAlignment','left');
-h_piv(1).text_analysis_radius.ForegroundColor = ptcolor;
-h_piv(1).text_analysis_radius.BackgroundColor = pcolor;
+h_piv.text_analysis_radius = uicontrol('Parent',h_piv.panel_analysis,'style','text','position',[5,80,100,15],'string','subset radius','HorizontalAlignment','left');
+h_piv.text_analysis_radius.ForegroundColor = ptcolor;
+h_piv.text_analysis_radius.BackgroundColor = pcolor;
 %analysis settings: text: spacing
-h_piv(1).text_analysis_spacing = uicontrol('Parent',h_piv(1).panel_analysis,'style','text','position',[5,55,100,15],'string','spacing coefficient','HorizontalAlignment','left');
-h_piv(1).text_analysis_spacing.ForegroundColor = ptcolor;
-h_piv(1).text_analysis_spacing.BackgroundColor = pcolor;
+h_piv.text_analysis_spacing = uicontrol('Parent',h_piv.panel_analysis,'style','text','position',[5,55,100,15],'string','spacing coefficient','HorizontalAlignment','left');
+h_piv.text_analysis_spacing.ForegroundColor = ptcolor;
+h_piv.text_analysis_spacing.BackgroundColor = pcolor;
 %analysis settings: text: norm
-h_piv(1).text_analysis_cutnorm = uicontrol('Parent',h_piv(1).panel_analysis,'style','text','position',[5,30,100,15],'string','cutoff norm','HorizontalAlignment','left');
-h_piv(1).text_analysis_cutnorm.ForegroundColor = ptcolor;
-h_piv(1).text_analysis_cutnorm.BackgroundColor = pcolor;
+h_piv.text_analysis_cutnorm = uicontrol('Parent',h_piv.panel_analysis,'style','text','position',[5,30,100,15],'string','cutoff norm','HorizontalAlignment','left');
+h_piv.text_analysis_cutnorm.ForegroundColor = ptcolor;
+h_piv.text_analysis_cutnorm.BackgroundColor = pcolor;
 %analysis settings: text: iter
-h_piv(1).text_analysis_cutiter = uicontrol('Parent',h_piv(1).panel_analysis,'style','text','position',[5,5,100,15],'string','cutoff iteration','HorizontalAlignment','left');
-h_piv(1).text_analysis_cutiter.ForegroundColor = ptcolor;
-h_piv(1).text_analysis_cutiter.BackgroundColor = pcolor;
+h_piv.text_analysis_cutiter = uicontrol('Parent',h_piv.panel_analysis,'style','text','position',[5,5,100,15],'string','cutoff iteration','HorizontalAlignment','left');
+h_piv.text_analysis_cutiter.ForegroundColor = ptcolor;
+h_piv.text_analysis_cutiter.BackgroundColor = pcolor;
 %analysis settings: edit: radius
 tfm_init_user_subset_rad = getappdata(0,'tfm_init_user_subset_rad');
-h_piv(1).edit_analysis_radius = uicontrol('Parent',h_piv(1).panel_analysis,'style','edit','position',[120,80,110,15],'string',num2str(tfm_init_user_subset_rad),'HorizontalAlignment','center');
+h_piv.edit_analysis_radius = uicontrol('Parent',h_piv.panel_analysis,'style','edit','position',[120,80,110,15],'string',num2str(tfm_init_user_subset_rad),'HorizontalAlignment','center');
 %analysis settings: edit: spacing
 tfm_init_user_spacing_coeff = getappdata(0,'tfm_init_user_spacing_coeff');
-h_piv(1).edit_analysis_spacing = uicontrol('Parent',h_piv(1).panel_analysis,'style','edit','position',[120,55,110,15],'string',num2str(tfm_init_user_spacing_coeff),'HorizontalAlignment','center');
+h_piv.edit_analysis_spacing = uicontrol('Parent',h_piv.panel_analysis,'style','edit','position',[120,55,110,15],'string',num2str(tfm_init_user_spacing_coeff),'HorizontalAlignment','center');
 %analysis settings: edit: norm
-h_piv(1).edit_analysis_cutnorm = uicontrol('Parent',h_piv(1).panel_analysis,'style','edit','position',[120,30,110,15],'string','1e-6','HorizontalAlignment','center');
+h_piv.edit_analysis_cutnorm = uicontrol('Parent',h_piv.panel_analysis,'style','edit','position',[120,30,110,15],'string','1e-6','HorizontalAlignment','center');
 %analysis settings: edit: iter
-h_piv(1).edit_analysis_cutiter = uicontrol('Parent',h_piv(1).panel_analysis,'style','edit','position',[120,5,110,15],'string','20','HorizontalAlignment','center');
+h_piv.edit_analysis_cutiter = uicontrol('Parent',h_piv.panel_analysis,'style','edit','position',[120,5,110,15],'string','20','HorizontalAlignment','center');
 %checkbox: post processing
-h_piv(1).checkbox = uicontrol('Parent',h_piv(1).panel_ncorr,'style','checkbox','position',[5,150,100,15],'string','Post-processing','HorizontalAlignment','left');
-h_piv(1).checkbox.ForegroundColor = ptcolor;
-h_piv(1).checkbox.BackgroundColor = pcolor;
+h_piv.checkbox = uicontrol('Parent',h_piv.panel_ncorr,'style','checkbox','position',[5,150,100,15],'string','Post-processing','HorizontalAlignment','left');
+h_piv.checkbox.ForegroundColor = ptcolor;
+h_piv.checkbox.BackgroundColor = pcolor;
 %uipanel: post settings
-h_piv(1).panel_post = uipanel('Parent',h_piv(1).panel_ncorr,'Title','Postprocess Settings','units','pixels','Position',[5,40,240,105]);
-h_piv(1).panel_post.ForegroundColor = ptcolor;
-h_piv(1).panel_post.BackgroundColor = pcolor;
+h_piv.panel_post = uipanel('Parent',h_piv.panel_ncorr,'Title','Postprocess Settings','units','pixels','Position',[5,40,240,105]);
+h_piv.panel_post.ForegroundColor = ptcolor;
+h_piv.panel_post.BackgroundColor = pcolor;
 %post settings: text umin
-h_piv(1).text_post_umin = uicontrol('Parent',h_piv(1).panel_post,'style','text','position',[5,70,30,15],'string','umin','HorizontalAlignment','left');
-h_piv(1).text_post_umin.ForegroundColor = ptcolor;
-h_piv(1).text_post_umin.BackgroundColor = pcolor;
+h_piv.text_post_umin = uicontrol('Parent',h_piv.panel_post,'style','text','position',[5,70,30,15],'string','umin','HorizontalAlignment','left');
+h_piv.text_post_umin.ForegroundColor = ptcolor;
+h_piv.text_post_umin.BackgroundColor = pcolor;
 %post settings: text vmin
-h_piv(1).text_post_vmin = uicontrol('Parent',h_piv(1).panel_post,'style','text','position',[5,55,30,15],'string','vmin','HorizontalAlignment','left');
-h_piv(1).text_post_vmin.ForegroundColor = ptcolor;
-h_piv(1).text_post_vmin.BackgroundColor = pcolor;
+h_piv.text_post_vmin = uicontrol('Parent',h_piv.panel_post,'style','text','position',[5,55,30,15],'string','vmin','HorizontalAlignment','left');
+h_piv.text_post_vmin.ForegroundColor = ptcolor;
+h_piv.text_post_vmin.BackgroundColor = pcolor;
 %post settings: text umax
-h_piv(1).text_post_umin = uicontrol('Parent',h_piv(1).panel_post,'style','text','position',[125,70,30,15],'string','umax','HorizontalAlignment','left');
-h_piv(1).text_post_umin.ForegroundColor = ptcolor;
-h_piv(1).text_post_umin.BackgroundColor = pcolor;
+h_piv.text_post_umin = uicontrol('Parent',h_piv.panel_post,'style','text','position',[125,70,30,15],'string','umax','HorizontalAlignment','left');
+h_piv.text_post_umin.ForegroundColor = ptcolor;
+h_piv.text_post_umin.BackgroundColor = pcolor;
 %post settings: text vmax
-h_piv(1).text_post_vmin = uicontrol('Parent',h_piv(1).panel_post,'style','text','position',[125,55,30,15],'string','vmax','HorizontalAlignment','left');
-h_piv(1).text_post_vmin.ForegroundColor = ptcolor;
-h_piv(1).text_post_vmin.BackgroundColor = pcolor;
+h_piv.text_post_vmin = uicontrol('Parent',h_piv.panel_post,'style','text','position',[125,55,30,15],'string','vmax','HorizontalAlignment','left');
+h_piv.text_post_vmin.ForegroundColor = ptcolor;
+h_piv.text_post_vmin.BackgroundColor = pcolor;
 %post settings: text std
-h_piv(1).text_post_std = uicontrol('Parent',h_piv(1).panel_post,'style','text','position',[5,35,200,15],'string','std threshold','HorizontalAlignment','left');
-h_piv(1).text_post_std.ForegroundColor = ptcolor;
-h_piv(1).text_post_std.BackgroundColor = pcolor;
+h_piv.text_post_std = uicontrol('Parent',h_piv.panel_post,'style','text','position',[5,35,200,15],'string','std threshold','HorizontalAlignment','left');
+h_piv.text_post_std.ForegroundColor = ptcolor;
+h_piv.text_post_std.BackgroundColor = pcolor;
 %post settings: text median eps
-h_piv(1).text_post_eps = uicontrol('Parent',h_piv(1).panel_post,'style','text','position',[5,20,200,15],'string','normalized median epsilon','HorizontalAlignment','left');
-h_piv(1).text_post_eps.ForegroundColor = ptcolor;
-h_piv(1).text_post_eps.BackgroundColor = pcolor;
+h_piv.text_post_eps = uicontrol('Parent',h_piv.panel_post,'style','text','position',[5,20,200,15],'string','normalized median epsilon','HorizontalAlignment','left');
+h_piv.text_post_eps.ForegroundColor = ptcolor;
+h_piv.text_post_eps.BackgroundColor = pcolor;
 %post settings: text median thresh
-h_piv(1).text_post_thresh = uicontrol('Parent',h_piv(1).panel_post,'style','text','position',[5,5,200,15],'string','normalized median threshold','HorizontalAlignment','left');
-h_piv(1).text_post_thresh.ForegroundColor = ptcolor;
-h_piv(1).text_post_thresh.BackgroundColor = pcolor;
+h_piv.text_post_thresh = uicontrol('Parent',h_piv.panel_post,'style','text','position',[5,5,200,15],'string','normalized median threshold','HorizontalAlignment','left');
+h_piv.text_post_thresh.ForegroundColor = ptcolor;
+h_piv.text_post_thresh.BackgroundColor = pcolor;
 %post settings: edit: umin
-h_piv(1).edit_post_umin = uicontrol('Parent',h_piv(1).panel_post,'style','edit','position',[45,70,50,15],'string','-10','HorizontalAlignment','center');
+h_piv.edit_post_umin = uicontrol('Parent',h_piv.panel_post,'style','edit','position',[45,70,50,15],'string','-10','HorizontalAlignment','center');
 %post settings: edit: vmin
-h_piv(1).edit_post_vmin = uicontrol('Parent',h_piv(1).panel_post,'style','edit','position',[45,55,50,15],'string','-10','HorizontalAlignment','center');
+h_piv.edit_post_vmin = uicontrol('Parent',h_piv.panel_post,'style','edit','position',[45,55,50,15],'string','-10','HorizontalAlignment','center');
 %post settings: edit: umax
-h_piv(1).edit_post_umax = uicontrol('Parent',h_piv(1).panel_post,'style','edit','position',[170,70,50,15],'string','10','HorizontalAlignment','center');
+h_piv.edit_post_umax = uicontrol('Parent',h_piv.panel_post,'style','edit','position',[170,70,50,15],'string','10','HorizontalAlignment','center');
 %post settings: edit: vmax
-h_piv(1).edit_post_vmax = uicontrol('Parent',h_piv(1).panel_post,'style','edit','position',[170,55,50,15],'string','10','HorizontalAlignment','center');
+h_piv.edit_post_vmax = uicontrol('Parent',h_piv.panel_post,'style','edit','position',[170,55,50,15],'string','10','HorizontalAlignment','center');
 %post settings: edit: std
-h_piv(1).edit_post_std = uicontrol('Parent',h_piv(1).panel_post,'style','edit','position',[170,35,50,15],'string','6','HorizontalAlignment','center');
+h_piv.edit_post_std = uicontrol('Parent',h_piv.panel_post,'style','edit','position',[170,35,50,15],'string','6','HorizontalAlignment','center');
 %post settings: edit: eps
-h_piv(1).edit_post_eps = uicontrol('Parent',h_piv(1).panel_post,'style','edit','position',[170,20,50,15],'string','0.15','HorizontalAlignment','center');
+h_piv.edit_post_eps = uicontrol('Parent',h_piv.panel_post,'style','edit','position',[170,20,50,15],'string','0.15','HorizontalAlignment','center');
 %post settings: edit: thresh
-h_piv(1).edit_post_thresh = uicontrol('Parent',h_piv(1).panel_post,'style','edit','position',[170,5,50,15],'string','3','HorizontalAlignment','center');
+h_piv.edit_post_thresh = uicontrol('Parent',h_piv.panel_post,'style','edit','position',[170,5,50,15],'string','3','HorizontalAlignment','center');
 %button: calculate all
-h_piv(1).button_calcncorr = uicontrol('Parent',h_piv(1).panel_ncorr,'style','pushbutton','position',[5,5,240,30],'string','Calculate all');
+h_piv.button_calcncorr = uicontrol('Parent',h_piv.panel_ncorr,'style','pushbutton','position',[5,5,240,30],'string','Calculate all','FontSize',fontsizeA);
 %checkbox: delete extra files after ncorr
-h_piv(1).checkbox_delete = uicontrol('Parent',h_piv(1).panel_ncorr,'style','checkbox','position',[100,150,150,15],'string','Delete extra files after ncorr','value',0);
-h_piv(1).checkbox_delete.ForegroundColor = ptcolor;
-h_piv(1).checkbox_delete.BackgroundColor = pcolor;
+h_piv.checkbox_delete = uicontrol('Parent',h_piv.panel_ncorr,'style','checkbox','position',[100,150,150,15],'string','Delete extra files after ncorr','value',0);
+h_piv.checkbox_delete.ForegroundColor = ptcolor;
+h_piv.checkbox_delete.BackgroundColor = pcolor;
 
 %create uipanel for smartguess
 %uipanel
-h_piv(1).panel_guess = uipanel('Parent',h_piv(1).fig,'Title','Determine reference frame','units','pixels','Position',[550,85,150,50]);
-h_piv(1).panel_guess.ForegroundColor = ptcolor;
-h_piv(1).panel_guess.BackgroundColor = pcolor;
+h_piv.panel_guess = uipanel('Parent',h_piv.fig,'Title','Determine reference frame','units','pixels','Position',[550,85,150,50]);
+h_piv.panel_guess.ForegroundColor = ptcolor;
+h_piv.panel_guess.BackgroundColor = pcolor;
 %button
-h_piv(1).button_guess = uicontrol('Parent',h_piv(1).panel_guess,'style','pushbutton','position',[5,5,137,25],'string','Determine all');
+h_piv.button_guess = uicontrol('Parent',h_piv.panel_guess,'style','pushbutton','position',[5,5,137,25],'string','Determine all');
 
 %create uipanel for reference shift
 %uipanel
-h_piv(1).panel_ref = uipanel('Parent',h_piv(1).fig,'Title','Reference shift','units','pixels','Position',[20,30,525,105]);
-h_piv(1).panel_ref.ForegroundColor = ptcolor;
-h_piv(1).panel_ref.BackgroundColor = pcolor;
+h_piv.panel_ref = uipanel('Parent',h_piv.fig,'Title','Reference shift','units','pixels','Position',[20,30,525,105]);
+h_piv.panel_ref.ForegroundColor = ptcolor;
+h_piv.panel_ref.BackgroundColor = pcolor;
 %text: reference
-h_piv(1).text_ref_ref = uicontrol('Parent',h_piv(1).panel_ref,'style','text','position',[5,65,60,15],'string','Relaxed','HorizontalAlignment','left');
-h_piv(1).text_ref_ref.ForegroundColor = ptcolor;
-h_piv(1).text_ref_ref.BackgroundColor = pcolor;
+h_piv.text_ref_ref = uicontrol('Parent',h_piv.panel_ref,'style','text','position',[5,65,60,15],'string','Relaxed','HorizontalAlignment','left');
+h_piv.text_ref_ref.ForegroundColor = ptcolor;
+h_piv.text_ref_ref.BackgroundColor = pcolor;
 %text: contracted
-h_piv(1).text_ref_contr = uicontrol('Parent',h_piv(1).panel_ref,'style','text','position',[5,45,60,15],'string','Contracted','HorizontalAlignment','left');
-h_piv(1).text_ref_contr.ForegroundColor = ptcolor;
-h_piv(1).text_ref_contr.BackgroundColor = pcolor;
+h_piv.text_ref_contr = uicontrol('Parent',h_piv.panel_ref,'style','text','position',[5,45,60,15],'string','Contracted','HorizontalAlignment','left');
+h_piv.text_ref_contr.ForegroundColor = ptcolor;
+h_piv.text_ref_contr.BackgroundColor = pcolor;
 %edit: reference
-h_piv(1).edit_ref_ref = uicontrol('Parent',h_piv(1).panel_ref,'style','edit','position',[75,65,40,15],'HorizontalAlignment','center');
+h_piv.edit_ref_ref = uicontrol('Parent',h_piv.panel_ref,'style','edit','position',[75,65,40,15],'HorizontalAlignment','center');
 %edit: contracted
-h_piv(1).edit_ref_contr = uicontrol('Parent',h_piv(1).panel_ref,'style','edit','position',[75,45,40,15],'HorizontalAlignment','center');
+h_piv.edit_ref_contr = uicontrol('Parent',h_piv.panel_ref,'style','edit','position',[75,45,40,15],'HorizontalAlignment','center');
 %button: pick relaxed
-h_piv(1).button_pickref = uicontrol('Parent',h_piv(1).panel_ref,'style','pushbutton','position',[120,64,40,18],'string','Pick');
+h_piv.button_pickref = uicontrol('Parent',h_piv.panel_ref,'style','pushbutton','position',[120,64,40,18],'string','Pick');
 %button: pick contr
-h_piv(1).button_pickcontr = uicontrol('Parent',h_piv(1).panel_ref,'style','pushbutton','position',[120,43,40,18],'string','Pick');
+h_piv.button_pickcontr = uicontrol('Parent',h_piv.panel_ref,'style','pushbutton','position',[120,43,40,18],'string','Pick');
 %button: update
-h_piv(1).button_update = uicontrol('Parent',h_piv(1).panel_ref,'style','pushbutton','position',[5,5,155,25],'string','Update preview');
+h_piv.button_update = uicontrol('Parent',h_piv.panel_ref,'style','pushbutton','position',[5,5,155,25],'string','Update preview');
 %axes:
-h_piv(1).axes_ref = axes('Parent',h_piv(1).panel_ref,'Units', 'pixels','Position',[165,5,200,85]);
+h_piv.axes_ref = axes('Parent',h_piv.panel_ref,'Units', 'pixels','Position',[165,5,200,85]);
 %button: calculate all
-h_piv(1).button_calcref = uicontrol('Parent',h_piv(1).panel_ref,'style','pushbutton','position',[370,5,147,25],'string','Calc displacements');
+h_piv.button_calcref = uicontrol('Parent',h_piv.panel_ref,'style','pushbutton','position',[370,5,147,25],'string','Calc displacements');
 %button: forwards
-h_piv(1).button_forwards = uicontrol('Parent',h_piv(1).panel_ref,'style','pushbutton','position',[395,67,25,25],'string','>');
+h_piv.button_forwards = uicontrol('Parent',h_piv.panel_ref,'style','pushbutton','position',[395,67,25,25],'string','>');
 %button: backwards
-h_piv(1).button_backwards = uicontrol('Parent',h_piv(1).panel_ref,'style','pushbutton','position',[370,67,25,25],'string','<');
+h_piv.button_backwards = uicontrol('Parent',h_piv.panel_ref,'style','pushbutton','position',[370,67,25,25],'string','<');
 %text: show which video (i/n)
-h_piv(1).text_whichvid = uicontrol('Parent',h_piv(1).panel_ref,'style','text','position',[425,75,25,15],'string','(1/1)','HorizontalAlignment','left');
-h_piv(1).text_whichvid.ForegroundColor = ptcolor;
-h_piv(1).text_whichvid.BackgroundColor = pcolor;
+h_piv.text_whichvid = uicontrol('Parent',h_piv.panel_ref,'style','text','position',[425,75,25,15],'string','(1/1)','HorizontalAlignment','left');
+h_piv.text_whichvid.ForegroundColor = ptcolor;
+h_piv.text_whichvid.BackgroundColor = pcolor;
 %text: show which video (name)
-h_piv(1).text_whichvidname = uicontrol('Parent',h_piv(1).panel_ref,'style','text','position',[370,50,100,15],'string','Experiment','HorizontalAlignment','left');
-h_piv(1).text_whichvidname.ForegroundColor = ptcolor;
-h_piv(1).text_whichvidname.BackgroundColor = pcolor;
+h_piv.text_whichvidname = uicontrol('Parent',h_piv.panel_ref,'style','text','position',[370,50,100,15],'string','Experiment','HorizontalAlignment','left');
+h_piv.text_whichvidname.ForegroundColor = ptcolor;
+h_piv.text_whichvidname.BackgroundColor = pcolor;
 
 %create ok button
-h_piv(1).button_ok = uicontrol('Parent',h_piv(1).fig,'style','pushbutton','position',[735,30,45,20],'string','OK','visible','on');
+h_piv.button_ok = uicontrol('Parent',h_piv.fig,'style','pushbutton','position',[735,30,45,20],'string','OK','visible','on','FontWeight','bold');
 %create matrix save checkbox
-h_piv(1).checkbox_matrix = uicontrol('Parent',h_piv(1).fig,'style','checkbox','position',[550,30,160,15],'string','Save displacement matrices','HorizontalAlignment','left','value',1);
-h_piv(1).checkbox_matrix.ForegroundColor = ptcolor;
-h_piv(1).checkbox_matrix.BackgroundColor = pcolor;
+h_piv.checkbox_matrix = uicontrol('Parent',h_piv.fig,'style','checkbox','position',[550,30,160,15],'string','Save displacement matrices','HorizontalAlignment','left','value',1);
+h_piv.checkbox_matrix.ForegroundColor = ptcolor;
+h_piv.checkbox_matrix.BackgroundColor = pcolor;
 %create heatmaps save checkbox
-h_piv(1).checkbox_heatmaps = uicontrol('Parent',h_piv(1).fig,'style','checkbox','position',[550,50,160,15],'string','Save heatmaps','HorizontalAlignment','left');
-h_piv(1).checkbox_heatmaps.ForegroundColor = ptcolor;
-h_piv(1).checkbox_heatmaps.BackgroundColor = pcolor;
+h_piv.checkbox_heatmaps = uicontrol('Parent',h_piv.fig,'style','checkbox','position',[550,50,160,15],'string','Save heatmaps','HorizontalAlignment','left');
+h_piv.checkbox_heatmaps.ForegroundColor = ptcolor;
+h_piv.checkbox_heatmaps.BackgroundColor = pcolor;
 
 %callbacks for buttons and checkbox
-set(h_piv(1).button_calcncorr,'callback',{@piv_push_calcncorr,h_piv})
-set(h_piv(1).button_guess,'callback',{@piv_push_guess,h_piv})
-set(h_piv(1).button_pickref,'callback',{@piv_push_pickref,h_piv})
-set(h_piv(1).button_pickcontr,'callback',{@piv_push_pickcontr,h_piv})
-set(h_piv(1).button_update,'callback',{@piv_push_update,h_piv})
-set(h_piv(1).button_calcref,'callback',{@piv_push_calcref,h_piv})
-set(h_piv(1).button_backwards,'callback',{@piv_push_backwards,h_piv})
-set(h_piv(1).button_forwards,'callback',{@piv_push_forwards,h_piv})
-set(h_piv(1).button_ok,'callback',{@piv_push_ok,h_piv,h_main})
-set(h_piv(1).checkbox,'callback',{@piv_checkbox,h_piv})
+set(h_piv.button_calcncorr,'callback',{@piv_push_calcncorr,h_piv})  % "Calculate all" button
+set(h_piv.button_guess,'callback',{@piv_push_guess,h_piv})  % 
+set(h_piv.button_pickref,'callback',{@piv_push_pickref,h_piv})
+set(h_piv.button_pickcontr,'callback',{@piv_push_pickcontr,h_piv})
+set(h_piv.button_update,'callback',{@piv_push_update,h_piv})
+set(h_piv.button_calcref,'callback',{@piv_push_calcref,h_piv})  % "Calc displacements" button
+set(h_piv.button_backwards,'callback',{@piv_push_backwards,h_piv})
+set(h_piv.button_forwards,'callback',{@piv_push_forwards,h_piv})
+set(h_piv.button_ok,'callback',{@piv_push_ok,h_piv,h_main}) % "OK" button
+set(h_piv.checkbox,'callback',{@piv_checkbox,h_piv})
 
 %populate figure on launch
 %error catch loop (http://www.matlabtips.com/display-errors/)
 try
     %turn off panels
-    set(h_piv(1).panel_ncorr,'Visible','on');
-    set(h_piv(1).panel_post,'Visible','off');
-    set(h_piv(1).panel_ref,'Visible','off');
-    set(h_piv(1).panel_guess,'Visible','off');
-    set(h_piv(1).button_ok,'Visible','off');
-    set(h_piv(1).checkbox_matrix,'Visible','off')
-    set(h_piv(1).checkbox_heatmaps,'Visible','off')
+    set(h_piv.panel_ncorr,'Visible','on');
+    set(h_piv.panel_post,'Visible','off');
+    set(h_piv.panel_ref,'Visible','off');
+    set(h_piv.panel_guess,'Visible','off');
+    set(h_piv.button_ok,'Visible','off');
+    set(h_piv.checkbox_matrix,'Visible','off')
+    set(h_piv.checkbox_heatmaps,'Visible','off')
     
     %load vars
     tfm_init_user_preview_frame1=getappdata(0,'tfm_init_user_preview_frame1');
     tfm_init_user_Nfiles=getappdata(0,'tfm_init_user_Nfiles');
     
     %display 1st frame of 1st vid in axes
-    reset(h_piv(1).axes_ncorr)
-    axes(h_piv(1).axes_ncorr)
-    imshow(tfm_init_user_preview_frame1{1});hold on;
+    reset(h_piv.axes_ncorr)
+    axes(h_piv.axes_ncorr)
+    imshow(tfm_init_user_preview_frame1{1}); hold on;
     
     %initiate counter (which video)
     tfm_piv_user_counter=1;
@@ -278,25 +282,37 @@ end
 %setappdata(0,'userTiming',userTiming);
 
 %make fig visible
-set(h_piv(1).fig,'visible','on');
+set(h_piv.fig,'visible','on');
+%movegui(h_piv.fig,'north');
 
 %move main window to the side
-movegui(h_main(1).fig,'west')
+% movegui(h_main.fig,'west')
+% MH put the panel to the left of the main window
+%  [left bottom width height]
+fp = get(h_piv.fig,'Position');
+set(h_main.fig,'Units','pixels');
+ap = get(h_main.fig,'Position');
+set(h_main.fig,'Position',[fp(1)-ap(3) fp(2)+fp(4)-ap(4) ap(3) ap(4)]);
+
+% initialize status bar
+sb=statusbar(h_piv.fig,'Ready');
+sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
 
 %Streamlining
 if tfm_init_user_strln
-    piv_push_calcncorr(h_piv(1).button_calcncorr, h_piv, h_piv)
+    piv_push_calcncorr(h_piv.button_calcncorr, h_piv, h_piv)
 end
 
-waitfor(h_piv(1).fig)
+waitfor(h_piv.fig)
 
 
+%% piv_push_calcncorr
 function piv_push_calcncorr(hObject, eventdata, h_piv)
 %disable figure during calculation
-enableDisableFig(h_piv(1).fig,0);
+enableDisableFig(h_piv.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_piv(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_piv.fig,1));
 
 %profile on
 
@@ -318,21 +334,21 @@ try
     
     %ncorr settings
     num_region = 0; % Assume only 1 region exists in ROI
-    radius_rgdic = str2double(get(h_piv(1).edit_analysis_radius,'String'));
-    spacing_rgdic = str2double(get(h_piv(1).edit_analysis_spacing,'String'));
-    cutoff_diffnorm = str2double(get(h_piv(1).edit_analysis_cutnorm,'String'));
-    cutoff_iteration = str2double(get(h_piv(1).edit_analysis_cutiter,'String'));
+    radius_rgdic = str2double(get(h_piv.edit_analysis_radius,'String'));
+    spacing_rgdic = str2double(get(h_piv.edit_analysis_spacing,'String'));
+    cutoff_diffnorm = str2double(get(h_piv.edit_analysis_cutnorm,'String'));
+    cutoff_iteration = str2double(get(h_piv.edit_analysis_cutiter,'String'));
     enabled_stepanalysis = false;
     subsettrunc = false;
     
     %filter/post settings
-    umin = str2double(get(h_piv(1).edit_post_umin,'String')); % minimum allowed u velocity
-    umax = str2double(get(h_piv(1).edit_post_umax,'String')); % maximum allowed u velocity
-    vmin = str2double(get(h_piv(1).edit_post_vmin,'String')); % minimum allowed v velocity
-    vmax = str2double(get(h_piv(1).edit_post_vmax,'String')); % maximum allowed v velocity
-    stdthresh=str2double(get(h_piv(1).edit_post_std,'String')); % threshold for standard deviation check
-    epsilon=str2double(get(h_piv(1).edit_post_eps,'String')); % epsilon for normalized median test
-    thresh=str2double(get(h_piv(1).edit_post_thresh,'String')); % threshold for normalized median test
+    umin = str2double(get(h_piv.edit_post_umin,'String')); % minimum allowed u velocity
+    umax = str2double(get(h_piv.edit_post_umax,'String')); % maximum allowed u velocity
+    vmin = str2double(get(h_piv.edit_post_vmin,'String')); % minimum allowed v velocity
+    vmax = str2double(get(h_piv.edit_post_vmax,'String')); % maximum allowed v velocity
+    stdthresh=str2double(get(h_piv.edit_post_std,'String')); % threshold for standard deviation check
+    epsilon=str2double(get(h_piv.edit_post_eps,'String')); % epsilon for normalized median test
+    thresh=str2double(get(h_piv.edit_post_thresh,'String')); % threshold for normalized median test
     
     %     %first save images as png for lazy loading...
     %     witer=0;
@@ -350,7 +366,7 @@ try
     %         for ifr=1:tfm_init_user_Nframes{ivid}
     %             %estimate waiting time
     %             witer=witer+1;
-    %             sb=statusbar(h_piv(1).fig,['Tweaking images... ',num2str(floor(100*(witer-1)/sum([tfm_init_user_Nframes{:}]))), '%% done']);
+    %             sb=statusbar(h_piv.fig,['Tweaking images... ',num2str(floor(100*(witer-1)/sum([tfm_init_user_Nframes{:}]))), '%% done']);
     %             sb.getComponent(0).setForeground(java.awt.Color.red);
     %
     %             s=load(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,ivid},'/image',num2str(ifr),'.mat'],'imagei');
@@ -359,21 +375,25 @@ try
     %         end
     %     end
     %     %statusbar
-    %     sb=statusbar(h_piv(1).fig,'Tweaking - Done !');
+    %     sb=statusbar(h_piv.fig,'Tweaking - Done !');
     %     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     %
     
+	tstartMH = tic;
+	fprintf(1,'CXS-TFM: Start Video Processing Loop\n')
+	
     %loop over videos
     %w_i=0;
     for ivid=1:tfm_init_user_Nfiles
         Num=tfm_init_user_Nframes{ivid};
         
-        sb=statusbar(h_piv(1).fig,['Calculating Video ',num2str(ivid),'/',num2str(tfm_init_user_Nfiles),'...', num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '%% done']);
+        disp([' Analyzing Video ',num2str(ivid),'/',num2str(tfm_init_user_Nfiles),'... '])
+        sb=statusbar(h_piv.fig,['Analyzing Video ',num2str(ivid),'/',num2str(tfm_init_user_Nfiles),'... ']);
         sb.getComponent(0).setForeground(java.awt.Color.red);
         
         %create folder to save disp.
-        mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots'])
-        mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Displacement Heatmaps'])
+        [~,~] = mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots']);  
+        [~,~] = mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Displacement Heatmaps']);  
         
         % load image stack
         s = load(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,ivid},'/image_stack.mat'],'image_stack');
@@ -391,6 +411,7 @@ try
         %set current
         cur = ncorr_class_img.empty;
         
+		fprintf(1,'CXS-TFM: Start ncorr init at %.02f s\n',toc(tstartMH));
         for ifr=1:Num
             cur(end+1) = ncorr_class_img;
             cur(end).set_img('load',struct('img',s.image_stack(:,:,ifr),...
@@ -398,6 +419,10 @@ try
                 'path',tfm_init_user_pathnamestack{ivid}));
             % cur(end).set_img('lazy',struct('name',['image',num2str(ifr),'.png'],'path',['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,ivid}]));
         end
+		fprintf(1,'CXS-TFM: End ncorr init at %.02f s\n',toc(tstartMH));
+
+        statusbar(h_piv.fig,sprintf('Analyzing Video %d/%d (%d frames)...',ivid,tfm_init_user_Nfiles,length(cur)));
+        fprintf(1,'  Video has %d frames\n',length(cur));
         
         %set roi
         mask = true([ref.height ref.width]);
@@ -481,10 +506,18 @@ try
         final_fu=u_matr(1:end-1,:,:);
         final_fv=v_matr(1:end-1,:,:);
         
+
+		fprintf(1,'CXS-TFM: Start frame processing at %.02f s\n',toc(tstartMH));
+		tstartFRAME = tic;
+        %h_pf = h_piv.fig;
+		
         parfor frame = 1:length(cur)
-            %        for frame = 1:length(cur)
-            
-            disp(['Calculating frame #',num2str(frame)])
+%        for frame = 1:length(cur)
+			%timeperframe = toc(tstartFRAME)/frame;
+            if rem(frame,20)==0
+                fprintf(1,' #%d/%d, %.02f sec elapsed\n',frame,length(cur),toc(tstartFRAME));
+            end
+            %disp([' Calculating frame #',num2str(frame)])
             
             [seedinfo(frame), convergeinfo, success_seeds] = ncorr_alg_calcseeds(ref.formatted(), ...
                 cur(frame).formatted(), ...
@@ -506,7 +539,7 @@ try
             %         parfor frame = 1:length(cur)
             %disp(frame)
             %w_i=frame;
-            %sb=statusbar(h_piv(1).fig,['Calculating Video ',num2str(ivid),'/',num2str(tfm_init_user_Nfiles),' frame: ',num2str(frame)]);%,'/',num2str(Num),'... ',num2str(floor(100*(w_i-1)/sum([tfm_init_user_Nframes{:}]))), '%% done']);
+            %sb=statusbar(h_piv.fig,['Calculating Video ',num2str(ivid),'/',num2str(tfm_init_user_Nfiles),' frame: ',num2str(frame)]);%,'/',num2str(Num),'... ',num2str(floor(100*(w_i-1)/sum([tfm_init_user_Nframes{:}]))), '%% done']);
             %sb.getComponent(0).setForeground(java.awt.Color.red);
             
             % Format seedinfo
@@ -573,17 +606,17 @@ try
             v_filtered=v(1:end-1,:);
             
             %check if user wants filter
-            if get(h_piv(1).checkbox,'Value')
+            if get(h_piv.checkbox,'Value')
                 %vellimit check
                 u_filtered(u_filtered<umin)=NaN;
                 u_filtered(u_filtered>umax)=NaN;
                 v_filtered(v_filtered<vmin)=NaN;
                 v_filtered(v_filtered>vmax)=NaN;
                 % stddev check
-                meanu=nanmean(u_filtered(:));
-                meanv=nanmean(v_filtered(:));
-                std2u=nanstd(reshape(u_filtered,size(u_filtered,1)*size(u_filtered,2),1));
-                std2v=nanstd(reshape(v_filtered,size(v_filtered,1)*size(v_filtered,2),1));
+                meanu=mean(u_filtered(:),'omitnan');
+                meanv=mean(v_filtered(:),'omitnan');
+                std2u=std(reshape(u_filtered,size(u_filtered,1)*size(u_filtered,2),1),'omitnan');
+                std2v=std(reshape(v_filtered,size(v_filtered,1)*size(v_filtered,2),1),'omitnan');
                 minvalu=meanu-stdthresh*std2u;
                 maxvalu=meanu+stdthresh*std2u;
                 minvalv=meanv-stdthresh*std2v;
@@ -648,8 +681,11 @@ try
             set(gca,'xtick',[],'ytick',[])
             set(gca,'linewidth',2);
             axis image;
-            export_fig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Displacement Heatmaps/heatmap',int2str(frame)],'-png','-m1.5',p);
+            saveas(p,[tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Displacement Heatmaps/heatmap',int2str(frame),'.png']);
+            %export_fig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Displacement Heatmaps/heatmap',int2str(frame)],...
+            %    '-png','-painters','-m1.5',p);
             close(p)
+			%[lsta,lastb]=lastwarn
             
             %%%%%%%%%%%%%%
             
@@ -712,16 +748,17 @@ try
         save2disk(final_x_new,final_y_new,final_fu_new,final_fv_new,tfm_init_user_filenamestack{1,ivid});
         
         % delete extra image files
-        if get(h_piv(1).checkbox_delete,'Value')
+        if get(h_piv.checkbox_delete,'Value')
             delete(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{ivid},'/image_stack.mat'])
         end
+		fprintf(1,'CXS-TFM: End frame processing at %.02f s\n',toc(tstartMH));
     end
     %statusbar
-    sb=statusbar(h_piv(1).fig,'Calculation - Done !');
+    sb=statusbar(h_piv.fig,'Calculation - Done !');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     
     %enable ok button; cancel grey out
-    set(h_piv(1).panel_guess,'Visible','on');
+    set(h_piv.panel_guess,'Visible','on');
     
     %profile viewer
     
@@ -738,6 +775,8 @@ if tfm_init_user_strln
     piv_push_calcref(hObject, eventdata, h_piv)
 end
 
+
+% save2disk
 function save2disk(x,y,fu,fv,filename)
 
 %save to mat
@@ -747,16 +786,16 @@ save(['vars_DO_NOT_DELETE/',filename,'/tfm_piv_u.mat'],'fu','-v7.3')
 save(['vars_DO_NOT_DELETE/',filename,'/tfm_piv_v.mat'],'fv','-v7.3')
 
 
-
+%% piv_push_guess
 function piv_push_guess(hObject, eventdata, h_piv)
 
 %profile on
 
 %disable figure during calculation
-enableDisableFig(h_piv(1).fig,0);
+enableDisableFig(h_piv.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_piv(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_piv.fig,1));
 
 
 try
@@ -773,15 +812,15 @@ try
     tfm_init_user_binary2=getappdata(0,'tfm_init_user_binary2');
     tfm_gui_call_piv_flag=getappdata(0,'tfm_gui_call_piv_flag');
         
-    sb=statusbar(h_piv(1).fig,['Looking for reference frame...']);
+    sb=statusbar(h_piv.fig,['Looking for reference frame...']);
     sb.getComponent(0).setForeground(java.awt.Color.red);
     
     
     parfor current_vid=1:tfm_init_user_Nfiles
         %waitbar
-        %         sb=statusbar(h_piv(1).fig,['Looking for reference frame... ',num2str(floor(100*(current_vid-1)/tfm_init_user_Nfiles)), '%% done']);
+        %         sb=statusbar(h_piv.fig,['Looking for reference frame... ',num2str(floor(100*(current_vid-1)/tfm_init_user_Nfiles)), '%% done']);
         %         sb.getComponent(0).setForeground(java.awt.Color.red);
-        disp(['Guessing reference frame for video#',num2str(current_vid)])
+        disp(['Guessing reference frame for video #',num2str(current_vid)])
         
         %get displacements from calc. before
         Num=tfm_init_user_Nframes{current_vid};
@@ -828,36 +867,38 @@ try
         for ktest=1:Num
             deltaU=mask2.*(tfm_piv_user_us{ktest}-u1ref);
             deltaV=mask2.*(tfm_piv_user_vs{ktest}-v1ref);
-            usn=(tfm_piv_user_us{ktest}-u1ref)-nanmean(deltaU(:)).*ones(size(u1ref,1),size(u1ref,2));
-            vsn=(tfm_piv_user_vs{ktest}-v1ref)-nanmean(deltaV(:)).*ones(size(v1ref,1),size(v1ref,2));
+            usn=(tfm_piv_user_us{ktest}-u1ref)-mean(deltaU(:),'omitnan').*ones(size(u1ref,1),size(u1ref,2));
+            vsn=(tfm_piv_user_vs{ktest}-v1ref)-mean(deltaV(:),'omitnan').*ones(size(v1ref,1),size(v1ref,2));
             dsn=mask1.*sqrt(usn.^2+vsn.^2);
-            d(ktest)=nanmean(dsn(:));
+            d(ktest)=mean(dsn(:),'omitnan');
         end
         d(relax)=NaN;
         %for later use
         tfm_piv_user_d{current_vid}=d*tfm_init_user_conversion{current_vid}*1e-6;
     end
-    %statusbar
-    sb=statusbar(h_piv(1).fig,'Calculation - Done !');
+
+    fprintf(1,'CSX-TFM: Ready to calculate displacements\n');
+    % statusbar
+    sb=statusbar(h_piv.fig,'Calculation - Done !');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     
     %set the counter back to 1
     tfm_piv_user_counter=1;
     
     %make second panel visible
-    set(h_piv(1).panel_ref,'Visible','on');
+    set(h_piv.panel_ref,'Visible','on');
     
     %%now display this info for 1st video.
-    set(h_piv(1).edit_ref_ref,'String',num2str(tfm_piv_user_relax{tfm_piv_user_counter}));
-    set(h_piv(1).edit_ref_contr,'String',num2str(tfm_piv_user_contr{tfm_piv_user_counter}));
+    set(h_piv.edit_ref_ref,'String',num2str(tfm_piv_user_relax{tfm_piv_user_counter}));
+    set(h_piv.edit_ref_contr,'String',num2str(tfm_piv_user_contr{tfm_piv_user_counter}));
     
     %display displacement plot
-    reset(h_piv(1).axes_ref)
-    axes(h_piv(1).axes_ref)
+    reset(h_piv.axes_ref)
+    axes(h_piv.axes_ref)
     plot((1:length(tfm_piv_user_d{tfm_piv_user_counter})),tfm_piv_user_d{tfm_piv_user_counter})
     %1e6: otherwise it will not plot in axes, not sure why...
-    set(h_piv(1).axes_ref, 'XTick', []);
-    set(h_piv(1).axes_ref, 'YTick', []);
+    set(h_piv.axes_ref, 'XTick', []);
+    set(h_piv.axes_ref, 'YTick', []);
     
     %display the displacement map for the contracted frame of 1st video
     fr = [tfm_piv_user_relax{1}, tfm_piv_user_contr{1}];
@@ -885,15 +926,15 @@ try
     vcontr=tfm_piv_user_vs{2};
     deltaU=mask2.*(ucontr-urel);
     deltaV=mask2.*(vcontr-vrel);
-    uref=(ucontr-urel)-nanmean(deltaU(:)).*ones(size(urel,1),size(urel,2));
-    vref=(vcontr-vrel)-nanmean(deltaV(:)).*ones(size(vrel,1),size(vrel,2));
+    uref=(ucontr-urel)-mean(deltaU(:),'omitnan').*ones(size(urel,1),size(urel,2));
+    vref=(vcontr-vrel)-mean(deltaV(:),'omitnan').*ones(size(vrel,1),size(vrel,2));
     V=sqrt(uref.^2+vref.^2);
     
     %plot spacing factor
     sp=1;%ceil(20/(spacing+1));
     %plot in axes
-    cla(h_piv(1).axes_ncorr);
-    axes(h_piv(1).axes_ncorr);
+    cla(h_piv.axes_ncorr);
+    axes(h_piv.axes_ncorr);
     hold on
     caxis('auto');
     colormap('parula');
@@ -906,21 +947,21 @@ try
     axis image;
     
     %buttons
-    %set(h_piv(1).button_ok,'Visible','on');
+    %set(h_piv.button_ok,'Visible','on');
     if tfm_piv_user_counter>1
-        set(h_piv(1).button_backwards,'Enable','on');
+        set(h_piv.button_backwards,'Enable','on');
     else
-        set(h_piv(1).button_backwards,'Enable','off');
+        set(h_piv.button_backwards,'Enable','off');
     end
     if tfm_piv_user_counter==tfm_init_user_Nfiles
-        set(h_piv(1).button_forwards,'Enable','off');
+        set(h_piv.button_forwards,'Enable','off');
     else
-        set(h_piv(1).button_forwards,'Enable','on');
+        set(h_piv.button_forwards,'Enable','on');
     end
     
     %set texts to 1st vid
-    set(h_piv(1).text_whichvidname,'String',tfm_init_user_filenamestack{1,tfm_piv_user_counter});
-    set(h_piv(1).text_whichvid,'String',[num2str(tfm_piv_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
+    set(h_piv.text_whichvidname,'String',tfm_init_user_filenamestack{1,tfm_piv_user_counter});
+    set(h_piv.text_whichvid,'String',[num2str(tfm_piv_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
     
 catch errorObj
     % If there is a problem, we display the error message
@@ -942,10 +983,10 @@ setappdata(0,'tfm_piv_user_counter',tfm_piv_user_counter);
 
 function piv_push_pickref(hObject, eventdata, h_piv)
 %disable figure during calculation
-enableDisableFig(h_piv(1).fig,0);
+enableDisableFig(h_piv.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_piv(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_piv.fig,1));
 
 
 try
@@ -966,7 +1007,7 @@ try
     tfm_piv_user_relax{tfm_piv_user_counter}=x;
     
     %set in boxes and save
-    set(h_piv(1).edit_ref_ref,'String',num2str(tfm_piv_user_relax{tfm_piv_user_counter}));
+    set(h_piv.edit_ref_ref,'String',num2str(tfm_piv_user_relax{tfm_piv_user_counter}));
     
 catch
 end
@@ -975,12 +1016,14 @@ end
 %store everything for shared use
 setappdata(0,'tfm_piv_user_relax',tfm_piv_user_relax);
 
+
+%% piv_push_pickcontr
 function piv_push_pickcontr(hObject, eventdata, h_piv)
 %disable figure during calculation
-enableDisableFig(h_piv(1).fig,0);
+enableDisableFig(h_piv.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_piv(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_piv.fig,1));
 
 
 try
@@ -1001,7 +1044,7 @@ try
     tfm_piv_user_contr{tfm_piv_user_counter}=x;
     
     %set in boxes and save
-    set(h_piv(1).edit_ref_contr,'String',num2str(tfm_piv_user_contr{tfm_piv_user_counter}));
+    set(h_piv.edit_ref_contr,'String',num2str(tfm_piv_user_contr{tfm_piv_user_counter}));
     
 catch
 end
@@ -1011,11 +1054,10 @@ setappdata(0,'tfm_piv_user_contr',tfm_piv_user_contr);
 
 function piv_push_update(hObject, eventdata, h_piv)
 %disable figure during calculation
-enableDisableFig(h_piv(1).fig,0);
+enableDisableFig(h_piv.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_piv(1).fig,1));
-
+clean1=onCleanup(@()enableDisableFig(h_piv.fig,1));
 
 try
     %load shared needed para
@@ -1034,7 +1076,7 @@ try
     current_vid=tfm_piv_user_counter;
     
     %waitbar
-    sb=statusbar(h_piv(1).fig,['Updating...']);
+    sb=statusbar(h_piv.fig,['Updating...']);
     sb.getComponent(0).setForeground(java.awt.Color.red);
     
     %get displacmenets from calc. before
@@ -1068,8 +1110,8 @@ try
     dismask=tfm_init_user_binary1{current_vid}(tfm_piv_user_ys{1}(:,1) ,tfm_piv_user_xs{1}(1,:));
     
     %read relaxed contr from editbox
-    contr=str2double(get(h_piv(1).edit_ref_contr,'String'));
-    relax=str2double(get(h_piv(1).edit_ref_ref,'String'));
+    contr=str2double(get(h_piv.edit_ref_contr,'String'));
+    relax=str2double(get(h_piv.edit_ref_ref,'String'));
     
     %for later use
     tfm_piv_user_contr{current_vid}=contr;
@@ -1088,27 +1130,27 @@ try
     for ktest=1:Num
         deltaU=mask2.*(tfm_piv_user_us{ktest}-u1ref);
         deltaV=mask2.*(tfm_piv_user_vs{ktest}-v1ref);
-        usn=(tfm_piv_user_us{ktest}-u1ref)-nanmean(deltaU(:)).*ones(size(u1ref,1),size(u1ref,2));
-        vsn=(tfm_piv_user_vs{ktest}-v1ref)-nanmean(deltaV(:)).*ones(size(v1ref,1),size(v1ref,2));
+        usn=(tfm_piv_user_us{ktest}-u1ref)-mean(deltaU(:),'omitnan').*ones(size(u1ref,1),size(u1ref,2));
+        vsn=(tfm_piv_user_vs{ktest}-v1ref)-mean(deltaV(:),'omitnan').*ones(size(v1ref,1),size(v1ref,2));
         dsn=mask1.*sqrt(usn.^2+vsn.^2);
-        d(ktest)=nanmean(dsn(:));
+        d(ktest)=mean(dsn(:),'omitnan');
     end
     d(relax)=NaN;
     %for later use
     tfm_piv_user_d{current_vid}=d*tfm_init_user_conversion{current_vid}*1e6;
     
     %statusbar
-    sb=statusbar(h_piv(1).fig,'Calculation - Done !');
+    sb=statusbar(h_piv.fig,'Calculation - Done !');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     
     %make second panel visible
-    set(h_piv(1).panel_ref,'Visible','on');
+    set(h_piv.panel_ref,'Visible','on');
     
     %display displacement plot
-    axes(h_piv(1).axes_ref);
+    axes(h_piv.axes_ref);
     plot(1:length(tfm_piv_user_d{tfm_piv_user_counter}),tfm_piv_user_d{tfm_piv_user_counter})
-    set(h_piv(1).axes_ref, 'XTick', []);
-    set(h_piv(1).axes_ref, 'YTick', []);
+    set(h_piv.axes_ref, 'XTick', []);
+    set(h_piv.axes_ref, 'YTick', []);
     
     %display the displacement map for the contracted frame of that video
     fr = [tfm_piv_user_relax{tfm_piv_user_counter}, tfm_piv_user_contr{tfm_piv_user_counter}];
@@ -1133,15 +1175,15 @@ try
     vcontr=tfm_piv_user_vs{2};
     deltaU=mask2.*(ucontr-urel);
     deltaV=mask2.*(vcontr-vrel);
-    uref=(ucontr-urel)-nanmean(deltaU(:)).*ones(size(urel,1),size(urel,2));
-    vref=(vcontr-vrel)-nanmean(deltaV(:)).*ones(size(vrel,1),size(vrel,2));
+    uref=(ucontr-urel)-mean(deltaU(:),'omitnan').*ones(size(urel,1),size(urel,2));
+    vref=(vcontr-vrel)-mean(deltaV(:),'omitnan').*ones(size(vrel,1),size(vrel,2));
     V=sqrt(uref.^2+vref.^2);
     
     %plot spacing factor
     sp=1;%ceil(20/(spacing+1));
     %plot in axes
-    cla(h_piv(1).axes_ncorr);
-    axes(h_piv(1).axes_ncorr);
+    cla(h_piv.axes_ncorr);
+    axes(h_piv.axes_ncorr);
     hold on
     caxis('auto');
     colormap('parula');
@@ -1154,21 +1196,21 @@ try
     axis image;
     
     %buttons
-    %set(h_piv(1).button_ok,'Visible','on');
+    %set(h_piv.button_ok,'Visible','on');
     if tfm_piv_user_counter>1
-        set(h_piv(1).button_backwards,'Enable','on');
+        set(h_piv.button_backwards,'Enable','on');
     else
-        set(h_piv(1).button_backwards,'Enable','off');
+        set(h_piv.button_backwards,'Enable','off');
     end
     if tfm_piv_user_counter==tfm_init_user_Nfiles
-        set(h_piv(1).button_forwards,'Enable','off');
+        set(h_piv.button_forwards,'Enable','off');
     else
-        set(h_piv(1).button_forwards,'Enable','on');
+        set(h_piv.button_forwards,'Enable','on');
     end
     
     %set texts to 1st vid
-    set(h_piv(1).text_whichvidname,'String',tfm_init_user_filenamestack{1,tfm_piv_user_counter});
-    set(h_piv(1).text_whichvid,'String',[num2str(tfm_piv_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
+    set(h_piv.text_whichvidname,'String',tfm_init_user_filenamestack{1,tfm_piv_user_counter});
+    set(h_piv.text_whichvid,'String',[num2str(tfm_piv_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
     
 catch errorObj
     % If there is a problem, we display the error message
@@ -1182,6 +1224,8 @@ setappdata(0,'tfm_piv_user_relax',tfm_piv_user_relax);
 setappdata(0,'tfm_piv_user_d',tfm_piv_user_d);
 setappdata(0,'tfm_piv_user_counter',tfm_piv_user_counter);
 
+
+%% piv_push_calcref
 function piv_push_calcref(hObject, eventdata, h_piv)
 
 %profile on
@@ -1189,10 +1233,10 @@ function piv_push_calcref(hObject, eventdata, h_piv)
 %userTiming.disp2ref{2} = toc(userTiming.disp2ref{1});
 
 %disable figure during calculation
-enableDisableFig(h_piv(1).fig,0);
+enableDisableFig(h_piv.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_piv(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_piv.fig,1));
 
 
 try
@@ -1231,13 +1275,13 @@ try
         tfm_piv_user_delta_roi=cell(tfm_init_user_Nfiles,max(tfm_conc_user_number_roi));
     end
     
-    sb=statusbar(h_piv(1).fig,['Calculating referenced displacements...']);
+    sb=statusbar(h_piv.fig,'Calculating referenced displacements...');
     sb.getComponent(0).setForeground(java.awt.Color.red);
     
     %pivs
     for ivid=1:tfm_init_user_Nfiles
         %deleted for parfor
-        %sb=statusbar(h_piv(1).fig,['Calculating... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '%% done']);
+        %sb=statusbar(h_piv.fig,['Calculating... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '%% done']);
         %sb.getComponent(0).setForeground(java.awt.Color.red);
         disp(['Referencing displacement for video #',num2str(ivid)])
         
@@ -1258,7 +1302,7 @@ try
         
         
         if ~tfm_gui_call_piv_flag
-            parfor frame=1:Num%parfor
+            parfor frame=1:Num %parfor
                 %calculation
                 [ displacement,alphamean,alphastd,displacement_roi,alphamean_roi,alphastd_roi,~,dis_pts(:,:,frame), dis_pts_dwnsamp(:,:,frame)]=calc_blobb3(tfm_init_user_filenamestack{1,ivid},tfm_piv_user_relax{ivid},tfm_piv_user_contr{ivid},frame,tfm_piv_user_dismask,tfm_init_user_binary2{ivid},tfm_conc_user_counter_roi(ivid),tfm_conc_user_number_roi(ivid),tfm_conc_user_binary_roi(:,ivid));%[],[],[]);
                 tfm_piv_user_meanalpha{ivid,frame}=alphamean;
@@ -1310,7 +1354,7 @@ try
             dis = num2cell(dis_pts_dwnsamp, [1 2]);
             
             %find peaks for mean displ. (inside cell)
-            [pks,locs] = findpeaks([tfm_piv_user_meand{ivid,2:end-1}],'MINPEAKHEIGHT',.5*max([tfm_piv_user_meand{ivid,:}]));
+            [~,locs] = findpeaks([tfm_piv_user_meand{ivid,2:end-1}],'MinPeakHeight',.5*max([tfm_piv_user_meand{ivid,:}]));
             
             %find pts inside blobbs...
             blobb_comb=double(tfm_conc_user_binary1{ivid});
@@ -1356,7 +1400,7 @@ try
                     
                     %now this gives a range for our delta calc.
                     %peaks i
-                    [pksi,locsi] = findpeaks(s2(2:end-1),'MINPEAKHEIGHT',.5*max(s2));
+                    [pksi,locsi] = findpeaks(s2(2:end-1),'MinPeakHeight',.5*max(s2));
                     %for each peak of the current curve, look if there is a peak on
                     %the reference curve inside the range
                     ltot=length(pksi);
@@ -1373,7 +1417,7 @@ try
                             d_delta(i) = closest-locsi(i);
                         end
                     end
-                    d_delta_mean(kk) = nanmean(d_delta);%parfor modification
+                    d_delta_mean(kk) = mean(d_delta,'omitnan');%parfor modification
                 end
             end
             
@@ -1433,14 +1477,17 @@ try
             %%%%
         end
     end
+
     %statusbar
-    sb=statusbar(h_piv(1).fig,'Calculation - Done !');
+    sb=statusbar(h_piv.fig,'Calculation - Done !');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
-    
+
+    fprintf(1,'CXS-TFM: Displacements calculated.\n');
+
     %enable ok button & checkbox
-    set(h_piv(1).button_ok,'Visible','on')
-    set(h_piv(1).checkbox_matrix,'Visible','on')
-    set(h_piv(1).checkbox_heatmaps,'Visible','on')
+    set(h_piv.button_ok,'Visible','on')
+    set(h_piv.checkbox_matrix,'Visible','on')
+    set(h_piv.checkbox_heatmaps,'Visible','on')
     
     
     %save for shared use
@@ -1482,12 +1529,14 @@ if ~tfm_gui_call_piv_flag
     setappdata(0,'tfm_piv_user_delta_roi',tfm_piv_user_delta_roi)
 end
 
+
+%% piv_push_backwards
 function piv_push_backwards(hObject, eventdata, h_piv)
 %disable figure during calculation
-enableDisableFig(h_piv(1).fig,0);
+enableDisableFig(h_piv.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_piv(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_piv.fig,1));
 
 
 try
@@ -1504,14 +1553,14 @@ try
     tfm_piv_user_counter=tfm_piv_user_counter-1;
     
     %now display info for current video.
-    set(h_piv(1).edit_ref_ref,'String',num2str(tfm_piv_user_relax{tfm_piv_user_counter}));
-    set(h_piv(1).edit_ref_contr,'String',num2str(tfm_piv_user_contr{tfm_piv_user_counter}));
+    set(h_piv.edit_ref_ref,'String',num2str(tfm_piv_user_relax{tfm_piv_user_counter}));
+    set(h_piv.edit_ref_contr,'String',num2str(tfm_piv_user_contr{tfm_piv_user_counter}));
     
     %display displacement plot
-    axes(h_piv(1).axes_ref);
+    axes(h_piv.axes_ref);
     plot(1:length(tfm_piv_user_d{tfm_piv_user_counter}),tfm_piv_user_d{tfm_piv_user_counter})
-    set(h_piv(1).axes_ref, 'XTick', []);
-    set(h_piv(1).axes_ref, 'YTick', []);
+    set(h_piv.axes_ref, 'XTick', []);
+    set(h_piv.axes_ref, 'YTick', []);
     
     %display the displacement map for the contracted frame of that video
     fr = [tfm_piv_user_relax{tfm_piv_user_counter}, tfm_piv_user_contr{tfm_piv_user_counter}];
@@ -1536,15 +1585,15 @@ try
     vcontr=tfm_piv_user_vs{2};
     deltaU=mask2.*(ucontr-urel);
     deltaV=mask2.*(vcontr-vrel);
-    uref=(ucontr-urel)-nanmean(deltaU(:)).*ones(size(urel,1),size(urel,2));
-    vref=(vcontr-vrel)-nanmean(deltaV(:)).*ones(size(vrel,1),size(vrel,2));
+    uref=(ucontr-urel)-mean(deltaU(:)).*ones(size(urel,1),size(urel,2),'omitnan');
+    vref=(vcontr-vrel)-mean(deltaV(:)).*ones(size(vrel,1),size(vrel,2),'omitnan');
     V=sqrt(uref.^2+vref.^2);
     
     %plot spacing factor
     sp=1;%ceil(20/(spacing+1));
     %plot in axes
-    cla(h_piv(1).axes_ncorr);
-    axes(h_piv(1).axes_ncorr);
+    cla(h_piv.axes_ncorr);
+    axes(h_piv.axes_ncorr);
     hold on
     caxis('auto');
     colormap('parula');
@@ -1557,21 +1606,21 @@ try
     axis image;
     
     %buttons
-    %set(h_piv(1).button_ok,'Visible','on');
+    %set(h_piv.button_ok,'Visible','on');
     if tfm_piv_user_counter>1
-        set(h_piv(1).button_backwards,'Enable','on');
+        set(h_piv.button_backwards,'Enable','on');
     else
-        set(h_piv(1).button_backwards,'Enable','off');
+        set(h_piv.button_backwards,'Enable','off');
     end
     if tfm_piv_user_counter==tfm_init_user_Nfiles
-        set(h_piv(1).button_forwards,'Enable','off');
+        set(h_piv.button_forwards,'Enable','off');
     else
-        set(h_piv(1).button_forwards,'Enable','on');
+        set(h_piv.button_forwards,'Enable','on');
     end
     
     %set texts to 1st vid
-    set(h_piv(1).text_whichvidname,'String',tfm_init_user_filenamestack{1,tfm_piv_user_counter});
-    set(h_piv(1).text_whichvid,'String',[num2str(tfm_piv_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
+    set(h_piv.text_whichvidname,'String',tfm_init_user_filenamestack{1,tfm_piv_user_counter});
+    set(h_piv.text_whichvid,'String',[num2str(tfm_piv_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
     
 catch errorObj
     % If there is a problem, we display the error message
@@ -1582,13 +1631,14 @@ end
 %store everything for shared use
 setappdata(0,'tfm_piv_user_counter',tfm_piv_user_counter);
 
+
+%% piv_push_forwards
 function piv_push_forwards(hObject, eventdata, h_piv)
 %disable figure during calculation
-enableDisableFig(h_piv(1).fig,0);
+enableDisableFig(h_piv.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_piv(1).fig,1));
-
+clean1=onCleanup(@()enableDisableFig(h_piv.fig,1));
 
 try
     %load shared needed para
@@ -1604,14 +1654,14 @@ try
     tfm_piv_user_counter=tfm_piv_user_counter+1;
     
     %now display info for current video.
-    set(h_piv(1).edit_ref_ref,'String',num2str(tfm_piv_user_relax{tfm_piv_user_counter}));
-    set(h_piv(1).edit_ref_contr,'String',num2str(tfm_piv_user_contr{tfm_piv_user_counter}));
+    set(h_piv.edit_ref_ref,'String',num2str(tfm_piv_user_relax{tfm_piv_user_counter}));
+    set(h_piv.edit_ref_contr,'String',num2str(tfm_piv_user_contr{tfm_piv_user_counter}));
     
     %display displacement plot
-    axes(h_piv(1).axes_ref);
+    axes(h_piv.axes_ref);
     plot(1:length(tfm_piv_user_d{tfm_piv_user_counter}),tfm_piv_user_d{tfm_piv_user_counter})
-    set(h_piv(1).axes_ref, 'XTick', []);
-    set(h_piv(1).axes_ref, 'YTick', []);
+    set(h_piv.axes_ref, 'XTick', []);
+    set(h_piv.axes_ref, 'YTick', []);
     
     %display the displacement map for the contracted frame of that video
     fr = [tfm_piv_user_relax{tfm_piv_user_counter}, tfm_piv_user_contr{tfm_piv_user_counter}];
@@ -1636,15 +1686,15 @@ try
     vcontr=tfm_piv_user_vs{2};
     deltaU=mask2.*(ucontr-urel);
     deltaV=mask2.*(vcontr-vrel);
-    uref=(ucontr-urel)-nanmean(deltaU(:)).*ones(size(urel,1),size(urel,2));
-    vref=(vcontr-vrel)-nanmean(deltaV(:)).*ones(size(vrel,1),size(vrel,2));
+    uref=(ucontr-urel)-mean(deltaU(:)).*ones(size(urel,1),size(urel,2),'omitnan');
+    vref=(vcontr-vrel)-mean(deltaV(:)).*ones(size(vrel,1),size(vrel,2),'omitnan');
     V=sqrt(uref.^2+vref.^2);
     
     %plot spacing factor
     sp=1;%ceil(20/(spacing+1));
     %plot in axes
-    cla(h_piv(1).axes_ncorr);
-    axes(h_piv(1).axes_ncorr);
+    cla(h_piv.axes_ncorr);
+    axes(h_piv.axes_ncorr);
     hold on
     caxis('auto');
     colormap('parula');
@@ -1657,21 +1707,21 @@ try
     axis image;
     
     %buttons
-    %set(h_piv(1).button_ok,'Visible','on');
+    %set(h_piv.button_ok,'Visible','on');
     if tfm_piv_user_counter>1
-        set(h_piv(1).button_backwards,'Enable','on');
+        set(h_piv.button_backwards,'Enable','on');
     else
-        set(h_piv(1).button_backwards,'Enable','off');
+        set(h_piv.button_backwards,'Enable','off');
     end
     if tfm_piv_user_counter==tfm_init_user_Nfiles
-        set(h_piv(1).button_forwards,'Enable','off');
+        set(h_piv.button_forwards,'Enable','off');
     else
-        set(h_piv(1).button_forwards,'Enable','on');
+        set(h_piv.button_forwards,'Enable','on');
     end
     
     %set texts to 1st vid
-    set(h_piv(1).text_whichvidname,'String',tfm_init_user_filenamestack{1,tfm_piv_user_counter});
-    set(h_piv(1).text_whichvid,'String',[num2str(tfm_piv_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
+    set(h_piv.text_whichvidname,'String',tfm_init_user_filenamestack{1,tfm_piv_user_counter});
+    set(h_piv.text_whichvid,'String',[num2str(tfm_piv_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
     
 catch errorObj
     % If there is a problem, we display the error message
@@ -1682,13 +1732,14 @@ end
 %store everything for shared use
 setappdata(0,'tfm_piv_user_counter',tfm_piv_user_counter);
 
+
+%% piv_push_ok
 function piv_push_ok(hObject, eventdata, h_piv, h_main)
 %disable figure during calculation
-enableDisableFig(h_piv(1).fig,0);
+enableDisableFig(h_piv.fig,0);
 
 %turn back on in the end
-%clean1=onCleanup(@()enableDisableFig(h_piv(1).fig,1));
-
+%clean1=onCleanup(@()enableDisableFig(h_piv.fig,1));
 
 try
     %load what shared para we need
@@ -1703,29 +1754,29 @@ try
     
     %add relaxed/contracted to excel file
     for ivid=1:tfm_init_user_Nfiles
-        sb=statusbar(h_piv(1).fig,['Saving to Excel... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '%% done']);
+        sb=statusbar(h_piv.fig,['Saving to Excel... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '%% done']);
         sb.getComponent(0).setForeground(java.awt.Color.red);
         
         newfile=[tfm_init_user_pathnamestack{1,ivid},'/',tfm_init_user_filenamestack{1,ivid},'/Results/',tfm_init_user_filenamestack{1,ivid},'.xlsx'];
         A = {tfm_piv_user_relax{ivid},tfm_piv_user_contr{ivid}};
         sheet = 'General';
         xlRange = 'F3';
-        xlwrite(newfile,A,sheet,xlRange)
+        xlwrite(newfile,A,sheet,xlRange);
     end
     %statusbar
-    sb=statusbar(h_piv(1).fig,'Saving - Done !');
+    sb=statusbar(h_piv.fig,'Saving - Done !');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     
     %check if user wants to save
-    value = get(h_piv(1).checkbox_matrix, 'Value');
+    value = get(h_piv.checkbox_matrix, 'Value');
     
     if value
         w_i=0;
-        %loop over videos
+        % loop over videos
         for ivid=1:tfm_init_user_Nfiles
-            %make output folder for displacements
+            % make output folder for displacements
             if ~isequal(exist([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Datasets/Displacements'], 'dir'),7)
-                mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Datasets/Displacements'])
+                [~,~] = mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Datasets/Displacements']);  
             end
             
             %loop over frames
@@ -1733,7 +1784,7 @@ try
             %to wait because all displacements are in one file
             %waitbar
             w_i=w_i+1;
-            sb=statusbar(h_piv(1).fig,['Saving full fields... ',num2str(floor(100*(w_i-1)/sum([tfm_init_user_Nframes{:}]))), '%% done']);
+            sb=statusbar(h_piv.fig,['Saving full fields... ',num2str(floor(100*(w_i-1)/sum([tfm_init_user_Nframes{:}]))), '%% done']);
             sb.getComponent(0).setForeground(java.awt.Color.red);
             %copy displacements
             copyfile(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,ivid},'/tfm_piv_x.mat'],[tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Datasets/Displacements/tfm_piv_x.mat']);
@@ -1743,16 +1794,16 @@ try
             %end
         end
         %statusbar
-        sb=statusbar(h_piv(1).fig,'Saving - Done !');
+        sb=statusbar(h_piv.fig,'Saving - Done !');
         sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     end
     
     %check if user wants to save heatmaps
-    value = get(h_piv(1).checkbox_heatmaps, 'Value');
+    value = get(h_piv.checkbox_heatmaps, 'Value');
     
     if ~value
         for ivid=1:tfm_init_user_Nfiles
-            rmdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Displacement Heatmaps'],'s')
+            rmdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Displacement Heatmaps'],'s');
         end
     end
     
@@ -1768,28 +1819,31 @@ end
 %save for shared use
 %setappdata(0,'userTiming',userTiming)
 
+fprintf(1,'CXS-TFM: PIV calculations complete.\n');
+
 %enable fig
-enableDisableFig(h_piv(1).fig,1)
+enableDisableFig(h_piv.fig,1);
 
 %change main windows 3. button status
-set(h_main(1).button_piv,'ForegroundColor',[0 .5 0]);
+set(h_main.button_piv,'ForegroundColor',[0 .5 0]);
 
 %close window
-close(h_piv(1).fig);
+close(h_piv.fig);
 
 %move main window to the side
-movegui(h_main(1).fig,'center')
+movegui(h_main.fig,'center')
 
 %Streamlining
 if tfm_init_user_strln
-    if tfm_gui_call_piv_flag%only for ContraX, not for IntraX
+    if tfm_gui_call_piv_flag %only for ContraX, not for IntraX
         tfm_tfm(h_main);
     end
 end
 
+
 function piv_checkbox(hObject, eventdata, h_piv)
-if get(h_piv(1).checkbox,'Value')
-    set(h_piv(1).panel_post,'Visible','on')
+if get(h_piv.checkbox,'Value')
+    set(h_piv.panel_post,'Visible','on')
 else
-    set(h_piv(1).panel_post,'Visible','off')
+    set(h_piv.panel_post,'Visible','off')
 end

@@ -40,19 +40,19 @@ ys_frame=s.y(:,:,frame);
 %get angle
 deltaU=(us_contr-us_relax);
 deltaV=(vs_contr-vs_relax);
-u1_0=(us_contr-us_relax)-nanmean(deltaU(:)).*ones(size(us_relax,1),size(us_relax,2));
-v1_0=(vs_contr-vs_relax)-nanmean(deltaV(:)).*ones(size(vs_relax,1),size(vs_relax,2));
+u1_0=(us_contr-us_relax)-mean(deltaU(:),'omitnan').*ones(size(us_relax,1),size(us_relax,2));
+v1_0=(vs_contr-vs_relax)-mean(deltaV(:),'omitnan').*ones(size(vs_relax,1),size(vs_relax,2));
 
 %angle
 Ang=atand((mask.*v1_0)./(mask.*u1_0+eps));
 Weights = sqrt(mask.*u1_0.^2+mask.*v1_0.^2);
-theta_0 = nansum(nansum(Ang.*Weights))./nansum(nansum(Weights));
+theta_0 = sum(sum(Ang.*Weights,'omitnan'),'omitnan')./sum(sum(Weights,'omitnan'),'omitnan');
 
 %between current frame and relaxed:
 deltaU=(us_frame-us_relax);
 deltaV=(vs_frame-vs_relax);
-u1_0=(us_frame-us_relax)-nanmean(deltaU(:)).*ones(size(us_relax,1),size(us_relax,2));
-v1_0=(vs_frame-vs_relax)-nanmean(deltaV(:)).*ones(size(vs_relax,1),size(vs_relax,2));
+u1_0=(us_frame-us_relax)-mean(deltaU(:),'omitnan').*ones(size(us_relax,1),size(us_relax,2));
+v1_0=(vs_frame-vs_relax)-mean(deltaV(:),'omitnan').*ones(size(vs_relax,1),size(vs_relax,2));
 x1=xs_frame;
 y1=ys_frame;
 
@@ -62,7 +62,7 @@ v1=v1_0;
 %angle between curent frame and relaxed and delta_theta:
 % Ang=atand((mask.*v1_0)./(mask.*u1_0+eps));
 % Weights = sqrt(mask.*u1_0.^2+mask.*v1_0.^2);
-% theta = nansum(nansum(Ang.*Weights))./nansum(nansum(Weights));
+% theta = sum(sum(Ang.*Weights,'omitnan'),'omitnan')./sum(sum(Weights,'omitnan'),'omitnan');
 
 %fourier transform
 u=(fft2(u1));

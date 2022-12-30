@@ -27,29 +27,32 @@
 % version 1.0 written by O. Schwab: oschwab@stanford.edu
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function tfm_tfm(h_main)
 %main function for the tfm window of beads gui
+function tfm_tfm(h_main)
+fprintf(1,'\n');
+fprintf(1,'CXS-TFM: TFM Module\n');
 
 %userTiming= getappdata(0,'userTiming');
 %userTiming.piv2tfm{2} = toc(userTiming.piv2tfm{1});
 
+warning('off','MATLAB:MKDIR:DirectoryExists');
 
 %create new window for tfm
 %fig size
-figsize=[450,800];
+figsize=[470,800];
 %get screen size
 screensize = get(0,'ScreenSize');
 %position fig on center of screen
 xpos = ceil((screensize(3)-figsize(2))/2);
 ypos = ceil((screensize(4)-figsize(1))/2);
 %create fig; invisible at first
-h_tfm(1).fig=figure(...
+h_tfm.fig=figure(...
     'position',[xpos, ypos, figsize(2), figsize(1)],...
     'units','pixels',...
     'renderer','OpenGL',...
     'MenuBar','none',...
     'PaperPositionMode','auto',...
-    'Name','Beads Traction Forces',...
+    'Name','ContraX Traction Forces',...
     'NumberTitle','off',...
     'Resize','off',...
     'Color',[.2,.2,.2],...
@@ -60,129 +63,130 @@ pcolor = [.2 .2 .2];
 ptcolor = [1 1 1];
 bcolor = [.3 .3 .3];
 btcolor = [1 1 1];
-h_tfm(1).ForegroundColor = ptcolor;
-h_tfm(1).BackgroundColor = pcolor;
+h_tfm.ForegroundColor = ptcolor;
+h_tfm.BackgroundColor = pcolor;
+fontsizeA = 10;
 
 %create uipanel for smartguess
 %uipanel
-h_tfm(1).panel_guess = uipanel('Parent',h_tfm(1).fig,'Title','Regularization','units','pixels','Position',[630,390,100,50]);
-h_tfm(1).panel_guess.ForegroundColor = ptcolor;
-h_tfm(1).panel_guess.BackgroundColor = pcolor;
+h_tfm.panel_guess = uipanel('Parent',h_tfm.fig,'Title','Regularization','units','pixels','Position',[630,390,100,50]);
+h_tfm.panel_guess.ForegroundColor = ptcolor;
+h_tfm.panel_guess.BackgroundColor = pcolor;
 %button
-h_tfm(1).button_guess = uicontrol('Parent',h_tfm(1).panel_guess,'style','pushbutton','position',[5,10,87,25],'string','Guess all');
+h_tfm.button_guess = uicontrol('Parent',h_tfm.panel_guess,'style','pushbutton','position',[5,10,87,25],'string','Guess all');
 
 %create uipanel for settings
 %uipanel
-h_tfm(1).panel_settings = uipanel('Parent',h_tfm(1).fig,'Title','Settings','units','pixels','Position',[20,335,605,105]);
-h_tfm(1).panel_settings.ForegroundColor = ptcolor;
-h_tfm(1).panel_settings.BackgroundColor = pcolor;
+h_tfm.panel_settings = uipanel('Parent',h_tfm.fig,'Title','Settings','units','pixels','Position',[20,335,605,105]);
+h_tfm.panel_settings.ForegroundColor = ptcolor;
+h_tfm.panel_settings.BackgroundColor = pcolor;
 %text: regul
-h_tfm(1).text_regul = uicontrol('Parent',h_tfm(1).panel_settings,'style','text','position',[5,75,100,15],'string','Lambda','HorizontalAlignment','left');
-h_tfm(1).text_regul.ForegroundColor = ptcolor;
-h_tfm(1).text_regul.BackgroundColor = pcolor;
+h_tfm.text_regul = uicontrol('Parent',h_tfm.panel_settings,'style','text','position',[5,75,100,15],'string','Lambda','HorizontalAlignment','left');
+h_tfm.text_regul.ForegroundColor = ptcolor;
+h_tfm.text_regul.BackgroundColor = pcolor;
 %text: youngs
-h_tfm(1).text_youngs = uicontrol('Parent',h_tfm(1).panel_settings,'style','text','position',[5,60,100,15],'string','Substrate Young"s','HorizontalAlignment','left');
-h_tfm(1).text_youngs.ForegroundColor = ptcolor;
-h_tfm(1).text_youngs.BackgroundColor = pcolor;
+h_tfm.text_youngs = uicontrol('Parent',h_tfm.panel_settings,'style','text','position',[5,60,100,15],'string','Substrate Young"s','HorizontalAlignment','left');
+h_tfm.text_youngs.ForegroundColor = ptcolor;
+h_tfm.text_youngs.BackgroundColor = pcolor;
 %text: poisson
-h_tfm(1).text_poisson = uicontrol('Parent',h_tfm(1).panel_settings,'style','text','position',[5,45,100,15],'string','Substrate Poisson"s','HorizontalAlignment','left');
-h_tfm(1).text_poisson.ForegroundColor = ptcolor;
-h_tfm(1).text_poisson.BackgroundColor = pcolor;
+h_tfm.text_poisson = uicontrol('Parent',h_tfm.panel_settings,'style','text','position',[5,45,100,15],'string','Substrate Poisson"s','HorizontalAlignment','left');
+h_tfm.text_poisson.ForegroundColor = ptcolor;
+h_tfm.text_poisson.BackgroundColor = pcolor;
 %text:traction limits
-h_tfm(1).text_limits = uicontrol('Parent',h_tfm(1).panel_settings,'style','text','position',[180,70,100,15],'string','Visualization limits','HorizontalAlignment','left');
-h_tfm(1).text_limits.ForegroundColor = ptcolor;
-h_tfm(1).text_limits.BackgroundColor = pcolor;
+h_tfm.text_limits = uicontrol('Parent',h_tfm.panel_settings,'style','text','position',[180,70,100,15],'string','Visualization limits','HorizontalAlignment','left');
+h_tfm.text_limits.ForegroundColor = ptcolor;
+h_tfm.text_limits.BackgroundColor = pcolor;
 %text:tmin
-h_tfm(1).text_tmin = uicontrol('Parent',h_tfm(1).panel_settings,'style','text','position',[180,50,35,15],'string','T min.','HorizontalAlignment','left');
-h_tfm(1).text_tmin.ForegroundColor = ptcolor;
-h_tfm(1).text_tmin.BackgroundColor = pcolor;
+h_tfm.text_tmin = uicontrol('Parent',h_tfm.panel_settings,'style','text','position',[180,50,35,15],'string','T min.','HorizontalAlignment','left');
+h_tfm.text_tmin.ForegroundColor = ptcolor;
+h_tfm.text_tmin.BackgroundColor = pcolor;
 %text:tmax
-h_tfm(1).text_tmax = uicontrol('Parent',h_tfm(1).panel_settings,'style','text','position',[230,50,35,15],'string','T max.','HorizontalAlignment','left');
-h_tfm(1).text_tmax.ForegroundColor = ptcolor;
-h_tfm(1).text_tmax.BackgroundColor = pcolor;
+h_tfm.text_tmax = uicontrol('Parent',h_tfm.panel_settings,'style','text','position',[230,50,35,15],'string','T max.','HorizontalAlignment','left');
+h_tfm.text_tmax.ForegroundColor = ptcolor;
+h_tfm.text_tmax.BackgroundColor = pcolor;
 %edit: regul
-h_tfm(1).edit_regul = uicontrol('Parent',h_tfm(1).panel_settings,'style','edit','position',[105,75,40,15],'HorizontalAlignment','center');
+h_tfm.edit_regul = uicontrol('Parent',h_tfm.panel_settings,'style','edit','position',[105,75,40,15],'HorizontalAlignment','center');
 %edit: youngs
 % GASPARD's edit of Young's modulus default value to 3e4
-%h_tfm(1).edit_youngs = uicontrol('Parent',h_tfm(1).panel_settings,'style','edit','position',[105,60,40,15],'HorizontalAlignment','center','String','1e4');
-%h_tfm(1).edit_youngs = uicontrol('Parent',h_tfm(1).panel_settings,'style','edit','position',[105,60,40,15],'HorizontalAlignment','center','String','3e4');
-h_tfm(1).edit_youngs = uicontrol('Parent',h_tfm(1).panel_settings,'style','edit','position',[105,60,40,15],'HorizontalAlignment','center');
+%h_tfm.edit_youngs = uicontrol('Parent',h_tfm.panel_settings,'style','edit','position',[105,60,40,15],'HorizontalAlignment','center','String','1e4');
+%h_tfm.edit_youngs = uicontrol('Parent',h_tfm.panel_settings,'style','edit','position',[105,60,40,15],'HorizontalAlignment','center','String','3e4');
+h_tfm.edit_youngs = uicontrol('Parent',h_tfm.panel_settings,'style','edit','position',[105,60,40,15],'HorizontalAlignment','center');
 
 %edit: poissons
-%h_tfm(1).edit_poisson = uicontrol('Parent',h_tfm(1).panel_settings,'style','edit','position',[105,45,40,15],'HorizontalAlignment','center','String','0.4');
-h_tfm(1).edit_poisson = uicontrol('Parent',h_tfm(1).panel_settings,'style','edit','position',[105,45,40,15],'HorizontalAlignment','center');
+%h_tfm.edit_poisson = uicontrol('Parent',h_tfm.panel_settings,'style','edit','position',[105,45,40,15],'HorizontalAlignment','center','String','0.4');
+h_tfm.edit_poisson = uicontrol('Parent',h_tfm.panel_settings,'style','edit','position',[105,45,40,15],'HorizontalAlignment','center');
 
 %radiobuttongroup
-h_tfm(1).buttongroup_constrain = uibuttongroup('Parent',h_tfm(1).panel_settings,'Units', 'pixels','Position',[5,5,142,40]);
-h_tfm(1).buttongroup_constrain.ForegroundColor = ptcolor;
-h_tfm(1).buttongroup_constrain.BackgroundColor = pcolor;
+h_tfm.buttongroup_constrain = uibuttongroup('Parent',h_tfm.panel_settings,'Units', 'pixels','Position',[5,5,142,40]);
+h_tfm.buttongroup_constrain.ForegroundColor = ptcolor;
+h_tfm.buttongroup_constrain.BackgroundColor = pcolor;
 %radiobutton 1: unconstrained
-h_tfm(1).radiobutton_uncontrained = uicontrol('Parent',h_tfm(1).buttongroup_constrain,'style','radiobutton','position',[5,19,130,18],'string','unconstrained analysis','tag','radiobutton_unconstrained');
-h_tfm(1).radiobutton_uncontrained.ForegroundColor = ptcolor;
-h_tfm(1).radiobutton_uncontrained.BackgroundColor = pcolor;
+h_tfm.radiobutton_uncontrained = uicontrol('Parent',h_tfm.buttongroup_constrain,'style','radiobutton','position',[5,19,130,18],'string','unconstrained analysis','tag','radiobutton_unconstrained');
+h_tfm.radiobutton_uncontrained.ForegroundColor = ptcolor;
+h_tfm.radiobutton_uncontrained.BackgroundColor = pcolor;
 %radiobutton 1: constrained
-h_tfm(1).radiobutton_constrained = uicontrol('Parent',h_tfm(1).buttongroup_constrain,'style','radiobutton','position',[5,1,130,18],'string','constrained analysis','tag','radiobutton_constrained');
-h_tfm(1).radiobutton_constrained.ForegroundColor = ptcolor;
-h_tfm(1).radiobutton_constrained.BackgroundColor = pcolor;
+h_tfm.radiobutton_constrained = uicontrol('Parent',h_tfm.buttongroup_constrain,'style','radiobutton','position',[5,1,130,18],'string','constrained analysis','tag','radiobutton_constrained');
+h_tfm.radiobutton_constrained.ForegroundColor = ptcolor;
+h_tfm.radiobutton_constrained.BackgroundColor = pcolor;
 %edit: tmin
-h_tfm(1).edit_tmin = uicontrol('Parent',h_tfm(1).panel_settings,'style','edit','position',[180,35,35,15],'HorizontalAlignment','center');
+h_tfm.edit_tmin = uicontrol('Parent',h_tfm.panel_settings,'style','edit','position',[180,35,35,15],'HorizontalAlignment','center');
 %edit: tmax
-h_tfm(1).edit_tmax = uicontrol('Parent',h_tfm(1).panel_settings,'style','edit','position',[230,35,35,15],'HorizontalAlignment','center');
+h_tfm.edit_tmax = uicontrol('Parent',h_tfm.panel_settings,'style','edit','position',[230,35,35,15],'HorizontalAlignment','center');
 %button: update
-h_tfm(1).button_update = uicontrol('Parent',h_tfm(1).panel_settings,'style','pushbutton','position',[177,5,92,25],'string','Update preview');
+h_tfm.button_update = uicontrol('Parent',h_tfm.panel_settings,'style','pushbutton','position',[177,5,92,25],'string','Update preview');
 %axes:
-h_tfm(1).axes_settings = axes('Parent',h_tfm(1).panel_settings,'Units', 'pixels','Position',[285,5,200,85]);
+h_tfm.axes_settings = axes('Parent',h_tfm.panel_settings,'Units', 'pixels','Position',[285,5,200,85]);
 %button: calculate all
-h_tfm(1).button_calc = uicontrol('Parent',h_tfm(1).panel_settings,'style','pushbutton','position',[490,5,100,25],'string','Calculate all');
+h_tfm.button_calc = uicontrol('Parent',h_tfm.panel_settings,'style','pushbutton','position',[490,5,100,25],'string','Calculate all');
 %button: forwards
-h_tfm(1).button_forwards = uicontrol('Parent',h_tfm(1).panel_settings,'style','pushbutton','position',[515,67,25,25],'string','>');
+h_tfm.button_forwards = uicontrol('Parent',h_tfm.panel_settings,'style','pushbutton','position',[515,67,25,25],'string','>');
 %button: backwards
-h_tfm(1).button_backwards = uicontrol('Parent',h_tfm(1).panel_settings,'style','pushbutton','position',[490,67,25,25],'string','<');
+h_tfm.button_backwards = uicontrol('Parent',h_tfm.panel_settings,'style','pushbutton','position',[490,67,25,25],'string','<');
 %text: show which video (i/n)
-h_tfm(1).text_whichvid = uicontrol('Parent',h_tfm(1).panel_settings,'style','text','position',[545,75,25,15],'string','(1/1)','HorizontalAlignment','left');
-h_tfm(1).text_whichvid.ForegroundColor = ptcolor;
-h_tfm(1).text_whichvid.BackgroundColor = pcolor;
+h_tfm.text_whichvid = uicontrol('Parent',h_tfm.panel_settings,'style','text','position',[545,75,25,15],'string','(1/1)','HorizontalAlignment','left');
+h_tfm.text_whichvid.ForegroundColor = ptcolor;
+h_tfm.text_whichvid.BackgroundColor = pcolor;
 %text: show which video (name)
-h_tfm(1).text_whichvidname = uicontrol('Parent',h_tfm(1).panel_settings,'style','text','position',[490,50,100,15],'string','Experiment','HorizontalAlignment','left');
-h_tfm(1).text_whichvidname.ForegroundColor = ptcolor;
-h_tfm(1).text_whichvidname.BackgroundColor = pcolor;
+h_tfm.text_whichvidname = uicontrol('Parent',h_tfm.panel_settings,'style','text','position',[490,50,100,15],'string','Experiment','HorizontalAlignment','left');
+h_tfm.text_whichvidname.ForegroundColor = ptcolor;
+h_tfm.text_whichvidname.BackgroundColor = pcolor;
 
 %uipanel for tfm calc preview
-h_tfm(1).panel_tfm = uipanel('Parent',h_tfm(1).fig,'units','pixels','Position',[20,25,760,305]);
-h_tfm(1).panel_tfm.ForegroundColor = ptcolor;
-h_tfm(1).panel_tfm.BackgroundColor = pcolor;
-h_tfm(1).axes_tfm = axes('Parent',h_tfm(1).panel_tfm,'Units', 'pixels','Position',[10,10,737,285]);
+h_tfm.panel_tfm = uipanel('Parent',h_tfm.fig,'units','pixels','Position',[20,25,760,305]);
+h_tfm.panel_tfm.ForegroundColor = ptcolor;
+h_tfm.panel_tfm.BackgroundColor = pcolor;
+h_tfm.axes_tfm = axes('Parent',h_tfm.panel_tfm,'Units', 'pixels','Position',[10,10,737,285]);
 
-% h_tfm(1).panel_tfm_gif = uipanel('Parent',h_tfm(1).fig,'units','pixels','Position',[30,35,287,160]);
-% h_tfm(1).axes_tfm_gif = axes('Parent',h_tfm(1).panel_tfm_gif,'Units', 'pixels','Position',[0,0,287,160]);%737,285]);
+% h_tfm.panel_tfm_gif = uipanel('Parent',h_tfm.fig,'units','pixels','Position',[30,35,287,160]);
+% h_tfm.axes_tfm_gif = axes('Parent',h_tfm.panel_tfm_gif,'Units', 'pixels','Position',[0,0,287,160]);%737,285]);
 
 %create ok button
-h_tfm(1).button_ok = uicontrol('Parent',h_tfm(1).fig,'style','pushbutton','position',[735,413,45,20],'string','OK','visible','on');
+h_tfm.button_ok = uicontrol('Parent',h_tfm.fig,'style','pushbutton','position',[735,30,45,20],'string','OK','visible','on','FontWeight','bold'); % [735,413,45,20]
 %create matrix save checkbox
-h_tfm(1).checkbox_matrix = uicontrol('Parent',h_tfm(1).fig,'style','checkbox','position',[630,335,160,15],'string','Save traction matrices','HorizontalAlignment','left','value',1);
-h_tfm(1).checkbox_matrix.ForegroundColor = ptcolor;
-h_tfm(1).checkbox_matrix.BackgroundColor = pcolor;
+h_tfm.checkbox_matrix = uicontrol('Parent',h_tfm.fig,'style','checkbox','position',[630,335,160,15],'string','Save traction matrices','HorizontalAlignment','left','value',1);
+h_tfm.checkbox_matrix.ForegroundColor = ptcolor;
+h_tfm.checkbox_matrix.BackgroundColor = pcolor;
 %create heatmaps save checkbox
-h_tfm(1).checkbox_heatmaps = uicontrol('Parent',h_tfm(1).fig,'style','checkbox','position',[630,355,160,15],'string','Save heatmaps','HorizontalAlignment','left');
-h_tfm(1).checkbox_heatmaps.ForegroundColor = ptcolor;
-h_tfm(1).checkbox_heatmaps.BackgroundColor = pcolor;
+h_tfm.checkbox_heatmaps = uicontrol('Parent',h_tfm.fig,'style','checkbox','position',[630,355,160,15],'string','Save heatmaps','HorizontalAlignment','left');
+h_tfm.checkbox_heatmaps.ForegroundColor = ptcolor;
+h_tfm.checkbox_heatmaps.BackgroundColor = pcolor;
 
 %callbacks for buttons and buttongroup
-set(h_tfm(1).button_guess,'callback',{@tfm_push_guess,h_tfm})
-set(h_tfm(1).button_update,'callback',{@tfm_push_update,h_tfm})
-set(h_tfm(1).button_calc,'callback',{@tfm_push_calc,h_tfm,h_main})
-set(h_tfm(1).button_forwards,'callback',{@tfm_push_forwards,h_tfm})
-set(h_tfm(1).button_backwards,'callback',{@tfm_push_backwards,h_tfm})
-set(h_tfm(1).button_ok,'callback',{@tfm_push_ok,h_tfm,h_main})
-set(h_tfm(1).buttongroup_constrain,'SelectionChangeFcn',{@tfm_buttongroup_constrain,h_tfm})
+set(h_tfm.button_guess,'callback',{@tfm_push_guess,h_tfm})
+set(h_tfm.button_update,'callback',{@tfm_push_update,h_tfm})
+set(h_tfm.button_calc,'callback',{@tfm_push_calc,h_tfm,h_main})
+set(h_tfm.button_forwards,'callback',{@tfm_push_forwards,h_tfm})
+set(h_tfm.button_backwards,'callback',{@tfm_push_backwards,h_tfm})
+set(h_tfm.button_ok,'callback',{@tfm_push_ok,h_tfm,h_main})
+set(h_tfm.buttongroup_constrain,'SelectionChangeFcn',{@tfm_buttongroup_constrain,h_tfm})
 
 %upon window openeing: make elements visible?unvisible
-set(h_tfm(1).panel_settings,'visible','off')
-set(h_tfm(1).panel_tfm,'visible','off')
-%set(h_tfm(1).panel_tfm_gif,'visible','off')
-set(h_tfm(1).button_ok,'visible','off')
-set(h_tfm(1).checkbox_matrix,'visible','off')
-set(h_tfm(1).checkbox_heatmaps,'visible','off')
+set(h_tfm.panel_settings,'visible','off')
+set(h_tfm.panel_tfm,'visible','off')
+%set(h_tfm.panel_tfm_gif,'visible','off')
+set(h_tfm.button_ok,'visible','off')
+set(h_tfm.checkbox_matrix,'visible','off')
+set(h_tfm.checkbox_heatmaps,'visible','off')
 
 %initiate counter
 tfm_tfm_user_counter=1;
@@ -195,23 +199,37 @@ tfm_tfm_user_counter=1;
 setappdata(0,'tfm_tfm_user_counter',tfm_tfm_user_counter)
 
 %make fig visible
-set(h_tfm(1).fig,'visible','on');
+set(h_tfm.fig,'visible','on');
+%movegui(h_tfm.fig,'north');
 
 %move main window to the side
-movegui(h_main(1).fig,'west')
+% movegui(h_main.fig,'west')
+% MH put the panel to the left of the main window
+%  [left bottom width height]
+fp = get(h_tfm.fig,'Position');
+set(h_main.fig,'Units','pixels');
+ap = get(h_main.fig,'Position');
+set(h_main.fig,'Position',[fp(1)-ap(3) fp(2)+fp(4)-ap(4) ap(3) ap(4)]);
 
-%trigger guess all
-tfm_push_guess(h_tfm(1).button_guess, h_tfm, h_tfm, h_main)
+% initialize status bar
+sb=statusbar(h_tfm.fig,'Ready');
+sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
+
+% automatically trigger guess all
+tfm_push_guess(h_tfm.button_guess, h_tfm, h_tfm, h_main)
+
+
+
 
 function tfm_push_guess(hObject, eventdata, h_tfm, h_main)
 
 %profile on
 
 %disable figure during calculation
-enableDisableFig(h_tfm(1).fig,0);
+enableDisableFig(h_tfm.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_tfm(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_tfm.fig,1));
 
 try
     %load shared needed para
@@ -228,8 +246,8 @@ try
     tfm_init_user_nu=getappdata(0,'tfm_init_user_nu');
     
     %initial values
-    %E=str2double(get(h_tfm(1).edit_youngs,'String'));
-    %nu=str2double(get(h_tfm(1).edit_poisson,'String'));
+    %E=str2double(get(h_tfm.edit_youngs,'String'));
+    %nu=str2double(get(h_tfm.edit_poisson,'String'));
     
     %initialize
     tfm_tfm_user_lambda=cell(1,tfm_init_user_Nfiles);
@@ -244,14 +262,14 @@ try
     
     %waitbar
     %hf = waitbar(0,'SmartGuessing. Please wait...');
-    sb=statusbar(h_tfm(1).fig,['Calculating regularization...']);
+    sb=statusbar(h_tfm.fig,'Calculating regularization...');
     sb.getComponent(0).setForeground(java.awt.Color.red);
     
     parfor current_vid=1:tfm_init_user_Nfiles
 %    for current_vid=1:tfm_init_user_Nfiles
         %hf=waitbar(current_vid/tfm_init_user_Nfiles,hf);
         %statusbar
-%         sb=statusbar(h_tfm(1).fig,['Calculating regularization: video ',num2str(current_vid),'/',num2str(tfm_init_user_Nfiles),'... ',num2str(floor(100*(current_vid-1)/tfm_init_user_Nfiles)), '%% done']);
+%         sb=statusbar(h_tfm.fig,['Calculating regularization: video ',num2str(current_vid),'/',num2str(tfm_init_user_Nfiles),'... ',num2str(floor(100*(current_vid-1)/tfm_init_user_Nfiles)), '%% done']);
 %         sb.getComponent(0).setForeground(java.awt.Color.red);
         disp(['Guessing regularization for video #',num2str(current_vid)])
         
@@ -291,34 +309,34 @@ try
         
     end
     %new statusbar text
-    sb=statusbar(h_tfm(1).fig,'SmartGuessing - Done !');
+    sb=statusbar(h_tfm.fig,'SmartGuessing - Done !');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     
     %make second panel visible
-    set(h_tfm(1).panel_settings,'Visible','on');
+    set(h_tfm.panel_settings,'Visible','on');
     
     %%now display this info for 1st video.
-    set(h_tfm(1).edit_regul,'String',num2str(tfm_tfm_user_lambda{tfm_tfm_user_counter}));
-    set(h_tfm(1).edit_tmin,'String',num2str(tfm_tfm_user_clims{tfm_tfm_user_counter}(1)));
-    set(h_tfm(1).edit_tmax,'String',num2str(tfm_tfm_user_clims{tfm_tfm_user_counter}(2)));
-    set(h_tfm(1).edit_youngs,'String',num2str(tfm_init_user_E{tfm_tfm_user_counter}));
-    set(h_tfm(1).edit_poisson,'String',num2str(tfm_init_user_nu{tfm_tfm_user_counter}));
+    set(h_tfm.edit_regul,'String',num2str(tfm_tfm_user_lambda{tfm_tfm_user_counter}));
+    set(h_tfm.edit_tmin,'String',num2str(tfm_tfm_user_clims{tfm_tfm_user_counter}(1)));
+    set(h_tfm.edit_tmax,'String',num2str(tfm_tfm_user_clims{tfm_tfm_user_counter}(2)));
+    set(h_tfm.edit_youngs,'String',num2str(tfm_init_user_E{tfm_tfm_user_counter}));
+    set(h_tfm.edit_poisson,'String',num2str(tfm_init_user_nu{tfm_tfm_user_counter}));
     
     %plot heat plot
-    axes(h_tfm(1).axes_settings);
+    axes(h_tfm.axes_settings);
     imagesc( tfm_tfm_user_preview_V{tfm_tfm_user_counter},tfm_tfm_user_clims{tfm_tfm_user_counter}); axis image; colormap parula; hold on;
     %quiver(tfm_tfm_user_preview_x1{1},tfm_tfm_user_preview_y1{1},tfm_tfm_user_preview_u1_0{1},tfm_tfm_user_preview_v1_0{1},'r');
-    set(h_tfm(1).axes_settings, 'XTick', []);
-    set(h_tfm(1).axes_settings, 'YTick', []);
+    set(h_tfm.axes_settings, 'XTick', []);
+    set(h_tfm.axes_settings, 'YTick', []);
     
     %disable backwards button
-    set(h_tfm(1).button_backwards,'Enable','off');
+    set(h_tfm.button_backwards,'Enable','off');
     %if vid<vidtot, enable forward button
     if 1==tfm_init_user_Nfiles
-        set(h_tfm(1).button_forwards,'Enable','off');
+        set(h_tfm.button_forwards,'Enable','off');
     end
     %disable regularization edit
-    set(h_tfm(1).edit_regul,'Enable','off');
+    set(h_tfm.edit_regul,'Enable','off');
     
     %store everything for shared use
     setappdata(0,'tfm_init_user_E',tfm_init_user_E)
@@ -357,18 +375,20 @@ end
 
 %Streamlining
 if tfm_init_user_strln
-    tfm_push_calc(h_tfm(1).button_calc, h_tfm, h_tfm, h_main)
+    tfm_push_calc(h_tfm.button_calc, h_tfm, h_tfm, h_main)
 end
 
+
+%% tfm_push_update
 function tfm_push_update(hObject, eventdata, h_tfm)
 
 %profile on
 
 %disable figure during calculation
-enableDisableFig(h_tfm(1).fig,0);
+enableDisableFig(h_tfm.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_tfm(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_tfm.fig,1));
 
 try
     %load shared needed para
@@ -393,16 +413,16 @@ try
     
     
     %statusbar
-    sb=statusbar(h_tfm(1).fig,'Updating');
+    sb=statusbar(h_tfm.fig,'Updating');
     sb.getComponent(0).setForeground(java.awt.Color(1,0,0));
     
     %which vid are we at?
     current_vid=tfm_tfm_user_counter;
     
     %read values
-    E=str2double(get(h_tfm(1).edit_youngs,'String'));
-    nu=str2double(get(h_tfm(1).edit_poisson,'String'));
-    clims = [str2double(get(h_tfm(1).edit_tmin,'String')),str2double(get(h_tfm(1).edit_tmax,'String'))];
+    E=str2double(get(h_tfm.edit_youngs,'String'));
+    nu=str2double(get(h_tfm.edit_poisson,'String'));
+    clims = [str2double(get(h_tfm.edit_tmin,'String')),str2double(get(h_tfm.edit_tmax,'String'))];
     
     
     s=matfile(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,current_vid},'/tfm_piv_x.mat']);
@@ -441,28 +461,28 @@ try
     tfm_tfm_user_preview_v1_0{current_vid}=v1_0;
     
     %new statusbar text
-    sb=statusbar(h_tfm(1).fig,'Update - Done !');
+    sb=statusbar(h_tfm.fig,'Update - Done !');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     
     %plot heat plot
-    axes(h_tfm(1).axes_settings);
+    axes(h_tfm.axes_settings);
     imagesc( tfm_tfm_user_preview_V{tfm_tfm_user_counter},clims); axis image; colormap parula; hold on;
     %quiver(tfm_tfm_user_preview_x1{1},tfm_tfm_user_preview_y1{1},tfm_tfm_user_preview_u1_0{1},tfm_tfm_user_preview_v1_0{1},'r');
-    set(h_tfm(1).axes_settings, 'XTick', []);
-    set(h_tfm(1).axes_settings, 'YTick', []);
+    set(h_tfm.axes_settings, 'XTick', []);
+    set(h_tfm.axes_settings, 'YTick', []);
     
     if tfm_tfm_user_counter==1
-        set(h_tfm(1).button_backwards,'Enable','off');
+        set(h_tfm.button_backwards,'Enable','off');
     else
-        set(h_tfm(1).button_backwards,'Enable','on');
+        set(h_tfm.button_backwards,'Enable','on');
     end
     if tfm_tfm_user_counter<tfm_init_user_Nfiles
-        set(h_tfm(1).button_forwards,'Enable','on');
+        set(h_tfm.button_forwards,'Enable','on');
     else
-        set(h_tfm(1).button_forwards,'Enable','off');
+        set(h_tfm.button_forwards,'Enable','off');
     end
     %disable regularization edit
-    set(h_tfm(1).edit_regul,'Enable','off');
+    set(h_tfm.edit_regul,'Enable','off');
     
     %store everything for shared use
     setappdata(0,'tfm_init_user_E',tfm_init_user_E)
@@ -491,10 +511,10 @@ function tfm_push_calc(hObject, eventdata, h_tfm, h_main)
 %setappdata(0,'userTiming',userTiming)
 
 %disable figure during calculation
-enableDisableFig(h_tfm(1).fig,0);
+enableDisableFig(h_tfm.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_tfm(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_tfm.fig,1));
 
 try
     
@@ -521,12 +541,12 @@ try
     tfm_init_user_outline2y=getappdata(0,'tfm_init_user_outline2y');
     
     % overwrite current values
-    tfm_init_user_E{tfm_tfm_user_counter}=str2double(get(h_tfm(1).edit_youngs,'String'));
-    tfm_init_user_nu{tfm_tfm_user_counter}=str2double(get(h_tfm(1).edit_poisson,'String'));
-    tfm_tfm_user_clims{tfm_tfm_user_counter}=[str2double(get(h_tfm(1).edit_tmin,'String')),str2double(get(h_tfm(1).edit_tmax,'String'))];
+    tfm_init_user_E{tfm_tfm_user_counter}=str2double(get(h_tfm.edit_youngs,'String'));
+    tfm_init_user_nu{tfm_tfm_user_counter}=str2double(get(h_tfm.edit_poisson,'String'));
+    tfm_tfm_user_clims{tfm_tfm_user_counter}=[str2double(get(h_tfm.edit_tmin,'String')),str2double(get(h_tfm.edit_tmax,'String'))];
     
     
-    sb=statusbar(h_tfm(1).fig,['Calculating TFM... ']);
+    sb=statusbar(h_tfm.fig,'Calculating TFM... ');
     sb.getComponent(0).setForeground(java.awt.Color.red);
     
     tfm_piv_user_xs = cell(tfm_init_user_Nfiles);
@@ -541,21 +561,22 @@ try
     %w_i=0;
     parfor ivid=1:tfm_init_user_Nfiles
     %for ivid=1:tfm_init_user_Nfiles
+		tstartTFM = tic;
         
-        disp(['Calculating traction stress for video #',num2str(ivid)])
+        fprintf(1,'CXS-TFM: Calculating traction stress for video #%d\n',ivid);
         
         %create folder to save disp.
-        mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots'])
-        mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Traction Heatmaps'])
+        [mf,mf2] = mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots']);  %#ok<ASGLU> 
+        [mf,mf2] = mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Traction Heatmaps']);  %#ok<ASGLU> 
 
 % removed for parfor                    
-%         reset(h_tfm(1).axes_tfm);
-%         cla(h_tfm(1).axes_tfm);
-%         set(h_tfm(1).panel_tfm,'visible','on')
+%         reset(h_tfm.axes_tfm);
+%         cla(h_tfm.axes_tfm);
+%         set(h_tfm.panel_tfm,'visible','on')
         
-%         reset(h_tfm(1).axes_tfm_gif)
-%         cla(h_tfm(1).axes_tfm_gif)
-%         set(h_tfm(1).panel_tfm_gif,'visible','off');
+%         reset(h_tfm.axes_tfm_gif)
+%         cla(h_tfm.axes_tfm_gif)
+%         set(h_tfm.panel_tfm_gif,'visible','off');
                
         
 %removed for parfor
@@ -592,7 +613,7 @@ try
         im_rgb = imoverlay(im_rgb,elipse_outline,[0 0 1]);
         im_gif = zeros([gif_size,1,Num]);
         
-        
+        V=0; % this just eliminates a MATLAB warning about uninitialized variables
         %Run tfm to calculate the first frame of the gif
         if tfm_tfm_user_constraintval(ivid)==1 %unconstrained
             [ ~,~,~,~,~,~,~,V,~,~,~,~,~,~,~,~] = calculate_tfm(tfm_init_user_filenamestack{1,ivid},tfm_piv_user_relax{ivid},tfm_piv_user_contr{ivid},contr,mask_all,E,nu,lambda,tfm_init_user_conversion{ivid});
@@ -629,7 +650,7 @@ try
         vr = zeros(rows,cols,Num);
         u1_0 = zeros(rows,cols,Num);
         v1_0 = zeros(rows,cols,Num);
-        V = zeros(size(Xqu,1),size(Xqu,2),Num);
+        %V = zeros(size(Xqu,1),size(Xqu,2),Num); %MH: this is set above at line at line 608
         absd = zeros(rows,cols,Num);
         Fx = zeros(rows,cols,Num);
         Fy = zeros(rows,cols,Num);
@@ -644,7 +665,7 @@ try
             %disp(frame)
             %statusbar
             %w_i=w_i+1;
-            %sb=statusbar(h_tfm(1).fig,['Calculating Video ',num2str(ivid),'/',num2str(tfm_init_user_Nfiles),' frame ',num2str(frame),'/',num2str(Num),'... ',num2str(floor(100*(w_i-1)/sum([tfm_init_user_Nframes{:}]))), '%% done']);
+            %sb=statusbar(h_tfm.fig,['Calculating Video ',num2str(ivid),'/',num2str(tfm_init_user_Nfiles),' frame ',num2str(frame),'/',num2str(Num),'... ',num2str(floor(100*(w_i-1)/sum([tfm_init_user_Nframes{:}]))), '%% done']);
             %sb.getComponent(0).setForeground(java.awt.Color.red);
            
            
@@ -673,12 +694,12 @@ try
 %             save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,ivid},'/tfm_M_',num2str(frame),'.mat'],'M','-v7.3')
             
             %plot heat plot
-            %cla(h_tfm(1).axes_tfm);
+            %cla(h_tfm.axes_tfm);
 
 % removed for parfor            
-%             imagesc(V,'Parent',h_tfm(1).axes_tfm,clims);
-%             set(h_tfm(1).axes_tfm, 'XTick', []);
-%             set(h_tfm(1).axes_tfm, 'YTick', []);
+%             imagesc(V,'Parent',h_tfm.axes_tfm,clims);
+%             set(h_tfm.axes_tfm, 'XTick', []);
+%             set(h_tfm.axes_tfm, 'YTick', []);
 %             %colorbar;
 %             hold on;
 %             plot(tfm_init_user_outline2x{ivid},tfm_init_user_outline2y{ivid},'g','LineWidth',1);
@@ -725,12 +746,12 @@ try
             %             hmap_im = mat2gray(V,clims);
             %             hmap_im = imresize(hmap_im,'OutputSize',[160,287]);
             %             p=figure('visible','off');
-            %             %             cla(h_tfm(1).axes_tfm_gif);
-            %             %             axes(h_tfm(1).axes_tfm_gif);
+            %             %             cla(h_tfm.axes_tfm_gif);
+            %             %             axes(h_tfm.axes_tfm_gif);
             %             imshow(im_rgb); hold on;
             %             hmap=imagesc(hmap_im,'AlphaData',hmap_im);
-            %             %             set(h_tfm(1).axes_tfm_gif, 'XTick', []);
-            %             %             set(h_tfm(1).axes_tfm_gif, 'YTick', []);
+            %             %             set(h_tfm.axes_tfm_gif, 'XTick', []);
+            %             %             set(h_tfm.axes_tfm_gif, 'YTick', []);
             %
             %             %colormap jet;
             %             %plot(tfm_init_user_outline2x{ivid},tfm_init_user_outline2y{ivid},'g','LineWidth',2);
@@ -791,15 +812,17 @@ try
         % reset gif ims
         hmap_im = [];
         im_gif = [];
+		
+		fprintf(1,' complete in %.02f s\n',toc(tstartTFM));
     end
     %statusbar
-    sb=statusbar(h_tfm(1).fig,'Calculation - Done !');
+    sb=statusbar(h_tfm.fig,'Calculation - Done !');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     
     %ok button and checkboxes
-    set(h_tfm(1).button_ok,'Visible','on');
-    set(h_tfm(1).checkbox_heatmaps,'Visible','on');
-    set(h_tfm(1).checkbox_matrix,'Visible','on');
+    set(h_tfm.button_ok,'Visible','on');
+    set(h_tfm.checkbox_heatmaps,'Visible','on');
+    set(h_tfm.checkbox_matrix,'Visible','on');
     
     %profile viewer
     
@@ -819,7 +842,7 @@ end
 
 %Streamlining
 if tfm_init_user_strln
-    tfm_push_ok(h_tfm(1).button_ok, h_tfm, h_tfm, h_main)
+    tfm_push_ok(h_tfm.button_ok, h_tfm, h_tfm, h_main)
 end
 
 function save2disk(theta2,xr,yr,ur,vr,absd,Fx,Fy,F,Trx,Try,v,V,u1_0,v1_0,M,filename)
@@ -844,10 +867,10 @@ function save2disk(theta2,xr,yr,ur,vr,absd,Fx,Fy,F,Trx,Try,v,V,u1_0,v1_0,M,filen
 
 function tfm_push_forwards(hObject, eventdata, h_tfm)
 %disable figure during calculation
-enableDisableFig(h_tfm(1).fig,0);
+enableDisableFig(h_tfm.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_tfm(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_tfm.fig,1));
 
 %load what shared para we need
 tfm_tfm_user_counter=getappdata(0,'tfm_tfm_user_counter');
@@ -861,9 +884,9 @@ tfm_tfm_user_clims=getappdata(0,'tfm_tfm_user_clims');
 tfm_tfm_user_constraintval=getappdata(0,'tfm_tfm_user_constraintval');
 
 %save current stuff
-E=str2double(get(h_tfm(1).edit_youngs,'String'));
-nu=str2double(get(h_tfm(1).edit_poisson,'String'));
-clims = [str2double(get(h_tfm(1).edit_tmin,'String')),str2double(get(h_tfm(1).edit_tmax,'String'))];
+E=str2double(get(h_tfm.edit_youngs,'String'));
+nu=str2double(get(h_tfm.edit_poisson,'String'));
+clims = [str2double(get(h_tfm.edit_tmin,'String')),str2double(get(h_tfm.edit_tmax,'String'))];
 tfm_init_user_E{tfm_tfm_user_counter}=E;
 tfm_init_user_nu{tfm_tfm_user_counter}=nu;
 tfm_tfm_user_clims{tfm_tfm_user_counter}=clims;
@@ -872,43 +895,43 @@ tfm_tfm_user_clims{tfm_tfm_user_counter}=clims;
 tfm_tfm_user_counter=tfm_tfm_user_counter+1;
 
 %put the correct values for new count in boxes:
-set(h_tfm(1).edit_youngs,'String',num2str(tfm_init_user_E{tfm_tfm_user_counter}));
-set(h_tfm(1).edit_poisson,'String',num2str(tfm_init_user_nu{tfm_tfm_user_counter}));
-set(h_tfm(1).edit_regul,'String',num2str(tfm_tfm_user_lambda{tfm_tfm_user_counter}));
-set(h_tfm(1).edit_tmin,'String',num2str(tfm_tfm_user_clims{tfm_tfm_user_counter}(1)));
-set(h_tfm(1).edit_tmax,'String',num2str(tfm_tfm_user_clims{tfm_tfm_user_counter}(2)));
+set(h_tfm.edit_youngs,'String',num2str(tfm_init_user_E{tfm_tfm_user_counter}));
+set(h_tfm.edit_poisson,'String',num2str(tfm_init_user_nu{tfm_tfm_user_counter}));
+set(h_tfm.edit_regul,'String',num2str(tfm_tfm_user_lambda{tfm_tfm_user_counter}));
+set(h_tfm.edit_tmin,'String',num2str(tfm_tfm_user_clims{tfm_tfm_user_counter}(1)));
+set(h_tfm.edit_tmax,'String',num2str(tfm_tfm_user_clims{tfm_tfm_user_counter}(2)));
 
 %plot heat plot
-axes(h_tfm(1).axes_settings);
-cla(h_tfm(1).axes_settings)
+axes(h_tfm.axes_settings);
+cla(h_tfm.axes_settings);
 imagesc( tfm_tfm_user_preview_V{tfm_tfm_user_counter},tfm_tfm_user_clims{tfm_tfm_user_counter}); axis image; colormap parula;colorbar; hold on;
-set(h_tfm(1).axes_settings, 'XTick', []);
-set(h_tfm(1).axes_settings, 'YTick', []);
+set(h_tfm.axes_settings, 'XTick', []);
+set(h_tfm.axes_settings, 'YTick', []);
 
 %set texts to vid
-set(h_tfm(1).text_whichvidname,'String',tfm_init_user_filenamestack{1,tfm_tfm_user_counter});
-set(h_tfm(1).text_whichvid,'String',[num2str(tfm_tfm_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
+set(h_tfm.text_whichvidname,'String',tfm_init_user_filenamestack{1,tfm_tfm_user_counter});
+set(h_tfm.text_whichvid,'String',[num2str(tfm_tfm_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
 
 %constrained / unconstrained
 if tfm_tfm_user_constraintval(tfm_tfm_user_counter)==1
-    set(h_tfm(1).edit_regul,'visible','on')
-    set(h_tfm(1).text_regul,'visible','on')
-    set(h_tfm(1).radiobutton_uncontrained,'value',1)
+    set(h_tfm.edit_regul,'visible','on')
+    set(h_tfm.text_regul,'visible','on')
+    set(h_tfm.radiobutton_uncontrained,'value',1)
 elseif tfm_tfm_user_constraintval(tfm_tfm_user_counter)==2
-    set(h_tfm(1).edit_regul,'visible','off')
-    set(h_tfm(1).text_regul,'visible','off')
-    set(h_tfm(1).radiobutton_uncontrained,'value',0)
+    set(h_tfm.edit_regul,'visible','off')
+    set(h_tfm.text_regul,'visible','off')
+    set(h_tfm.radiobutton_uncontrained,'value',0)
 end
 
 if tfm_tfm_user_counter==1
-    set(h_tfm(1).button_backwards,'Enable','off');
+    set(h_tfm.button_backwards,'Enable','off');
 else
-    set(h_tfm(1).button_backwards,'Enable','on');
+    set(h_tfm.button_backwards,'Enable','on');
 end
 if tfm_tfm_user_counter<tfm_init_user_Nfiles
-    set(h_tfm(1).button_forwards,'Enable','on');
+    set(h_tfm.button_forwards,'Enable','on');
 else
-    set(h_tfm(1).button_forwards,'Enable','off');
+    set(h_tfm.button_forwards,'Enable','off');
 end
 
 %store everything for shared use
@@ -920,10 +943,10 @@ setappdata(0,'tfm_tfm_user_counter',tfm_tfm_user_counter)
 
 function tfm_push_backwards(hObject, eventdata, h_tfm)
 %disable figure during calculation
-enableDisableFig(h_tfm(1).fig,0);
+enableDisableFig(h_tfm.fig,0);
 
 %turn back on in the end
-clean1=onCleanup(@()enableDisableFig(h_tfm(1).fig,1));
+clean1=onCleanup(@()enableDisableFig(h_tfm.fig,1));
 
 %load what shared para we need
 tfm_tfm_user_counter=getappdata(0,'tfm_tfm_user_counter');
@@ -937,9 +960,9 @@ tfm_tfm_user_clims=getappdata(0,'tfm_tfm_user_clims');
 tfm_tfm_user_constraintval=getappdata(0,'tfm_tfm_user_constraintval');
 
 %save current stuff
-E=str2double(get(h_tfm(1).edit_youngs,'String'));
-nu=str2double(get(h_tfm(1).edit_poisson,'String'));
-clims = [str2double(get(h_tfm(1).edit_tmin,'String')),str2double(get(h_tfm(1).edit_tmax,'String'))];
+E=str2double(get(h_tfm.edit_youngs,'String'));
+nu=str2double(get(h_tfm.edit_poisson,'String'));
+clims = [str2double(get(h_tfm.edit_tmin,'String')),str2double(get(h_tfm.edit_tmax,'String'))];
 tfm_init_user_E{tfm_tfm_user_counter}=E;
 tfm_init_user_nu{tfm_tfm_user_counter}=nu;
 tfm_tfm_user_clims{tfm_tfm_user_counter}=clims;
@@ -948,43 +971,43 @@ tfm_tfm_user_clims{tfm_tfm_user_counter}=clims;
 tfm_tfm_user_counter=tfm_tfm_user_counter-1;
 
 %put the correct values for new count in boxes:
-set(h_tfm(1).edit_youngs,'String',num2str(tfm_init_user_E{tfm_tfm_user_counter}));
-set(h_tfm(1).edit_poisson,'String',num2str(tfm_init_user_nu{tfm_tfm_user_counter}));
-set(h_tfm(1).edit_regul,'String',num2str(tfm_tfm_user_lambda{tfm_tfm_user_counter}));
-set(h_tfm(1).edit_tmin,'String',num2str(tfm_tfm_user_clims{tfm_tfm_user_counter}(1)));
-set(h_tfm(1).edit_tmax,'String',num2str(tfm_tfm_user_clims{tfm_tfm_user_counter}(2)));
+set(h_tfm.edit_youngs,'String',num2str(tfm_init_user_E{tfm_tfm_user_counter}));
+set(h_tfm.edit_poisson,'String',num2str(tfm_init_user_nu{tfm_tfm_user_counter}));
+set(h_tfm.edit_regul,'String',num2str(tfm_tfm_user_lambda{tfm_tfm_user_counter}));
+set(h_tfm.edit_tmin,'String',num2str(tfm_tfm_user_clims{tfm_tfm_user_counter}(1)));
+set(h_tfm.edit_tmax,'String',num2str(tfm_tfm_user_clims{tfm_tfm_user_counter}(2)));
 
 %plot heat plot
-axes(h_tfm(1).axes_settings);
-cla(h_tfm(1).axes_settings)
+axes(h_tfm.axes_settings);
+cla(h_tfm.axes_settings)
 imagesc( tfm_tfm_user_preview_V{tfm_tfm_user_counter},tfm_tfm_user_clims{tfm_tfm_user_counter}); axis image; colormap parula;colorbar; hold on;
-set(h_tfm(1).axes_settings, 'XTick', []);
-set(h_tfm(1).axes_settings, 'YTick', []);
+set(h_tfm.axes_settings, 'XTick', []);
+set(h_tfm.axes_settings, 'YTick', []);
 
 %set texts to vid
-set(h_tfm(1).text_whichvidname,'String',tfm_init_user_filenamestack{1,tfm_tfm_user_counter});
-set(h_tfm(1).text_whichvid,'String',[num2str(tfm_tfm_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
+set(h_tfm.text_whichvidname,'String',tfm_init_user_filenamestack{1,tfm_tfm_user_counter});
+set(h_tfm.text_whichvid,'String',[num2str(tfm_tfm_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
 
 %constrained / unconstrained
 if tfm_tfm_user_constraintval(tfm_tfm_user_counter)==1
-    set(h_tfm(1).edit_regul,'visible','on')
-    set(h_tfm(1).text_regul,'visible','on')
-    set(h_tfm(1).radiobutton_uncontrained,'value',1)
+    set(h_tfm.edit_regul,'visible','on')
+    set(h_tfm.text_regul,'visible','on')
+    set(h_tfm.radiobutton_uncontrained,'value',1)
 elseif tfm_tfm_user_constraintval(tfm_tfm_user_counter)==2
-    set(h_tfm(1).edit_regul,'visible','off')
-    set(h_tfm(1).text_regul,'visible','off')
-    set(h_tfm(1).radiobutton_uncontrained,'value',0)
+    set(h_tfm.edit_regul,'visible','off')
+    set(h_tfm.text_regul,'visible','off')
+    set(h_tfm.radiobutton_uncontrained,'value',0)
 end
 
 if tfm_tfm_user_counter==1
-    set(h_tfm(1).button_backwards,'Enable','off');
+    set(h_tfm.button_backwards,'Enable','off');
 else
-    set(h_tfm(1).button_backwards,'Enable','on');
+    set(h_tfm.button_backwards,'Enable','on');
 end
 if tfm_tfm_user_counter<tfm_init_user_Nfiles
-    set(h_tfm(1).button_forwards,'Enable','on');
+    set(h_tfm.button_forwards,'Enable','on');
 else
-    set(h_tfm(1).button_forwards,'Enable','off');
+    set(h_tfm.button_forwards,'Enable','off');
 end
 
 %store everything for shared use
@@ -994,9 +1017,11 @@ setappdata(0,'tfm_tfm_user_lambda',tfm_tfm_user_lambda)
 setappdata(0,'tfm_tfm_user_clims',tfm_tfm_user_clims)
 setappdata(0,'tfm_tfm_user_counter',tfm_tfm_user_counter)
 
+
+%% Callback for the "OK" button
 function tfm_push_ok(hObject, eventdata, h_tfm, h_main)
 %disable figure during calculation
-enableDisableFig(h_tfm(1).fig,0);
+enableDisableFig(h_tfm.fig,0);
 
 %userTiming= getappdata(0,'userTiming');
 %userTiming.tfm{2} = toc(userTiming.tfm{1});
@@ -1020,40 +1045,40 @@ try
     %loop over files
     for ivid=1:tfm_init_user_Nfiles
         %waitbar
-        sb=statusbar(h_tfm(1).fig,['Saving parameters... ',num2str(floor(100*(ivid-1)/sum(tfm_init_user_Nfiles))), '%% done']);
+        sb=statusbar(h_tfm.fig,['Saving parameters... ',num2str(floor(100*(ivid-1)/sum(tfm_init_user_Nfiles))), '%% done']);
         sb.getComponent(0).setForeground(java.awt.Color.red);
         
         newfile=[tfm_init_user_pathnamestack{1,ivid},'/',tfm_init_user_filenamestack{1,ivid},'/Results/',tfm_init_user_filenamestack{1,ivid},'.xlsx'];
         A = {tfm_init_user_E{1,ivid},tfm_init_user_nu{1,ivid},[],tfm_tfm_user_lambda{1,ivid}};
         sheet = 'General';
         xlRange = 'O3';
-        xlwrite(newfile,A,sheet,xlRange)
+        xlwrite(newfile,A,sheet,xlRange);
         
         %write to master file
         A = {tfm_init_user_E{1,ivid},tfm_init_user_nu{1,ivid},tfm_tfm_user_lambda{1,ivid}};
         sheet = 'Curves Parameters Batch Summary';
         xlRange = ['I',num2str(ivid+2)];
-        xlwrite(masterfile,A,sheet,xlRange)
+        xlwrite(masterfile,A,sheet,xlRange);
         
     end
     
     %check if user wants to save
-    value = get(h_tfm(1).checkbox_matrix, 'Value');
+    value = get(h_tfm.checkbox_matrix, 'Value');
     
     if value
-        w_i=0;
+        %w_i=0;
         %loop over videos
         for ivid=1:tfm_init_user_Nfiles
             %make output folder for displacements
             if ~isequal(exist([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Datasets/Traction Forces'], 'dir'),7)
-                mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Datasets/Traction Forces'])
+                [mf,mf2] = mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Datasets/Traction Forces']); %#ok<ASGLU> 
             end
             
             %loop over frames
             %for ifr=1:tfm_init_user_Nframes{ivid}
                 %waitbar
             %    w_i=w_i+1;
-            %    sb=statusbar(h_tfm(1).fig,['Saving full fields... ',num2str(floor(100*(w_i-1)/sum([tfm_init_user_Nframes{:}]))), '%% done']);
+            %    sb=statusbar(h_tfm.fig,['Saving full fields... ',num2str(floor(100*(w_i-1)/sum([tfm_init_user_Nframes{:}]))), '%% done']);
             %    sb.getComponent(0).setForeground(java.awt.Color.red);
                 %copy displacements
                 copyfile(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,ivid},'/tfm_xr.mat'],[tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Datasets/Traction Forces/tfm_xr.mat']);
@@ -1065,7 +1090,7 @@ try
     end
     
     %check if user wants to save heatmaps
-    value = get(h_tfm(1).checkbox_heatmaps, 'Value');
+    value = get(h_tfm.checkbox_heatmaps, 'Value');
     
     if ~value
         for ivid=1:tfm_init_user_Nfiles
@@ -1074,7 +1099,7 @@ try
     end
     
     %statusbar
-    sb=statusbar(h_tfm(1).fig,'Saving - Done !');
+    sb=statusbar(h_tfm.fig,'Saving - Done !');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
     
 catch errorObj
@@ -1082,15 +1107,18 @@ catch errorObj
     errordlg(getReport(errorObj,'extended','hyperlinks','off'));
 end
 
+fprintf(1,'CXS-TFM: TFM calculations complete.\n')
+fprintf(1,'  Analysis End Time: %s \n',datestr(now));
+
 %enable fig
-enableDisableFig(h_tfm(1).fig,1)
+enableDisableFig(h_tfm.fig,1);
 
 %change main windows 3. button status
 set(h_main(1).button_tfm,'ForegroundColor',[0 .5 0]);
 set(h_main(1).button_para,'Enable','on');
 
 %close window
-close(h_tfm(1).fig);
+close(h_tfm.fig);
 
 %move main window to the side
 movegui(h_main(1).fig,'center')
@@ -1100,6 +1128,8 @@ if tfm_init_user_strln
     tfm_para(h_main)
 end
 
+
+
 function tfm_buttongroup_constrain(hObject, eventdata, h_tfm)
 %load
 tfm_tfm_user_counter=getappdata(0,'tfm_tfm_user_counter');
@@ -1108,11 +1138,11 @@ tfm_tfm_user_constraintval=getappdata(0,'tfm_tfm_user_constraintval');
 switch get(eventdata.NewValue,'Tag')   % Get Tag of selected object
     case 'radiobutton_unconstrained'
         tfm_tfm_user_constraintval(tfm_tfm_user_counter)=1;
-        set(h_tfm(1).edit_regul,'visible','on')
-        set(h_tfm(1).text_regul,'visible','on')
+        set(h_tfm.edit_regul,'visible','on')
+        set(h_tfm.text_regul,'visible','on')
     case 'radiobutton_constrained'
         tfm_tfm_user_constraintval(tfm_tfm_user_counter)=2;
-        set(h_tfm(1).edit_regul,'visible','off')
-        set(h_tfm(1).text_regul,'visible','off')
+        set(h_tfm.edit_regul,'visible','off')
+        set(h_tfm.text_regul,'visible','off')
 end
 setappdata(0,'tfm_tfm_user_constraintval',tfm_tfm_user_constraintval)
