@@ -20,7 +20,7 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% tfm_mains.m
+% tfm_main.m
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Instructions:
 % To analyse TFM video, execute tfm_main.m
@@ -58,12 +58,12 @@ warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
 warning('off','MATLAB:MKDIR:DirectoryExists');
 
 % are template files available?
-if isempty(which('bioformats_package.jar'))
-    fprintf(1,'WARNING: bioformats_package.jar file not found\n');
-end
+% Note: If deployed application, these files are in a cache directory
+%  If at command line, these files must be in directory with code files:
+%   Master_DO_NOT_EDIT.xlsx, Sample_DO_NOT_EDIT.xlsx
 path_to_templates = fileparts(which('Master_DO_NOT_EDIT.xlsx'));
 if isempty(path_to_templates)
-    fprintf(1,'WARNING: Master xlsx file not found\n');
+    fprintf(1,'WARNING: Output xlsx template files not found\n');
 end
 
 
@@ -82,8 +82,9 @@ fprintf(1,'   %s\n\n',buildver);
 fprintf(1,'  Start Time: %s \n\n',datestr(now));
 
 % check this machine
+%  https://docs.oracle.com/javase/7/docs/api/java/lang/Runtime.html
 fprintf(1,'System Architecture: %s, Number of CPU cores: %d\n',computer('arch'),feature('numCores'));
-fprintf(1,'Java Runtime Max. Memory: %d MB\n',java.lang.Runtime.getRuntime.maxMemory/1024)
+fprintf(1,'Java Runtime Max. Memory: %d MB\n',java.lang.Runtime.getRuntime.maxMemory/(1024*1024))
 
 fprintf(1,'\n');
 fprintf(1,'CXS-TFM: main function\n');
@@ -112,6 +113,7 @@ if isdeployed
 else % running at command line
     defaultstartdir = pwd;
 end
+
 % make the directory
 if ~isfolder(defaultstartdir)
     try
@@ -133,14 +135,14 @@ end
 fprintf(1,' Working directory: %s\n',pwd);
 
 % make sure that the template files are available
-if isdeployed
+%if isdeployed
     if ~isfile(fullfile(path_to_templates,'Master_DO_NOT_EDIT.xlsx'))
         fprintf(1,'WARNING: Master xlsx file not found\n');
     end
     if ~isfile(fullfile(path_to_templates,'Sample_DO_NOT_EDIT.xlsx'))
         fprintf(1,'WARNING: Sample xlsx file not found\n');
     end
-end
+%end
 
 % use this to check timing throughout image processing
 %userTiming.mainTiming{1} = tic;
@@ -148,7 +150,7 @@ end
 
 %profile on
 
-% start the parallel computing pool
+% start the parallel computing pool % MH: not helpful to start before needed
 %if use_parallel > 0, gcp; end
 
 % add paths of external funcs
@@ -170,10 +172,10 @@ if ~isdeployed
 %     else
 % 	    addpath('External/ncorr_v1_2');
 %     end
-    addpath('External/ncorr_v1_2');
+    addpath('External/ncorr_2D_matlab');
 %     addpath('External/ojwoodford-export_fig-5735e6d')
 %     addpath('External/freezeColors');
-    addpath('External/regu/regu');
+    addpath('External/regu');
 
     javaaddpath('External/20130227_xlwrite/poi_library/poi-3.8-20120326.jar');
     javaaddpath('External/20130227_xlwrite/poi_library/poi-ooxml-3.8-20120326.jar');
@@ -191,10 +193,13 @@ if ~isdeployed
 %     javaaddpath('poi_library/stax-api-1.0.1.jar');    
 end
 
-% javaclasspath
+% javaclasspath % print for debugging
 % fprintf(1,'\n');
+if isempty(which('bioformats_package.jar'))
+    fprintf(1,'WARNING: bioformats_package.jar file not found\n');
+end
 
-%figure size
+%figure size for main window
 figuresize=[200,225];
 %get screen size
 screensize = get(0,'ScreenSize');
@@ -223,13 +228,13 @@ buttonsize=[30,200];
 verticalspace=(figuresize(1)-4*buttonsize(1))/5;
 %button 1 - initalization
 h_main.button_init = uicontrol('Parent',h_main.fig,'style','pushbutton','position',[figuresize(2)/2-buttonsize(2)/2,4*verticalspace+3*buttonsize(1),buttonsize(2),buttonsize(1)],...
-    'string','Initialization','FontSize',fontsizeA);
+    'string','Initialization (Images)','FontSize',fontsizeA);
 %button 2 - displacement; disabled at start
 h_main.button_piv = uicontrol('Parent',h_main.fig,'style','pushbutton','position',[figuresize(2)/2-buttonsize(2)/2,3*verticalspace+2*buttonsize(1),buttonsize(2),buttonsize(1)],...
-    'string','Displacements','FontSize',fontsizeA,'Enable','off');
+    'string','Displacements (PIV)','FontSize',fontsizeA,'Enable','off');
 %button 3 - sarcomere analysis; disabled at start
 h_main.button_tfm = uicontrol('Parent',h_main.fig,'style','pushbutton','position',[figuresize(2)/2-buttonsize(2)/2,2*verticalspace+buttonsize(1),buttonsize(2),buttonsize(1)],...
-    'string','Traction Forces','FontSize',fontsizeA,'Enable','off');
+    'string','Traction Forces (TFM)','FontSize',fontsizeA,'Enable','off');
 %button 4 - parameter extraction; disabled at start
 h_main.button_para = uicontrol('Parent',h_main.fig,'style','pushbutton','position',[figuresize(2)/2-buttonsize(2)/2,verticalspace,buttonsize(2),buttonsize(1)],...
     'string','Results','FontSize',fontsizeA,'Enable','off');

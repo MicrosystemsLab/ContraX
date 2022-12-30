@@ -9,7 +9,7 @@
 %% Setup
 progname='ContraX';
 mainFunction='tfm_main';
-updateRepo=1; % update the repository with this source code?
+updateRepo=0; % update the repository with this source code?
 if ispc, updateRepo=0; end
 %copyFiles=0; % copy executables to correct locations?
 
@@ -32,8 +32,8 @@ addpath('External');
 addpath('External/20130227_xlwrite');
 %addpath('External/20130227_xlwrite/poi_library');
 addpath('External/bfmatlab');
-addpath('External/ncorr_v1_2');
-addpath('External/regu/regu');
+addpath('External/ncorr_2D_matlab');
+addpath('External/regu');
 addpath('External/statusbar');
 % remove the startup.m file
 user_path = userpath;
