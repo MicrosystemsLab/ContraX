@@ -49,14 +49,12 @@ function currentState = enableDisableFig(hFig, newState)
 %    2007-08-11: Fixed sanity checks for illegal list of figure handles
 %    2011-02-18: Remove Java warnings in modern Matlab releases
 %    2011-10-14: Fix for R2011b
-% 2015-01-04: modified using yair's code for getjframe for use w.
-% matlabe2014b (os.)
 %
 % See also:
 %    gcf, findjobj, getJFrame (last two on the File Exchange)
 
 % Programmed by Yair M. Altman: altmany(at)gmail.com
-% $Revision: 1.3 $  $Date: 2011/10/14 03:24:32 $
+% $Revision: 1.5 $  $Date: 2016/12/11 14:39:47 $
 
   try
       % Default figure = current (gcf)
@@ -98,7 +96,11 @@ function currentState = enableDisableFig(hFig, newState)
                   set(jff,'Enabled',newState);          % accepts 'on'/'off'
                   warning(oldWarn)
               catch
-                  set(handle(jff),'Enabled',newState);  % accepts true/false
+                  try
+                      set(handle(jff),'Enabled',newState);  % accepts true/false
+                  catch
+                      set(handle(jff),'Enabled',strcmpi(newState,'on'));  % accepts true/false
+                  end
               end
           end
       end
@@ -146,33 +148,33 @@ function currentState = enableDisableFig(hFig, newState)
   end
 
 %% Get the root Java frame (up to 10 tries, to wait for figure to become responsive)
-function jframe = getJFrame(hFigHandle)
+function jframe = getJFrame(hFig)
 
   % Ensure that hFig is a figure handle...
-  hFig = ancestor(hFigHandle,'figure');
+  hFig = ancestor(hFig,'figure');
   if isempty(hFig)
       error(['Cannot retrieve the figure handle for handle ' num2str(hFigHandle)]);
   end
 
+  oldWarn = warning('off','MATLAB:HandleGraphics:ObsoletedProperty:JavaFrame');
   jframe = [];
   maxTries = 10;
   while maxTries > 0
       try
           % Get the figure's underlying Java frame
-          jf = get(handle(hFig),'JavaFrame');
+          jf = get(handle(hFig),'javaframe');
 
           % Get the Java frame's root frame handle
           %jframe = jf.getFigurePanelContainer.getComponent(0).getRootPane.getParent;
           try
-              jClient = jf.fFigureClient;  % This works up to R2011a
+              jframe = jf.fFigureClient.getWindow;  % equivalent to above...
           catch
               try
-                  jClient = jf.fHG1Client;  % This works from R2008b-R2014a
+                  jframe = jf.fHG1Client.getWindow;  % equivalent to above...
               catch
-                  jClient = jf.fHG2Client;  % This works from R2014b and up
+                  jframe = jf.fHG2Client.getWindow;  % equivalent to above...
               end
           end
-          jframe = jClient.getWindow;  % equivalent to above...
           if ~isempty(jframe)
               break;
           else
@@ -185,5 +187,6 @@ function jframe = getJFrame(hFigHandle)
       end
   end
   if isempty(jframe)
-      error(['Cannot retrieve the java frame for handle ' num2str(hFigHandle)]);
+      error('Cannot retrieve figure''s java frame');
   end
+  warning(oldWarn);
