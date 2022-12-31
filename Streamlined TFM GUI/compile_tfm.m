@@ -66,6 +66,8 @@ catch
     return
 end
 
+fprintf(1,'Create compiler command\n')
+
 % Create buildversion file
 buildver=sprintf('%s/%s/%s',sprintf('%d%02d%02d%02d%02d%02.0f',datevec(now)),computer('arch'),matver.Release(2:end-1));
 fprintf(1,'buildver: %s\n',buildver);
