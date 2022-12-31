@@ -63,6 +63,7 @@ xpos = ceil((screensize(3)-figuresize(2))/2);
 ypos = ceil((screensize(4)-figuresize(1))/2);
 %create figure; invisible at first
 % MH: add 20 px to height to make room for statusbar
+%  'position' = [left, bottom, width, height]
 h_init.fig=figure(...
     'position',[xpos, ypos, figuresize(2), figuresize(1)+20],...
     'units','pixels',...
@@ -87,7 +88,8 @@ fontsizeA = 10;
 
 %create uipanel for readin & buttons
 %uipanel: contains readin button for videos and folders
-h_init.panel_read = uipanel('Parent',h_init.fig,'Title','Open 1 or more video files','units','pixels','Position',[20,350,155,135]);
+h_init.panel_read = uipanel('Parent',h_init.fig,'Title','Open 1 or more video files','units','pixels',...
+    'Position',[20,350,155,135]);
 h_init.panel_read.ForegroundColor = ptcolor;
 h_init.panel_read.BackgroundColor = pcolor;
 %button 1: read in videos
@@ -117,7 +119,6 @@ h_init.listbox_display = uicontrol('Parent',h_init.panel_list,'style','listbox',
 h_init.button_delete = uicontrol('Parent',h_init.panel_list,'style','pushbutton','position',[5,5,140,25],'string','Delete selected');
 
 %create uipanel to display video information and first frame
-%uipanel:
 h_init.panel_vid = uipanel('Parent',h_init.fig,'Title','Video information','units','pixels','Position',[190,45,850,440],'visible','off');
 h_init.panel_vid.ForegroundColor = ptcolor;
 h_init.panel_vid.BackgroundColor = pcolor;
@@ -125,7 +126,7 @@ h_init.panel_vid.BackgroundColor = pcolor;
 h_init.subpanel_vid = uipanel('Parent',h_init.panel_vid,'Title','Masks information','units','pixels','Position',[550,320,290,110],'visible','off');
 h_init.subpanel_vid.ForegroundColor = ptcolor;
 h_init.subpanel_vid.BackgroundColor = pcolor;
-%axes: display first frame of current
+%axes: display first frame of current (i.e. the TFM video)
 h_init.axes_curr = axes('Parent',h_init.panel_vid,'Units', 'pixels','Position',[15,35,400,290]);
 %axes: display corresponding bf frame
 h_init.axes_bf = axes('Parent',h_init.panel_vid,'Units','pixels','Position',[430,35,400,290]);
@@ -481,6 +482,8 @@ set(h_main.fig,'Position',[fp(1)-ap(3) fp(2)+fp(4)-ap(4) ap(3) ap(4)]);
 % initialize status bar
 sb=statusbar(h_init.fig,'Ready');
 sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
+
+if ~isdeployed, disp(get(h_init.axes_bf,'Position')); end % DEBUG
 
 %profile viewer
 %userTiming= getappdata(0,'userTiming');
@@ -989,7 +992,7 @@ try
     
     %set frame1 of 1st video
     axes(h_init.axes_curr);
-    imshow(tfm_init_user_preview_frame1{1});hold on;
+    imshow(tfm_init_user_preview_frame1{1}); hold on;
     plot(tfm_init_user_outline1x{1},tfm_init_user_outline1y{1},'r','LineWidth',2);
     plot(tfm_init_user_outline2x{1},tfm_init_user_outline2y{1},'b','LineWidth',2);
     plot(tfm_init_user_outline3x{1},tfm_init_user_outline3y{1},'g','LineWidth',2);
@@ -1413,7 +1416,7 @@ end
 
 
 %% the 'Add BF videos' button
-function init_push_readbf(hObject, eventdata, h_init)
+function init_push_readbf(hObject, eventdata, h_init) %#ok<INUSL> 
 
 try
     %load what shared para we need
@@ -1490,7 +1493,7 @@ try
         answer = 'No';
 	end
 
- 	tstartMH = tic;
+ 	tstartMH2 = tic;
     fprintf(1,'CXS-TFM: Start BF Video Import\n')
 	
     %Loop over vids and save preview frames
@@ -1525,7 +1528,7 @@ try
             Nchannels = data{1,4}.getChannelCount(0); % assuming 1 Image sequence as always
             fprintf(1,' File has %d channels\n', Nchannels);
 
-
+%             % MH Changed this to use file metadata Dec2022
 %             %--------
 %             %USE TO ADAPT TO MULTICHANNEL CZI files
 %             % check for image and channel stack
@@ -1550,23 +1553,23 @@ try
             % isolate selected channel (channel images are interleaved)
             images = images(TFMChannel:Nchannels:end);
 
+            % do we trim the first frame?
+            if get(h_init.checkbox_trim, 'value')
+                 images = images(2:end);
+            end
+
             N=size(images,1); %number of frames
             image_stack = zeros(m,n,N,'uint8'); % init processed image output
 
             fprintf(1,' %d Video frames of %d x %d pixels\n',N,m,n);
-            
-            start_frame = 1; % do we trim the first frame?
-            if get(h_init.checkbox_trim, 'value')
-                start_frame = 2;
-            end
 
-            fprintf(1,' Normalising video images...\n');
+            fprintf(1,'CXS-TFM: Normalise video images...\n'); tstartMH = tic;
             if ndims(images{1,1}) == 3
                 fprintf(1,'  Images are color; will convert to greyscale\n');
             end
 
             % save images to matlab variable
-            parfor (i = start_frame:N-1, tfm_init_use_parallel)
+            parfor (i = 1:N, tfm_init_use_parallel)
                 %index = TFMChannel + Nchannels*i;
                 imagei = images{i}; % MH 29Dec2022 changed indexing for better parfor
                 %convert to grey
@@ -1578,14 +1581,13 @@ try
                 imagei=im2uint8(imagei);
                 image_stack(:,:,i) = imagei;
             end
-%             if start_frame == 1
-%                 image_stack = image_stack(:,:,2:end);
-%             end
+            fprintf(1,'CXS-TFM: Normalising completed in %.1f seconds\n',toc(tstartMH));
+
 %             N = size(image_stack,3);
 
             %save to mat
             save(['vars_DO_NOT_DELETE/',tfm_init_user_bf_filenamestack{1,j},'/image_stack_bf.mat'],'image_stack','-v7.3');
-            
+            % image for display
             image1_raw=image_stack(:,:,1);
             
         elseif strcmp(tfm_init_user_bf_vidext{1,Nfiles0_bf+j},'.tif')
@@ -1596,24 +1598,24 @@ try
             TifLink=Tiff([tfm_init_user_bf_pathnamestack{1,Nfiles0_bf+j},tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},tfm_init_user_bf_vidext{1,Nfiles0_bf+j}],'r');
             
             % initialize image stack
-            TifLink.setDirectory(1);
+            TifLink.setDirectory(1); % multi-part TIFF files use internal "directories"
             imagei = TifLink.read();
             m = size(imagei,1);
             n = size(imagei,2);
-            image_stack = zeros(m,n,N,'uint8');
-            end_frame = N;
+            start_frame = 0; % do we trim the first frame?
             if get(h_init.checkbox_trim, 'value')
-                end_frame = N-1;
-                TifLink.read(); %read past first frame
-                image_stack = zeros(m,n,N-1,'uint8');
+                start_frame = 1; % an offset
             end
+            N = N - start_frame;
+            image_stack = zeros(m,n,N,'uint8');
 
-            fprintf(1,' Normalise TIFF stack images...\n');
+            fprintf(1,'CXS-TFM: Normalise video images...\n'); tstartMH = tic;
             if ndims(imagei) == 3
                 fprintf(1,'  Images are color; will convert to greyscale\n');
             end
-            for i=1:end_frame
-                TifLink.setDirectory(i);
+
+            for i=1:N
+                TifLink.setDirectory(i+start_frame);
                 imagei=TifLink.read();
                 %convert to grey
                 if ndims(imagei) == 3
@@ -1625,6 +1627,7 @@ try
                 image_stack(:,:,i) = imagei;
             end
             TifLink.close();
+            fprintf(1,'CXS-TFM: Normalising completed in %.1f seconds\n',toc(tstartMH));
             
             %save to mat
             save(['vars_DO_NOT_DELETE/',tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},'/image_stack_bf.mat'],'image_stack','-v7.3')
@@ -1640,26 +1643,20 @@ try
             imagei = read(videoObj,1);
             m = size(imagei,1);
             n = size(imagei,2);
-            image_stack = zeros(m,n,N,'uint8');
-            num_frames = N;
+            start_frame = 0; % do we trim the first frame?
             if get(h_init.checkbox_trim, 'value')
-                num_frames = N-1;
-                image_stack = zeros(m,n,N-1,'uint8');
+                start_frame = 1; % an offset
             end
+            N = N - start_frame;
+            image_stack = zeros(m,n,N,'uint8');
 
-            fprintf(1,' Normalise AVI video images...\n');
+            fprintf(1,'CXS-TFM: Normalise video images...\n'); tstartMH = tic;
             if ndims(imagei) == 3
                 fprintf(1,'  Images are color; will convert to greyscale\n');
             end
-            trim_ind = 0; % MH handle "trim first frame"
-            if get(h_init.checkbox_trim, 'value'), trim_ind = 1; end
 
-            parfor (i=1:num_frames,tfm_init_use_parallel)
-%                 if get(h_init.checkbox_trim, 'value')
-%                     imagei=read(videoObj, i+1);
-%                 else
-                    imagei=read(videoObj, i+trim_ind);
-%                 end
+            parfor (i=1:N,tfm_init_use_parallel)
+                imagei=read(videoObj, i+start_frame);
                 %convert to grey
                 if ndims(imagei) == 3
                     imagei=rgb2gray(imagei);
@@ -1669,6 +1666,7 @@ try
                 imagei=im2uint8(imagei);
                 image_stack(:,:,i) = imagei;
             end
+            fprintf(1,'CXS-TFM: Normalising completed in %.1f seconds\n',toc(tstartMH));
 
             %save to mat
             save(['vars_DO_NOT_DELETE/',tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},'/image_stack_bf.mat'],'image_stack','-v7.3')
@@ -1681,7 +1679,7 @@ try
         tfm_init_user_Nframes_bf{Nfiles0_bf+j}=size(image_stack,3);
     end	
     
- 	fprintf(1,'CXS-TFM: End BF video import and save at %.02f s\n',toc(tstartMH));
+ 	fprintf(1,'CXS-TFM: End BF video import and save at %.02f s\n',toc(tstartMH2));
 	
     %update statusbar
     sb=statusbar(h_init.fig,'Import - Done !');
@@ -1753,7 +1751,7 @@ try
     
     %set preview of 1st video
     axes(h_init.axes_curr);
-    imshow(tfm_init_user_preview_frame1{tfm_init_user_counter});hold on;
+    imshow(tfm_init_user_preview_frame1{tfm_init_user_counter}); hold on;
     plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
     plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
     plot(tfm_init_user_outline3x{tfm_init_user_counter},tfm_init_user_outline3y{tfm_init_user_counter},'g','LineWidth',2);
@@ -1773,12 +1771,13 @@ try
     elseif size(tfm_init_user_bf_filenamestack,2) >= tfm_init_user_counter
         set(h_init.axes_bf,'Visible','on');
         axes(h_init.axes_bf);
-        imshow(tfm_init_user_bf_preview_frame1{tfm_init_user_counter});hold on;
+        imshow(tfm_init_user_bf_preview_frame1{tfm_init_user_counter}); hold on;
         plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
         plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
         plot(tfm_init_user_outline3x{tfm_init_user_counter},tfm_init_user_outline3y{tfm_init_user_counter},'g','LineWidth',2);
         hold off;
         set(h_init.text_bf_whichvidname,'string',[tfm_init_user_bf_filenamestack{tfm_init_user_counter}]);
+        if ~isdeployed, disp(get(h_init.axes_bf,'Position')); end % DEBUG
     end
     
     %save
@@ -3662,16 +3661,6 @@ try
             %use bioformats for import
 %             [~,data]=evalc('bfopen([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]);');
 			data = bfopen([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]);
-            
-%             metadata = data{1, 2};
-%             tincrement = str2double(metadata.get('Global Information|Image|T|Interval|Increment #1'));
-%             if tincrement > 0
-%                 tfm_init_user_framerate{j}=1/tincrement;
-%                 set(h_init.edit_fps,'String',num2str(tfm_init_user_framerate{j}));
-%                 fprintf(' Framerate found in file is %d fps\n', tfm_init_user_framerate{j});
-%             else
-%                 fprintf(' Framerate not found in file (verify setting in window\n');
-%             end
 
             % get channels/frames info
             %  Note: cell 4 in data is the same as the item returned by bfGetReader
@@ -3708,16 +3697,16 @@ try
 
             % isolate selected channel (images are interleaved)
             images = images(TFMChannel:Nchannels:end);
+            
+            % do we trim the first frame?
+            if get(h_init.checkbox_trim, 'value')
+                 images = images(2:end);
+            end
 
             N=size(images,1); %number of frames
             image_stack = zeros(m,n,N,'uint8'); % init processed image output
 
             fprintf(1,' %d Video images of %d x %d pixels\n',N,m,n);
-
-            start_frame = 1; % do we trim the first frame?
-            if get(h_init.checkbox_trim, 'value')
-                start_frame = 2;
-            end
 
             fprintf(1,'CXS-TFM: Normalise video images...\n');
             tstartMH = tic;
@@ -3727,7 +3716,7 @@ try
             end
 
             % save images to matlab variable
-            parfor (i = start_frame:N-1, tfm_init_use_parallel)
+            parfor (i = 1:N, tfm_init_use_parallel)
                 %index = TFMChannel + Nchannels*i;
                 %imagei=images{index,1};
                 imagei = images{i}; % MH 29Dec2022 changed indexing for better parfor
@@ -3738,12 +3727,9 @@ try
                 %imagei=normalise(imagei); % MH change "normalise" to "rescale"
                 imagei=rescale(imagei);
                 imagei=im2uint8(imagei);
-                image_stack(:,:,i) = imagei; % this is saved to file
+                image_stack(:,:,i) = imagei; %#ok<PFOUS> % this is saved to file
                 %save to mat
                 %save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,j},'/image',num2str(i),'.mat'],'imagei','-v7.3')
-            end
-            if start_frame > 1
-                image_stack = image_stack(:,:,start_frame:end);
             end
 
             fprintf(1,'CXS-TFM: Normalising completed in %.1f seconds\n',toc(tstartMH));
@@ -3762,15 +3748,20 @@ try
                 % isolate selected channel (images are interleaved)
                 images = images(BFChannel:Nchannels:end);
 
+                % do we trim the first frame?
+                if get(h_init.checkbox_trim, 'value')
+                     images = images(2:end);
+                end
+
                 N=size(images,1); %number of frames
                 image_stack = zeros(m,n,N,'uint8'); % init processed image output
 
-                start_frame = 1; % do we trim the first frame?
-                if get(h_init.checkbox_trim, 'value')
-                    start_frame = 2;
+                fprintf(1,'CXS-TFM: Normalise video images...\n'); tstartMH = tic;
+                if ndims(images{1,1}) == 3
+                    fprintf(1,'  Images are color; will convert to greyscale\n');
                 end
 
-                parfor (ifr = start_frame:N-1, tfm_init_use_parallel)
+                parfor (ifr = 1:N, tfm_init_use_parallel)
                     %index = BFChannel + Nchannels*ifr;
                     %imagei=images{index,1}; %i+1*Nchannels no longer needed as long as nuclear stain goes first
                     imagei = images{ifr};
@@ -3782,9 +3773,8 @@ try
                     imagei=im2uint8(imagei);
                     image_stack(:,:,ifr) = imagei;
                 end
-                if start_frame > 1
-                    image_stack = image_stack(:,:,start_frame:end);
-                end
+                fprintf(1,'CXS-TFM: Normalising completed in %.1f seconds\n',toc(tstartMH));
+
                 %save to mat
                 save(['vars_DO_NOT_DELETE/',tfm_init_user_bf_filenamestack{1,j},'/image_stack_bf.mat'],'image_stack','-v7.3');
                 tfm_init_user_Nframes_bf{j} = size(image_stack,3);
@@ -3856,7 +3846,7 @@ try
                 end
                 imagei=normalise(imagei);
                 imagei=im2uint8(imagei);
-                image_stack(:,:,i) = imagei;
+                image_stack(:,:,i) = imagei; %#ok<PFOUS> % var is saved to file
             end
             fprintf(1,'CXS-TFM: Normalising completed in %.1f seconds\n',toc(tstartMH));
 

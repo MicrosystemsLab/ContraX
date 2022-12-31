@@ -698,7 +698,7 @@ try
             final_fv(:,:,frame) = fv;
             
         end % end ncorr frame processing
-        fprintf(1,'\n done. Elapsed time %.1f seconds.',toc(tstartFRAME));
+        fprintf(1,'\n done. Elapsed time %.1f seconds.\n',toc(tstartFRAME));
         
         %add boundaries to x, y, fu, and fv arrays
         final_x_new = [];

@@ -34,7 +34,7 @@ function tfm_main
 % the code is intended to be run from the Matlab command window,
 %  so initialize the environment when we start
 if ~isdeployed
-    clc
+    %clc
     clear all; %#ok<CLALL>
     close all;
 end
@@ -78,6 +78,7 @@ else
     buildver=sprintf('[command line]/%s/%s',computer('arch'),matver.Release(2:end-1));
 end
 
+if ~isdeployed, fprintf(1,'\n\n'); end
 fprintf(1,'\nContraX Streamlined TFM: Microscope Image TFM Analysis\n');
 fprintf(1,'   %s\n\n',buildver);
 fprintf(1,'  Start Time: %s \n\n',datestr(now));
