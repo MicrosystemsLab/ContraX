@@ -46,8 +46,9 @@ for ii = 1:numel(fns)
   rmappdata(0,fns{ii});
 end
 
- % set to positive integer to enable parallel processing with that many workers, or 0 to disable
-use_parallel=24; % note you will only get as many workers as you have CPU cores available
+% set to positive integer to enable parallel processing with that many workers, or 0 to disable
+Ncores = feature('numCores');
+use_parallel=round(Ncores*.75); % note max. workers = CPU cores available
 
 % disable warning for obsolete java components
 %  See: https://www.mathworks.com/products/matlab/app-designer/java-swing-alternatives.html?s_tid=OIT_20611
@@ -83,6 +84,7 @@ fprintf(1,'  Start Time: %s \n\n',datestr(now));
 
 % check this machine
 %  https://docs.oracle.com/javase/7/docs/api/java/lang/Runtime.html
+disp(version('-java'))
 fprintf(1,'System Architecture: %s, Number of CPU cores: %d\n',computer('arch'),feature('numCores'));
 fprintf(1,'Java Runtime Max. Memory: %d MB\n',java.lang.Runtime.getRuntime.maxMemory/(1024*1024))
 
@@ -173,8 +175,6 @@ if ~isdeployed
 % 	    addpath('External/ncorr_v1_2');
 %     end
     addpath('External/ncorr_2D_matlab');
-%     addpath('External/ojwoodford-export_fig-5735e6d')
-%     addpath('External/freezeColors');
     addpath('External/regu');
 
     javaaddpath('External/20130227_xlwrite/poi_library/poi-3.8-20120326.jar');
@@ -183,14 +183,7 @@ if ~isdeployed
     javaaddpath('External/20130227_xlwrite/poi_library/xmlbeans-2.3.0.jar');
     javaaddpath('External/20130227_xlwrite/poi_library/dom4j-1.6.1.jar');
     javaaddpath('External/20130227_xlwrite/poi_library/stax-api-1.0.1.jar');
-
-% else
-%     javaaddpath('poi_library/poi-3.8-20120326.jar');
-%     javaaddpath('poi_library/poi-ooxml-3.8-20120326.jar');
-%     javaaddpath('poi_library/poi-ooxml-schemas-3.8-20120326.jar');
-%     javaaddpath('poi_library/xmlbeans-2.3.0.jar');
-%     javaaddpath('poi_library/dom4j-1.6.1.jar');
-%     javaaddpath('poi_library/stax-api-1.0.1.jar');    
+  
 end
 
 % javaclasspath % print for debugging
