@@ -45,7 +45,7 @@
 function tfm_init(h_main)
 fprintf(1,'\n');
 fprintf(1,'CXS-TFM: Initialization Module\n');
-fprintf(1,'  Analysis Start Time: %s \n',datestr(now));
+fprintf(1,' Analysis Start Time: %s \n',datestr(now));
 
 warning('off','MATLAB:ui:javaframe:PropertyToBeRemoved');
 
@@ -705,7 +705,7 @@ try
     %loop over vids and extract first frame data
     for j = 1:size(filename,2)
         if strcmp(tfm_init_user_vidext{1,Nfiles0+j},'.czi')
-            fprintf(1,'CXS-TFM: Load first frame of TFM video (.czi)... (%d/%d)',j,size(filename,2));
+            fprintf(1,'CXS-TFM: Load first frame of TFM video (.czi)... (%d/%d)\n',j,size(filename,2));
             TFMChannel = getappdata(0,'TFMChannel');
             BFChannel = getappdata(0,'BFChannel');
             
@@ -757,7 +757,7 @@ try
             
             
         elseif strcmp(tfm_init_user_vidext{1,Nfiles0+j},'.tif')
-            fprintf(1,'CXS-TFM: Load first frame of TFM video (.tif)...');
+            fprintf(1,'CXS-TFM: Load first frame of TFM video (.tif)...\n');
             if exist('multichannelczi','var') == 0
                 multichannelczi = false;
             end
@@ -781,7 +781,7 @@ try
 
 			
         elseif strcmp(tfm_init_user_vidext{1,Nfiles0+j},'.avi')
-            fprintf(1,'CXS-TFM: Load first frame of TFM video (.avi)...');
+            fprintf(1,'CXS-TFM: Load first frame of TFM video (.avi)...\n');
             if exist('multichannelczi','var') == 0
                 multichannelczi = false;
             end
@@ -798,7 +798,7 @@ try
             m = size(image,1);
             n = size(image,2);
             
-        end
+        end % end load first frame
 		
 		
 		%convert extracted image to grey

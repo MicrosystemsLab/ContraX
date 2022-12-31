@@ -49,11 +49,11 @@ fprintf(1,'Checking dependencies\n');
 [fList, pList] = matlab.codetools.requiredFilesAndProducts(mainFunction);
 fprintf(1,'  Toolboxes Required:\n');
 for k= 1:length(pList)
-	disp(pList(k).Name)
+	fprintf(1,'- %s\n',pList(k).Name);
 end
 fprintf(1,'\n');
 if length(pList)-1 > 1
-    fprintf(1,'WARNING: Looks like Matlab toolboxes are required (%d).\n',length(pList)-1); % -1 for core MATLAB
+    fprintf(1,'ATTENTION: Looks like Matlab toolboxes are required (%d).\n',length(pList)-1); % -1 for core MATLAB
     fprintf(1,'  Ensure that they are included in the compile script.\n');
 end
 
