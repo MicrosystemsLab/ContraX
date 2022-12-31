@@ -3738,38 +3738,52 @@ try
                 %imagei=normalise(imagei); % MH change "normalise" to "rescale"
                 imagei=rescale(imagei);
                 imagei=im2uint8(imagei);
-                image_stack(:,:,i) = imagei; %#ok<PFOUS> % this is saved to file
+                image_stack(:,:,i) = imagei; % this is saved to file
                 %save to mat
                 %save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,j},'/image',num2str(i),'.mat'],'imagei','-v7.3')
             end
-%             if start_frame == 1
-%                 image_stack = image_stack(:,:,2:end);
-%             end
+            if start_frame > 1
+                image_stack = image_stack(:,:,start_frame:end);
+            end
 
             fprintf(1,'CXS-TFM: Normalising completed in %.1f seconds\n',toc(tstartMH));
             %save to mat
             save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,j},'/image_stack.mat'],'image_stack','-v7.3')
             
+            % Load BF frames if they are also in the same file
             BFChannel = getappdata(0, 'BFChannel');
             if multichannelczi && BFChannel <= Nchannels %also load bf frames
-                fprintf('CXS-TFM: Load BF image frames\n');
+                fprintf('CXS-TFM: Load BF image frames from this file\n');
                %[~,data]=evalc('bfopen([tfm_init_user_bf_pathnamestack{1,j},tfm_init_user_bf_filenamestack{1,j},tfm_init_user_bf_vidext{1,j}]);');
 % 				data = bfopen([tfm_init_user_bf_pathnamestack{1,j},tfm_init_user_bf_filenamestack{1,j},tfm_init_user_bf_vidext{1,j}]);
                 images=data{1,1}; %images
-                image_stack = zeros(m,n,N,'uint8');
-                parfor (ifr = start_frame:N-1,tfm_init_use_parallel)
-                    index = BFChannel + Nchannels*ifr;
-                    imagei=images{index,1}; %i+1*Nchannels no longer needed as long as nuclear stain goes first
+                images=images(:,1); % a Nx1 cell array
+
+                % isolate selected channel (images are interleaved)
+                images = images(BFChannel:Nchannels:end);
+
+                N=size(images,1); %number of frames
+                image_stack = zeros(m,n,N,'uint8'); % init processed image output
+
+                start_frame = 1; % do we trim the first frame?
+                if get(h_init.checkbox_trim, 'value')
+                    start_frame = 2;
+                end
+
+                parfor (ifr = start_frame:N-1, tfm_init_use_parallel)
+                    %index = BFChannel + Nchannels*ifr;
+                    %imagei=images{index,1}; %i+1*Nchannels no longer needed as long as nuclear stain goes first
+                    imagei = images{ifr};
                     %convert to grey
                     if ndims(imagei) == 3
                         imagei=rgb2gray(imagei);
                     end
-                    imagei=normalise(imagei);
+                    imagei=rescale(imagei);
                     imagei=im2uint8(imagei);
-                    image_stack(:,:,ifr+1) = imagei;
+                    image_stack(:,:,ifr) = imagei;
                 end
-                if start_frame == 1
-                    image_stack = image_stack(:,:,2:end);
+                if start_frame > 1
+                    image_stack = image_stack(:,:,start_frame:end);
                 end
                 %save to mat
                 save(['vars_DO_NOT_DELETE/',tfm_init_user_bf_filenamestack{1,j},'/image_stack_bf.mat'],'image_stack','-v7.3');

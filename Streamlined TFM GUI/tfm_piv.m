@@ -330,6 +330,7 @@ try
     if ~tfm_gui_call_piv_flag
         tfm_conc_user_binary1=getappdata(0,'sarco_conc_user_binarysarc');
     end
+    use_parallel = getappdata(0,'use_parallel');
     
     
     %ncorr settings
@@ -507,15 +508,16 @@ try
         final_fv=v_matr(1:end-1,:,:);
         
 
-		fprintf(1,'CXS-TFM: Start frame processing at %.02f s\n',toc(tstartMH));
+		fprintf(1,'CXS-TFM: Start frame processing at %.02f s\n ',toc(tstartMH));
 		tstartFRAME = tic;
         %h_pf = h_piv.fig;
 		
-        parfor frame = 1:length(cur)
+        parfor (frame = 1:length(cur), use_parallel)
 %        for frame = 1:length(cur)
 			%timeperframe = toc(tstartFRAME)/frame;
             if rem(frame,20)==0
-                fprintf(1,' #%d/%d, %.02f sec elapsed\n',frame,length(cur),toc(tstartFRAME));
+                %fprintf(1,' #%d/%d, %.02f sec elapsed\n',frame,length(cur),toc(tstartFRAME));
+                fprintf(1,'.');
             end
             %disp([' Calculating frame #',num2str(frame)])
             
@@ -694,8 +696,10 @@ try
             final_y(:,:,frame) = y;
             final_fu(:,:,frame) = fu;
             final_fv(:,:,frame) = fv;
+
+            fprintf(1,'\n done. Elapsed time %.1f seconds.',toc(tstartFRAME));
             
-        end
+        end % end ncorr frame processing
         
         %add boundaries to x, y, fu, and fv arrays
         final_x_new = [];
@@ -1585,8 +1589,8 @@ try
     vcontr=tfm_piv_user_vs{2};
     deltaU=mask2.*(ucontr-urel);
     deltaV=mask2.*(vcontr-vrel);
-    uref=(ucontr-urel)-mean(deltaU(:)).*ones(size(urel,1),size(urel,2),'omitnan');
-    vref=(vcontr-vrel)-mean(deltaV(:)).*ones(size(vrel,1),size(vrel,2),'omitnan');
+    uref=(ucontr-urel)-mean(deltaU(:),'omitnan').*ones(size(urel,1),size(urel,2));
+    vref=(vcontr-vrel)-mean(deltaV(:),'omitnan').*ones(size(vrel,1),size(vrel,2));
     V=sqrt(uref.^2+vref.^2);
     
     %plot spacing factor
@@ -1686,8 +1690,8 @@ try
     vcontr=tfm_piv_user_vs{2};
     deltaU=mask2.*(ucontr-urel);
     deltaV=mask2.*(vcontr-vrel);
-    uref=(ucontr-urel)-mean(deltaU(:)).*ones(size(urel,1),size(urel,2),'omitnan');
-    vref=(vcontr-vrel)-mean(deltaV(:)).*ones(size(vrel,1),size(vrel,2),'omitnan');
+    uref=(ucontr-urel)-mean(deltaU(:),'omitnan').*ones(size(urel,1),size(urel,2));
+    vref=(vcontr-vrel)-mean(deltaV(:),'omitnan').*ones(size(vrel,1),size(vrel,2));
     V=sqrt(uref.^2+vref.^2);
     
     %plot spacing factor

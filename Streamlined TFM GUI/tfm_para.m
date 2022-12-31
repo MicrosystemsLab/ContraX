@@ -633,7 +633,8 @@ try
 
     %format diplacements
     for current_vid=1:tfm_init_user_Nfiles % parfor
-        fprintf(1,' Calculating results for video %d/%d...',current_vid,tfm_init_user_Nfiles);
+        fprintf(1,' Calculating results for video %d/%d...\n',current_vid,tfm_init_user_Nfiles);
+        tstartMH = tic;
         
         tfm_para_user_d{current_vid}=[tfm_piv_user_meand{current_vid,:}];
         %Exclude 4 datapoints on each side of the relaxed frame, assigning the
@@ -1166,7 +1167,8 @@ try
     
     end
     
-    fprintf(1,' done\n');
+    %fprintf(1,' done\n');
+    fprintf(1,' Completed in %.1f seconds\n',toc(tstartMH));
 
 
     % calculate contraction times
