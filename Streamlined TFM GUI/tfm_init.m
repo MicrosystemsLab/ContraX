@@ -483,7 +483,7 @@ set(h_main.fig,'Position',[fp(1)-ap(3) fp(2)+fp(4)-ap(4) ap(3) ap(4)]);
 sb=statusbar(h_init.fig,'Ready');
 sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
 
-if ~isdeployed, disp(get(h_init.axes_bf,'Position')); end % DEBUG
+%if ~isdeployed, disp(get(h_init.axes_bf,'Position')); end % DEBUG
 
 %profile viewer
 %userTiming= getappdata(0,'userTiming');
@@ -1777,7 +1777,7 @@ try
         plot(tfm_init_user_outline3x{tfm_init_user_counter},tfm_init_user_outline3y{tfm_init_user_counter},'g','LineWidth',2);
         hold off;
         set(h_init.text_bf_whichvidname,'string',[tfm_init_user_bf_filenamestack{tfm_init_user_counter}]);
-        if ~isdeployed, disp(get(h_init.axes_bf,'Position')); end % DEBUG
+        %if ~isdeployed, disp(get(h_init.axes_bf,'Position')); end % DEBUG
     end
     
     %save
@@ -2731,7 +2731,7 @@ enableDisableFig(h_init.fig,0);
 %turn back on in the end
 clean1=onCleanup(@()enableDisableFig(h_init.fig,1));
 
-fprintf(1,'CXS-TFM: Start Draw Mask\n');
+fprintf(1,'CXS-TFM: Start Draw New Mask\n');
 
 try
     sb=statusbar(h_init.fig,'Please wait... ');
@@ -2785,17 +2785,17 @@ try
     sb=statusbar(h_init.fig,'Importing image for mask drawing...');
     sb.getComponent(0).setForeground(java.awt.Color.red);
     
-     fprintf(1,'CXS-TFM: Import image for mask...\n');
-     timpstartMH = tic;
+    fprintf(1,'CXS-TFM: Import image for mask...\n');
+    %tstartMH = tic;
     %check format and load:
     if strcmp(ext,'.czi')
         %use bioformats for import
 %         [~,data]=evalc('bfopen([pathname,filename{1,1}]);');
-		data=bfopen([pathname,filename{1,1}]);
+		data=bfopen([pathname,filename{1,1}]); % MH since we only need the first image, this could be changed to bfGetPlane
         
         %imagedata
         images=data{1,1}; %images
-        cellimage=normalise(images{1,1});
+        cellimage=rescale(images{1,1});
         cellimage=im2uint8(cellimage);
         
     elseif strcmp(ext,'.tif')
@@ -2806,7 +2806,7 @@ try
         if ndims(cellimage) == 3
             cellimage=rgb2gray(cellimage);
         end
-        cellimage=normalise(cellimage);
+        cellimage=rescale(cellimage);
         cellimage=im2uint8(cellimage);
         TifLink.close();
         %
@@ -3577,7 +3577,7 @@ end
 
 
 %% Callback for the "OK" button
-function init_push_ok(hObject, eventdata, h_init,h_main)
+function init_push_ok(hObject, eventdata, h_init, h_main) %#ok<INUSL> 
 fprintf('CXS-TFM: Processing video files...\n');
 %profile on
 %userTiming= getappdata(0,'userTiming');
@@ -3806,7 +3806,7 @@ try
                 if ndims(imagei) == 3
                     imagei=rgb2gray(imagei);
                 end
-                imagei=normalise(imagei);
+                imagei=rescale(imagei);
                 imagei=im2uint8(imagei);
                 image_stack(:,:,i) = imagei;
                 %save to mat
@@ -3844,7 +3844,7 @@ try
                 if ndims(imagei) == 3
                     imagei=rgb2gray(imagei);
                 end
-                imagei=normalise(imagei);
+                imagei=rescale(imagei);
                 imagei=im2uint8(imagei);
                 image_stack(:,:,i) = imagei; %#ok<PFOUS> % var is saved to file
             end
@@ -3931,11 +3931,11 @@ try
             %info = imfinfo([tfm_init_user_bf_pathnamestack{ivid},tfm_init_user_bf_filenamestack{ivid},'.tif']);
             bf_N_frames = tfm_init_user_Nframes_bf{ivid};%numel(info);
             
-            % initialize movie stacks bead and bf
-            bead_vid = zeros(height,width,N_frames);
-            bead_vid = im2uint8(bead_vid);
-            bf_vid = zeros(height,width,bf_N_frames);
-            bf_vid = im2uint8(bf_vid);
+%             % initialize movie stacks bead and bf
+%             bead_vid = zeros(height,width,N_frames);
+%             bead_vid = im2uint8(bead_vid);
+%             bf_vid = zeros(height,width,bf_N_frames);
+%             bf_vid = im2uint8(bf_vid);
             
             % load frames
             bead_frameN = load(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,ivid},'/image_stack.mat'],'image_stack');
@@ -4057,17 +4057,21 @@ try
             
             % save new .mat files
             image_stack = zeros(size(bead_vid_crop{ivid}));
-            parfor (i = 1:N_frames,tfm_init_use_parallel)
-                imagei = normalise(bead_vid_crop{ivid}(:,:,i));
-                image_stack(:,:,i) = imagei;
+            crop_vid = bead_vid_crop{ivid};
+            parfor (i = 1:N_frames, tfm_init_use_parallel)
+                %imagei = normalise(bead_vid_crop{ivid}(:,:,i));
+                imagei = rescale(crop_vid(:,:,i));
+                image_stack(:,:,i) = imagei; %#ok<PFOUS> % var is saved to file
                 % save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{ivid},'_cropped','/image',num2str(i),'.mat'],'imagei','-v7.3')
             end
             save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{ivid},'_cropped','/image_stack.mat'],'image_stack','-v7.3')
             % save new bf .mat files
             image_stack = zeros(size(bf_vid_crop{ivid}));
-            parfor (i = 1:bf_N_frames,tfm_init_use_parallel)
-                imagei = normalise(bf_vid_crop{ivid}(:,:,i));
-                image_stack(:,:,i) = imagei;
+            crop_vid = bf_vid_crop{ivid};
+            parfor (i = 1:bf_N_frames, tfm_init_use_parallel)
+                %imagei = normalise(bf_vid_crop{ivid}(:,:,i));
+                imagei = rescale(crop_vid(:,:,i));
+                image_stack(:,:,i) = imagei; %#ok<PFOUS> % var is saved to file
                 % save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{ivid},'_cropped','/image',num2str(i),'.mat'],'imagei','-v7.3')
             end
             save(['vars_DO_NOT_DELETE/',tfm_init_user_bf_filenamestack{ivid},'_cropped','/image_stack_bf.mat'],'image_stack','-v7.3')
@@ -4075,9 +4079,10 @@ try
             % clear temp vids
             bead_frameN.image_stack = [];
             bf_frameN.image_stack = [];
-            bead_vid = [];
-            bf_vid = [];
-            image_stack = [];
+            bead_vid = []; %#ok<NASGU> 
+            bf_vid = []; %#ok<NASGU> 
+            image_stack = []; %#ok<NASGU> 
+            crop_vid = []; %#ok<NASGU> 
             % bead_vid_crop{ivid} = [];
             % bf_vid_crop{ivid} = [];
         end

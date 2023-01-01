@@ -83,11 +83,14 @@ fprintf(1,'\nContraX Streamlined TFM: Microscope Image TFM Analysis\n');
 fprintf(1,'   %s\n\n',buildver);
 fprintf(1,'  Start Time: %s \n\n',datestr(now));
 
-% check this machine
+% check this machine and Java setup
 %  https://docs.oracle.com/javase/7/docs/api/java/lang/Runtime.html
-disp(version('-java'))
 fprintf(1,'System Architecture: %s, Number of CPU cores: %d\n',computer('arch'),feature('numCores'));
-fprintf(1,'Java Runtime Max. Memory: %d MB\n',java.lang.Runtime.getRuntime.maxMemory/(1024*1024))
+disp(version('-java'))
+fprintf(1,'Java Runtime Max. Memory: %d MB\n',java.lang.Runtime.getRuntime.maxMemory/(1024*1024));
+% Initialize logging for BioFormats
+bfInitLogging(); % default to "WARN"
+
 
 fprintf(1,'\n');
 fprintf(1,'CXS-TFM: main function\n');
