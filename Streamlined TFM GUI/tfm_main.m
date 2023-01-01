@@ -88,8 +88,6 @@ fprintf(1,'  Start Time: %s \n\n',datestr(now));
 fprintf(1,'System Architecture: %s, Number of CPU cores: %d\n',computer('arch'),feature('numCores'));
 disp(version('-java'))
 fprintf(1,'Java Runtime Max. Memory: %d MB\n',java.lang.Runtime.getRuntime.maxMemory/(1024*1024));
-% Initialize logging for BioFormats
-bfInitLogging(); % default to "WARN"
 
 
 fprintf(1,'\n');
@@ -195,6 +193,8 @@ end
 if isempty(which('bioformats_package.jar'))
     fprintf(1,'WARNING: bioformats_package.jar file not found\n');
 end
+% Initialize logging for BioFormats
+bfInitLogging(); % default to "WARN"
 
 %figure size for main window
 figuresize=[200,225];
