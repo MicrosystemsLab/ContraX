@@ -139,14 +139,12 @@ end
 fprintf(1,' Working directory: %s\n',pwd);
 
 % make sure that the template files are available
-%if isdeployed
-    if ~isfile(fullfile(path_to_templates,'Master_DO_NOT_EDIT.xlsx'))
-        fprintf(1,'WARNING: Master xlsx file not found\n');
-    end
-    if ~isfile(fullfile(path_to_templates,'Sample_DO_NOT_EDIT.xlsx'))
-        fprintf(1,'WARNING: Sample xlsx file not found\n');
-    end
-%end
+if ~isfile(fullfile(path_to_templates,'Master_DO_NOT_EDIT.xlsx'))
+    fprintf(1,'WARNING: Master xlsx file not found\n');
+end
+if ~isfile(fullfile(path_to_templates,'Sample_DO_NOT_EDIT.xlsx'))
+    fprintf(1,'WARNING: Sample xlsx file not found\n');
+end
 
 % use this to check timing throughout image processing
 %userTiming.mainTiming{1} = tic;

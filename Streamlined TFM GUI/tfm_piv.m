@@ -62,8 +62,8 @@ h_piv.fig=figure(...
 %color of the background and foreground
 pcolor = [.2 .2 .2];
 ptcolor = [1 1 1];
-bcolor = [.3 .3 .3];
-btcolor = [1 1 1];
+% bcolor = [.3 .3 .3];
+% btcolor = [1 1 1];
 h_piv.ForegroundColor = ptcolor;
 h_piv.BackgroundColor = pcolor;
 fontsizeA = 10;
@@ -188,9 +188,9 @@ h_piv.edit_ref_ref = uicontrol('Parent',h_piv.panel_ref,'style','edit','position
 %edit: contracted
 h_piv.edit_ref_contr = uicontrol('Parent',h_piv.panel_ref,'style','edit','position',[75,45,40,15],'HorizontalAlignment','center');
 %button: pick relaxed
-h_piv.button_pickref = uicontrol('Parent',h_piv.panel_ref,'style','pushbutton','position',[120,64,40,18],'string','Pick');
+h_piv.button_pickref = uicontrol('Parent',h_piv.panel_ref,'style','pushbutton','position',[120,64,40,18],'string','Pick','ForegroundColor','m');
 %button: pick contr
-h_piv.button_pickcontr = uicontrol('Parent',h_piv.panel_ref,'style','pushbutton','position',[120,43,40,18],'string','Pick');
+h_piv.button_pickcontr = uicontrol('Parent',h_piv.panel_ref,'style','pushbutton','position',[120,43,40,18],'string','Pick','ForegroundColor','c');
 %button: update
 h_piv.button_update = uicontrol('Parent',h_piv.panel_ref,'style','pushbutton','position',[5,5,155,25],'string','Update preview');
 %axes:
@@ -891,14 +891,20 @@ try
     %make second panel visible
     set(h_piv.panel_ref,'Visible','on');
     
-    %%now display this info for 1st video.
-    set(h_piv.edit_ref_ref,'String',num2str(tfm_piv_user_relax{tfm_piv_user_counter}));
-    set(h_piv.edit_ref_contr,'String',num2str(tfm_piv_user_contr{tfm_piv_user_counter}));
+    %now display this info for 1st video.
+    relax = tfm_piv_user_relax{tfm_piv_user_counter};
+    contr = tfm_piv_user_contr{tfm_piv_user_counter};
+    set(h_piv.edit_ref_ref,'String',num2str(relax));
+    set(h_piv.edit_ref_contr,'String',num2str(contr));
     
     %display displacement plot
     reset(h_piv.axes_ref)
     axes(h_piv.axes_ref)
-    plot((1:length(tfm_piv_user_d{tfm_piv_user_counter})),tfm_piv_user_d{tfm_piv_user_counter})
+    plot((1:length(tfm_piv_user_d{tfm_piv_user_counter})),tfm_piv_user_d{tfm_piv_user_counter});
+    hold on; py = ylim;
+    plot([relax relax],[py(1) py(2)],'--m');
+    plot([contr contr],[py(1) py(2)],'--c');
+    hold off;
     %1e6: otherwise it will not plot in axes, not sure why...
     set(h_piv.axes_ref, 'XTick', []);
     set(h_piv.axes_ref, 'YTick', []);
@@ -1055,6 +1061,7 @@ end
 %store everything for shared use
 setappdata(0,'tfm_piv_user_contr',tfm_piv_user_contr);
 
+
 function piv_push_update(hObject, eventdata, h_piv)
 %disable figure during calculation
 enableDisableFig(h_piv.fig,0);
@@ -1082,7 +1089,7 @@ try
     sb=statusbar(h_piv.fig,['Updating...']);
     sb.getComponent(0).setForeground(java.awt.Color.red);
     
-    %get displacmenets from calc. before
+    %get displacments from calc. before
     Num=tfm_init_user_Nframes{current_vid};
     tfm_piv_user_xs=cell(1,Num);
     tfm_piv_user_ys=cell(1,Num);
@@ -1151,7 +1158,11 @@ try
     
     %display displacement plot
     axes(h_piv.axes_ref);
-    plot(1:length(tfm_piv_user_d{tfm_piv_user_counter}),tfm_piv_user_d{tfm_piv_user_counter})
+    plot(1:length(tfm_piv_user_d{tfm_piv_user_counter}),tfm_piv_user_d{tfm_piv_user_counter});
+    hold on; py = ylim;
+    plot([relax relax],[py(1) py(2)],'--m');
+    plot([contr contr],[py(1) py(2)],'--c');
+    hold off;
     set(h_piv.axes_ref, 'XTick', []);
     set(h_piv.axes_ref, 'YTick', []);
     
@@ -1554,14 +1565,20 @@ try
     
     %update counter
     tfm_piv_user_counter=tfm_piv_user_counter-1;
-    
+
     %now display info for current video.
-    set(h_piv.edit_ref_ref,'String',num2str(tfm_piv_user_relax{tfm_piv_user_counter}));
-    set(h_piv.edit_ref_contr,'String',num2str(tfm_piv_user_contr{tfm_piv_user_counter}));
+    relax = tfm_piv_user_relax{tfm_piv_user_counter};
+    contr = tfm_piv_user_contr{tfm_piv_user_counter};
+    set(h_piv.edit_ref_ref,'String',num2str(relax));
+    set(h_piv.edit_ref_contr,'String',num2str(contr));
     
     %display displacement plot
     axes(h_piv.axes_ref);
     plot(1:length(tfm_piv_user_d{tfm_piv_user_counter}),tfm_piv_user_d{tfm_piv_user_counter})
+    hold on; py = ylim;
+    plot([relax relax],[py(1) py(2)],'--m');
+    plot([contr contr],[py(1) py(2)],'--c');
+    hold off;
     set(h_piv.axes_ref, 'XTick', []);
     set(h_piv.axes_ref, 'YTick', []);
     
@@ -1657,12 +1674,18 @@ try
     tfm_piv_user_counter=tfm_piv_user_counter+1;
     
     %now display info for current video.
-    set(h_piv.edit_ref_ref,'String',num2str(tfm_piv_user_relax{tfm_piv_user_counter}));
-    set(h_piv.edit_ref_contr,'String',num2str(tfm_piv_user_contr{tfm_piv_user_counter}));
+    relax = tfm_piv_user_relax{tfm_piv_user_counter};
+    contr = tfm_piv_user_contr{tfm_piv_user_counter};
+    set(h_piv.edit_ref_ref,'String',num2str(relax));
+    set(h_piv.edit_ref_contr,'String',num2str(contr));
     
     %display displacement plot
     axes(h_piv.axes_ref);
     plot(1:length(tfm_piv_user_d{tfm_piv_user_counter}),tfm_piv_user_d{tfm_piv_user_counter})
+    hold on; py = ylim;
+    plot([relax relax],[py(1) py(2)],'--m');
+    plot([contr contr],[py(1) py(2)],'--c');
+    hold off;
     set(h_piv.axes_ref, 'XTick', []);
     set(h_piv.axes_ref, 'YTick', []);
     
