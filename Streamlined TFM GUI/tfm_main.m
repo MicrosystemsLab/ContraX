@@ -213,7 +213,7 @@ h_main.fig=figure(...
     'NumberTitle','off',...
     'Resize','off',...
     'Color',[.2,.2,.2],...
-	'DeleteFcn',{@tfmCloseFcn});
+    'CloseRequestFcn',{@tfmCloseFcn});
 movegui(h_main.fig,'center');
 
 %create buttons:
@@ -290,5 +290,7 @@ tfm_para(h_main);
 
 function tfmCloseFcn(hObject, eventdata, h_main)
 % executed when the main window is closed by the user
-close all
+%disp('close fcn')
+% close all figures
+delete(findobj(0,'type','figure'));
 fprintf(1,'CXS-TFM: Program closed.\n');

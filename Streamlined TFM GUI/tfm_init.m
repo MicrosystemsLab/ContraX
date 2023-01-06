@@ -55,17 +55,16 @@ warning('off','MATLAB:ui:javaframe:PropertyToBeRemoved');
 
 %create new window for initialization
 %figure size
-figuresize=[500,1060];
+figuresize=[520,1060]; % MH added 20 to height to make room for statusbar
 %get screen size
 screensize = get(0,'ScreenSize');
 %position figure on center of screen
 xpos = ceil((screensize(3)-figuresize(2))/2);
 ypos = ceil((screensize(4)-figuresize(1))/2);
 %create figure; invisible at first
-% MH: add 20 px to height to make room for statusbar
 %  'position' = [left, bottom, width, height]
 h_init.fig=figure(...
-    'position',[xpos, ypos, figuresize(2), figuresize(1)+20],...
+    'position',[xpos, ypos, figuresize(2), figuresize(1)],...
     'units','pixels',...
     'renderer','OpenGL',...
     'MenuBar','none',...
@@ -249,7 +248,7 @@ h_init.edit_scale_factor = uicontrol('Parent',h_init.subpanel_vid,'style','edit'
 
 
 %checkbox: crop mask
-h_init.checkbox_cropmask = uicontrol('Parent',h_init.subpanel_vid,'style','checkbox','position',[150,5,15,15],'string','Preview crop mask','visible','on','value',0);
+h_init.checkbox_cropmask = uicontrol('Parent',h_init.subpanel_vid,'style','checkbox','position',[150,5,15,15],'string','Preview crop mask','visible','on','value',1);
 h_init.checkbox_cropmask.ForegroundColor = ptcolor;
 h_init.checkbox_cropmask.BackgroundColor = pcolor;
 % checkbox for rotate
@@ -397,7 +396,7 @@ if ~isempty(getappdata(0,'tfm_init_user_filenamestack'))                        
     set(h_init.edit_conversion,'String',num2str(tfm_init_user_conversion{tfm_init_user_counter}));                       %conversion
     set(h_init.edit_nframes,'String',num2str(tfm_init_user_Nframes{tfm_init_user_counter}));                             %number of frames
     set(h_init.edit_cellname,'String',tfm_init_user_cellname{tfm_init_user_counter});                                    %cellname
-    set(h_init.text_whichvidname,'String',[tfm_init_user_filenamestack{1,tfm_init_user_counter},' (showing 1st frame)']);%name of video
+    set(h_init.text_whichvidname,'String',[tfm_init_user_filenamestack{1,tfm_init_user_counter},' (frame #1)']);%name of video
     %set(h_init.text_bf_whichvidname,'String',[tfm_init_user_bf_filenamestack{1,tfm_init_user_counter}]);
     set(h_init.text_whichvid,'String',[num2str(tfm_init_user_counter),'/',num2str(tfm_init_user_Nfiles)]);               %which video (i/N)
     set(h_init.edit_area_factor,'String',num2str(tfm_init_user_area_factor));                                            %mask parameters
@@ -492,11 +491,9 @@ sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
 
 
 %% callback for the "Add TFM Video" button
-function init_push_readvid(hObject, eventdata, h_init)
+function init_push_readvid(hObject, eventdata, h_init) %#ok<INUSL> 
 
 %profile on
-
-%reads in a series of videos
 
 %disable figure during calculation
 enableDisableFig(h_init.fig,0);
@@ -644,8 +641,8 @@ try
             ypos = ceil((screensize(4)-figuresize(1))/2);
             pcolor = [.2 .2 .2];
             ptcolor = [1 1 1];
-            bcolor = [.3 .3 .3];
-            btcolor = [1 1 1];
+            bcolor = [.3 .3 .3]; %#ok<NASGU> 
+            btcolor = [1 1 1]; %#ok<NASGU> 
             %create figure
             selectChannel.fig=figure(...
                 'position',[xpos, ypos, figuresize(1), figuresize(2)],...
@@ -700,7 +697,7 @@ try
             selectChannel.fig.Visible='on';
             waitfor(selectChannel.fig);
         end
-	end
+    end
 	
 	tstartMH = tic;
 	fprintf(1,'CXS-TFM: Start TFM Video Scan\n')
@@ -717,10 +714,9 @@ try
 			reader = bfGetReader(fullfile(tfm_init_user_pathnamestack{1,Nfiles0+j},[tfm_init_user_filenamestack{1,Nfiles0+j},tfm_init_user_vidext{1,Nfiles0+j}]));
             omeMeta = reader.getMetadataStore();
             
-            N=omeMeta.getPlaneCount(0)/Nchannels; %number of frames
+            N = omeMeta.getPlaneCount(0)/Nchannels; %number of frames
             m = omeMeta.getPixelsSizeY(0).getValue(); %height in pixels
             n = omeMeta.getPixelsSizeX(0).getValue(); %width in pixels
-
 
             %save display image in variable
             display_frame = TFMChannel;
@@ -920,7 +916,7 @@ try
     set(h_init.edit_cellname,'String',tfm_init_user_cellname{1});
     set(h_init.edit_area_factor,'String',num2str(tfm_init_user_area_factor));
     set(h_init.edit_scale_factor,'String',num2str(tfm_init_user_scale_factor{1}));
-    set(h_init.text_whichvidname,'String',[tfm_init_user_filenamestack{1,1},' (showing 1st frame)']);
+    set(h_init.text_whichvidname,'String',[tfm_init_user_filenamestack{1,1},' (frame #1)']);
     
     %set default crop parameters here
     tfm_init_user_croplength=200;
@@ -1318,7 +1314,7 @@ try
     
     set(h_init.edit_cellname,'String',tfm_init_user_cellname{1});
     set(h_init.edit_area_factor,'String',num2str(tfm_init_user_area_factor));
-    set(h_init.text_whichvidname,'String',[tfm_init_user_filenamestack{1,1},' (showing 1st frame)']);
+    set(h_init.text_whichvidname,'String',[tfm_init_user_filenamestack{1,1},' (frame #1)']);
     set(h_init.text_bf_whichvidname,'String',[tfm_init_user_bf_filenamestack{1,1}]);
     
     %set frame1 of 1st video
@@ -1496,7 +1492,7 @@ try
  	tstartMH2 = tic;
     fprintf(1,'CXS-TFM: Start BF Video Import\n')
 	
-    %Loop over vids and save preview frames
+    %% Loop over vids and save preview frames
     for j=1:size(filename_bf,2)
         %update statusbar
         if size(filename_bf,2)==1
@@ -1542,10 +1538,12 @@ try
 %                 Nchannels = str2num(channels{2, 1}); %#ok<ST2NM> 
 %                 fprintf(1,' This appears to be a multi-channel file with %d channels\n', Nchannels);
 %             end
+
             TFMChannel = getappdata(0, 'TFMChannel');
             fprintf(1,'  Analyze channel %d\n', TFMChannel);
 
-            images=data{1,1}; %images
+            images=data{1,1}; % cell array of images and text labels
+            clear data; % save some memory
             images=images(:,1); % a Nx1 cell array
             m = size(images{1},1);
             n = size(images{1},2);
@@ -1558,7 +1556,7 @@ try
                  images = images(2:end);
             end
 
-            N=size(images,1); %number of frames
+            N=size(images,1); % number of frames
             image_stack = zeros(m,n,N,'uint8'); % init processed image output
 
             fprintf(1,' %d Video frames of %d x %d pixels\n',N,m,n);
@@ -1586,7 +1584,10 @@ try
 %             N = size(image_stack,3);
 
             %save to mat
+            fprintf(1,' Saving images to disk... '); tstartSave = tic;
             save(['vars_DO_NOT_DELETE/',tfm_init_user_bf_filenamestack{1,j},'/image_stack_bf.mat'],'image_stack','-v7.3');
+            fprintf(1,'done. (%.1f s)\n',toc(tstartSave));
+
             % image for display
             image1_raw=image_stack(:,:,1);
             
@@ -1630,8 +1631,11 @@ try
             fprintf(1,'CXS-TFM: Normalising completed in %.1f seconds\n',toc(tstartMH));
             
             %save to mat
-            save(['vars_DO_NOT_DELETE/',tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},'/image_stack_bf.mat'],'image_stack','-v7.3')
+            fprintf(1,' Saving images to disk... '); tstartSave = tic;
+            save(['vars_DO_NOT_DELETE/',tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},'/image_stack_bf.mat'],'image_stack','-v7.3');
+            fprintf(1,'done. (%.1f s)\n',toc(tstartSave));
             
+            % image for display
             image1_raw=image_stack(:,:,1);
             
         elseif strcmp(tfm_init_user_bf_vidext{1,Nfiles0_bf+j},'.avi')
@@ -1669,15 +1673,19 @@ try
             fprintf(1,'CXS-TFM: Normalising completed in %.1f seconds\n',toc(tstartMH));
 
             %save to mat
+            fprintf(1,' Saving images to disk... '); tstartSave = tic;
             save(['vars_DO_NOT_DELETE/',tfm_init_user_bf_filenamestack{1,Nfiles0_bf+j},'/image_stack_bf.mat'],'image_stack','-v7.3')
+            fprintf(1,'done. (%.1f s)\n',toc(tstartSave));
             
+            % image for display
             image1_raw=image_stack(:,:,1);
         end
         
         %save frames to preview stack
         tfm_init_user_bf_preview_frame1{Nfiles0_bf+j}=image1_raw;
         tfm_init_user_Nframes_bf{Nfiles0_bf+j}=size(image_stack,3);
-    end	
+
+    end	% import and normalise video data
     
  	fprintf(1,'CXS-TFM: End BF video import and save at %.02f s\n',toc(tstartMH2));
 	
@@ -1938,7 +1946,7 @@ try
         set(h_init.edit_youngs,'String',num2str(tfm_init_user_E{tfm_init_user_counter}));
         set(h_init.edit_poisson,'String',num2str(tfm_init_user_nu{tfm_init_user_counter}));
         set(h_init.edit_scale_factor,'String',num2str(tfm_init_user_scale_factor{tfm_init_user_counter}));
-        set(h_init.text_whichvidname,'String',[tfm_init_user_filenamestack{1,tfm_init_user_counter},' (showing 1st frame)']);
+        set(h_init.text_whichvidname,'String',[tfm_init_user_filenamestack{1,tfm_init_user_counter},' (frame #1)']);
         %set(h_init.text_bf_whichvidname,'String',[tfm_init_user_bf_filenamestack{1,tfm_init_user_counter}]);
         set(h_init.checkbox_rotate,'value',tfm_init_user_rotate(tfm_init_user_counter));
         if strcmp(tfm_init_user_vidext{1,tfm_init_user_counter},'.tif') || strcmp(tfm_init_user_vidext{1,tfm_init_user_counter},'.avi') || strcmp(tfm_init_user_vidext{1,tfm_init_user_counter},'none')
@@ -2045,8 +2053,8 @@ catch errorObj
 end
 
 
-%% The ">" button ????
-function init_push_forwards(hObject, eventdata, h_init)
+%% The ">" button. Advances view to next video in list (stack)
+function init_push_forwards(hObject, eventdata, h_init) %#ok<INUSL> 
 %disable figure during calculation
 enableDisableFig(h_init.fig,0);
 
@@ -2088,6 +2096,8 @@ try
     %look at vid counter
     if tfm_init_user_counter<tfm_init_user_Nfiles
         %save settings
+        % MH this is a bad place to do this. Should
+        % be in the callbacks for each edit field.
         tfm_init_user_framerate{tfm_init_user_counter}=str2double(get(h_init.edit_fps,'String'));
         tfm_init_user_conversion{tfm_init_user_counter}=str2double(get(h_init.edit_conversion,'String'));
         tfm_init_user_cellname{tfm_init_user_counter}=get(h_init.edit_cellname,'String');
@@ -2096,7 +2106,7 @@ try
         tfm_init_user_E{tfm_init_user_counter}=str2double(get(h_init.edit_youngs,'String'));
         tfm_init_user_nu{tfm_init_user_counter}=str2double(get(h_init.edit_poisson,'String'));
         
-        %go to video before
+        % advance the video counter
         tfm_init_user_counter=tfm_init_user_counter+1;
         
         %select item in listbox
@@ -2118,7 +2128,7 @@ try
         %set(h_init.edit_area_factor,'String',num2str(tfm_init_user_area_factor));
         set(h_init.edit_scale_factor,'String',num2str(tfm_init_user_scale_factor{tfm_init_user_counter}));
         set(h_init.edit_cellname,'String',tfm_init_user_cellname{tfm_init_user_counter});
-        set(h_init.text_whichvidname,'String',[tfm_init_user_filenamestack{1,tfm_init_user_counter},' (showing 1st frame)']);
+        set(h_init.text_whichvidname,'String',[tfm_init_user_filenamestack{1,tfm_init_user_counter},' (frame #1)']);
         %set(h_init.text_bf_whichvidname,'String',[tfm_init_user_bf_filenamestack{1,tfm_init_user_counter}]);
         set(h_init.edit_youngs,'String',num2str(tfm_init_user_E{tfm_init_user_counter}));
         set(h_init.edit_poisson,'String',num2str(tfm_init_user_nu{tfm_init_user_counter}));
@@ -2195,7 +2205,8 @@ catch errorObj
     errordlg(getReport(errorObj,'extended','hyperlinks','off'));
 end
 
-function init_push_backwards(hObject, eventdata, h_init)
+%% The "<" button. Changes view to previous video in list (stack)
+function init_push_backwards(hObject, eventdata, h_init) %#ok<INUSL> 
 %disable figure during calculation
 enableDisableFig(h_init.fig,0);
 
@@ -2269,7 +2280,7 @@ try
         set(h_init.edit_cellname,'String',tfm_init_user_cellname{tfm_init_user_counter});
         set(h_init.edit_youngs,'String',num2str(tfm_init_user_E{tfm_init_user_counter}));
         set(h_init.edit_poisson,'String',num2str(tfm_init_user_nu{tfm_init_user_counter}));
-        set(h_init.text_whichvidname,'String',[tfm_init_user_filenamestack{1,tfm_init_user_counter},' (showing 1st frame)']);
+        set(h_init.text_whichvidname,'String',[tfm_init_user_filenamestack{1,tfm_init_user_counter},' (frame #1)']);
         %set(h_init.text_bf_whichvidname,'String',[tfm_init_user_bf_filenamestack{1,tfm_init_user_counter}]);
         set(h_init.checkbox_rotate,'value',tfm_init_user_rotate(tfm_init_user_counter));
         if strcmp(tfm_init_user_vidext{1,tfm_init_user_counter},'.tif') || strcmp(tfm_init_user_vidext{1,tfm_init_user_counter},'.avi') || strcmp(tfm_init_user_vidext{1,tfm_init_user_counter},'none')
@@ -2446,7 +2457,7 @@ try
         tfm_init_user_outline3x{tfm_init_user_counter}=x_mask;
         tfm_init_user_outline3y{tfm_init_user_counter}=y_mask;
     else
-        tfm_init_user_binary3{tfm_init_user_counter}=logical(ones(size(image,1),size(image,2)));
+        tfm_init_user_binary3{tfm_init_user_counter}=true(size(image,1),size(image,2));
         tfm_init_user_outline3x{tfm_init_user_counter}=[];
         tfm_init_user_outline3y{tfm_init_user_counter}=[];
     end
@@ -2987,6 +2998,7 @@ clean1=onCleanup(@()enableDisableFig(h_init.fig,1));
 try
     %load shared data
     tfm_init_user_Nfiles=getappdata(0,'tfm_init_user_Nfiles');
+    tfm_init_user_filenamestack=getappdata(0,'tfm_init_user_filenamestack');
     tfm_init_user_bf_filenamestack=getappdata(0,'tfm_init_user_bf_filenamestack');
     tfm_init_user_preview_frame1=getappdata(0,'tfm_init_user_preview_frame1');
     tfm_init_user_bf_preview_frame1=getappdata(0,'tfm_init_user_bf_preview_frame1');
@@ -3028,232 +3040,248 @@ try
     if isempty(tfm_init_user_bf_filenamestack)
         sb = statusbar(h_init.fig,'No bright field images loaded');
         sb.getComponent(0).setForeground(java.awt.Color.red);
-    else
-        
-        axes(h_init.axes_curr)
-        fprintf(1,' Finding cell outlines on %d video files...\n',tfm_init_user_Nfiles)
-        
-        %auto-draw cell outlines
-        for ivid=1:tfm_init_user_Nfiles
-            
-            %status bar
-            sb = statusbar(h_init.fig,sprintf('Finding cell outlines... %d/%d',ivid,tfm_init_user_Nfiles));
-            sb.getComponent(0).setForeground(java.awt.Color.red);
-            
-            %check for bf image
-            if size(tfm_init_user_bf_filenamestack,2) < ivid
-            elseif isempty(tfm_init_user_bf_filenamestack{ivid})
-            elseif ~isempty(tfm_init_user_bf_filenamestack{ivid})
-                
-                %show next images
-                cla(h_init.axes_bf)
-                axes(h_init.axes_bf)
-                imshow(tfm_init_user_bf_preview_frame1{ivid});hold on;
-                
-                cla(h_init.axes_curr)
-                axes(h_init.axes_curr)
-                
-                pxscaling = 1.8;%1.8 was initial default value || adapt for image quality
-                %enhance contrast
-                %se = strel('disk',floor(1*pxscaling/tfm_init_user_conversion{ivid}));
-                %I_th = imtophat(tfm_init_user_bf_preview_frame1{ivid},se);
-                %imshow(I_th)
-                I_eq=adapthisteq(tfm_init_user_bf_preview_frame1{ivid});%I_th);
-                imshow(I_eq)
-                %filter noise
-                DoS = 6*std2(imcrop(I_eq,[0, 0, 50 50]))^2;
-                I_filt = imbilatfilt(I_eq,DoS,floor(pxscaling/tfm_init_user_conversion{ivid}));%Requires Matlab 2018
-                %[~,noise]=wiener2(I_eq,[floor(pxscaling/tfm_init_user_conversion{ivid}) floor(pxscaling/tfm_init_user_conversion{ivid})]);
-                %I_filt=wiener2(I_eq,[floor(pxscaling/tfm_init_user_conversion{ivid}) floor(pxscaling/tfm_init_user_conversion{ivid})],noise*2);
-                %I_filt=imgaussfilt(I_filt);
-                imshow(I_filt)
-                
-                %find edges
-                [~,threshold] = edge(I_filt,'canny');
-                BW = edge(I_filt,'canny',[0.001 0.5]);%[.02,.3]);
-                imshow(BW)
-                
-                %dilate and fill holes
-                BW2=imdilate(BW,strel('disk',floor(1.5/tfm_init_user_conversion{ivid})));
-                imshow(BW2)
-                BW3=imfill(BW2,'holes');
-                imshow(BW3)
-                
-                %smoothen
-                seD = strel('diamond',ceil(0.5/tfm_init_user_conversion{ivid}));
-                BW4 = imerode(BW3,seD);
-                BW4 = imerode(BW4,seD);
-                %BW4=imerode(BW3,strel('disk',ceil(1.4/tfm_init_user_conversion{ivid})));
-                imshow(BW4)
-                
-                %filter regions by area keeping only large objects
-                BW4=bwareaopen(BW4,1000);
-                imshow(BW4)
-                
-                %Filling the convex shape to capture running edge in  low
-                %contract area
-                BW4=bwconvhull(BW4,'objects');
-                imshow(BW4)
-                
-                %define centerline to automate cell selection in the center of
-                %the image
-                %c=ones(1,51);
-                %c=(size(tfm_init_user_bf_preview_frame1{ivid},2)/2)*c;
-                %r=(size(tfm_init_user_bf_preview_frame1{ivid},1)/2-25):(size(tfm_init_user_bf_preview_frame1{ivid},1)/2+25);
-                %select center cell
-                %BW=bwselect(BW,c,r,8);
-                
-                %Select cell to outline manually
-                axes(h_init.axes_curr)
-                enableDisableFig(h_init.axes_curr,1);
-                statusbar(h_init.fig,'Double-click on the shape to confirm the cell outline');
-                fprintf(1,'  Double-click on the shape to confirm the cell outline\n')
-                BW5=bwselect(BW4,8); % this requires the user to double-click on the image
-                enableDisableFig(h_init.axes_curr,0);
-                
-                
-                
-                %refine edges again using Chan-Vese method
-                BW6=activecontour(I_eq,BW5,100,'Chan-Vese','SmoothFactor',3);%,'ContractionBias',-.3);
-                %BW8=activecontour(I_filt,BW7,10,'edge','SmoothFactor',3,'ContractionBias',-.1);
-                imshow(BW6)
-                
-                %smooth edges
-                BW7=imerode(BW6,strel('disk',floor(2.0/tfm_init_user_conversion{ivid})));
-                imshow(BW7)
-                BW8=imdilate(BW7,strel('disk',floor(1.8/tfm_init_user_conversion{ivid})));
-                imshow(BW8)
-                
-                BWCC = bwconncomp(BW8);
-                if BWCC.NumObjects >1
-                    BW8=bwconvhull(BW8);
-                    imshow(BW8)
-                end
-                if BWCC.NumObjects == 0
-                    BW8(ceil(end/2),ceil(end/2))=1;
-                    imshow(BW8)
-                end
-                
-                %save mask + outline
-                tfm_init_user_binary1{ivid}=BW8;
-                BWoutline=bwboundaries(BW8);
-                
-                if ~isempty(BWoutline)
-                    tfm_init_user_outline1x{ivid}=BWoutline{1}(:,2);
-                    tfm_init_user_outline1y{ivid}=BWoutline{1}(:,1);
-                else
-                    tfm_init_user_outline1x{ivid}=[];
-                    tfm_init_user_outline1y{ivid}=[];
-                end
-                
-                axes(h_init.axes_bf);
-                plot(tfm_init_user_outline1x{ivid},tfm_init_user_outline1y{ivid},'r','LineWidth',2);
-                hold off;
-                
-            end
-        end
-        
-        
-        sb=statusbar(h_init.fig,'Done !');
-        sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
-        
-        %calculate cell dimensions
-        for ivid=1:tfm_init_user_Nfiles
-            
-            sb = statusbar(h_init.fig,sprintf('Calculating cell dimensions... %d/%d',ivid,tfm_init_user_Nfiles));
-            sb.getComponent(0).setForeground(java.awt.Color.red);
-            
-            %check if outline exists
-            if ~isempty(tfm_init_user_outline1x{ivid})
-                s = regionprops(tfm_init_user_binary1{ivid}, 'Orientation', 'MajorAxisLength', ...
-                    'MinorAxisLength', 'Eccentricity', 'Centroid','Area');
-                phi = linspace(0,2*pi,50);
-                cosphi = cos(phi);
-                sinphi = sin(phi);
-                xbar = s(1).Centroid(1);
-                ybar = s(1).Centroid(2);
-                a = s(1).MajorAxisLength/2;
-                b = s(1).MinorAxisLength/2;
-                theta = pi*s(1).Orientation/180;
-                R = [ cos(theta)   sin(theta)
-                    -sin(theta)   cos(theta)];
-                xy = [a*cosphi; b*sinphi];
-                xy = R*xy;
-                x = xy(1,:) + xbar;
-                y = xy(2,:) + ybar;
-                
-                %calculate new ellipse
-                an=tfm_init_user_scale_factor{ivid}*sqrt(tfm_init_user_area_factor)*a;
-                bn=1/tfm_init_user_scale_factor{ivid}*sqrt(tfm_init_user_area_factor)*b;
-                xyn = [an*cosphi; bn*sinphi];
-                xyn = R*xyn;
-                xn = xyn(1,:) + xbar;
-                yn = xyn(2,:) + ybar;
-                
-                %calculate crop mask
-                image=tfm_init_user_binary1{ivid};
-                if tfm_init_user_cropcheck == 1
-                    am=tfm_init_user_croplength/(2*tfm_init_user_conversion{ivid});
-                    bm=tfm_init_user_cropwidth/(2*tfm_init_user_conversion{ivid});
-                    x1=xbar-am*cos(theta)+bm*sin(theta);
-                    x2=xbar-am*cos(theta)-bm*sin(theta);
-                    x3=xbar+am*cos(theta)-bm*sin(theta);
-                    x4=xbar+am*cos(theta)+bm*sin(theta);
-                    y1=ybar+am*sin(theta)+bm*cos(theta);
-                    y2=ybar+am*sin(theta)-bm*cos(theta);
-                    y3=ybar-am*sin(theta)-bm*cos(theta);
-                    y4=ybar-am*sin(theta)+bm*cos(theta);
-                    x_mask=[x1 x2 x3 x4 x1];
-                    y_mask=[y1 y2 y3 y4 y1];
-                    mask=poly2mask(x_mask,y_mask,size(image,1),size(image,2));
-                    tfm_init_user_binary3{ivid}=mask;
-                    tfm_init_user_outline3x{ivid}=x_mask;
-                    tfm_init_user_outline3y{ivid}=y_mask;
-                else
-                    tfm_init_user_binary3{ivid}=true(size(image,1),size(image,2));
-                    tfm_init_user_outline3x{ivid}=[];
-                    tfm_init_user_outline3y{ivid}=[];
-                end
-                
-                %save dimensions
-                tfm_init_user_major(ivid)=2*a;
-                tfm_init_user_minor(ivid)=2*b;
-                tfm_init_user_angle(ivid)=s(1).Orientation;
-                tfm_init_user_ratio(ivid)=a/(b+eps);
-                tfm_init_user_area(ivid)=s(1).Area;
-                tfm_init_user_area_ellipse(ivid)=an*bn*pi;
-                
-                %save outlines
-                tfm_init_user_outline2x{ivid}=xn;
-                tfm_init_user_outline2y{ivid}=yn;
-                
-            else
-            end
-            
-        end
-        
-        sb=statusbar(h_init.fig,'Done !');
-        sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
-        
-        %display tfm preview w/ outlines
-        cla(h_init.axes_curr)
-        axes(h_init.axes_curr)
-        imshow(tfm_init_user_preview_frame1{tfm_init_user_counter});hold on;
-        plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
-        plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
-        plot(tfm_init_user_outline3x{tfm_init_user_counter},tfm_init_user_outline3y{tfm_init_user_counter},'g','LineWidth',2);
-        hold off;
-        
-        %display bf preview w/ outlines
-        cla(h_init.axes_bf)
-        axes(h_init.axes_bf)
-        imshow(tfm_init_user_bf_preview_frame1{tfm_init_user_counter});hold on;
-        plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
-        plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
-        plot(tfm_init_user_outline3x{tfm_init_user_counter},tfm_init_user_outline3y{tfm_init_user_counter},'g','LineWidth',2);
-        hold off;
-        
+        fprintf(1,'CXS-TFM: Error: No bright field images loaded\n')
+        return
     end
+        
+    %else
+        
+    axes(h_init.axes_curr)
+    fprintf(1,' Finding cell outlines on %d video files...\n',tfm_init_user_Nfiles)
+    
+    %auto-draw cell outlines
+    for ivid=1:tfm_init_user_Nfiles
+        
+        %status bar
+        sb = statusbar(h_init.fig,sprintf('Finding cell outlines... %d/%d',ivid,tfm_init_user_Nfiles));
+        sb.getComponent(0).setForeground(java.awt.Color.red);
+        
+        %check for bf image
+        if size(tfm_init_user_bf_filenamestack,2) < ivid
+        elseif isempty(tfm_init_user_bf_filenamestack{ivid})
+        elseif ~isempty(tfm_init_user_bf_filenamestack{ivid})
+            
+            %update text (x/N)
+            set(h_init.text_whichvid,'String',sprintf('%d/%d',ivid,tfm_init_user_Nfiles) );
+            set(h_init.text_bf_whichvidname,'string',[tfm_init_user_bf_filenamestack{ivid}]);
+            set(h_init.text_whichvidname,'String','Detected cell outlines');
+    
+            
+            %show next images
+            cla(h_init.axes_bf)
+            axes(h_init.axes_bf) %#ok<LAXES> 
+            imshow(tfm_init_user_bf_preview_frame1{ivid});hold on;
+            
+            cla(h_init.axes_curr)
+            axes(h_init.axes_curr) %#ok<LAXES> 
+            
+            pxscaling = 1.8;%1.8 was initial default value || adapt for image quality
+            %enhance contrast
+            %se = strel('disk',floor(1*pxscaling/tfm_init_user_conversion{ivid}));
+            %I_th = imtophat(tfm_init_user_bf_preview_frame1{ivid},se);
+            %imshow(I_th)
+            I_eq=adapthisteq(tfm_init_user_bf_preview_frame1{ivid});%I_th);
+            %imshow(I_eq)
+            %filter noise
+            DoS = 6*std2(imcrop(I_eq,[0, 0, 50 50]))^2;
+            I_filt = imbilatfilt(I_eq,DoS,floor(pxscaling/tfm_init_user_conversion{ivid}));%Requires Matlab 2018
+            %[~,noise]=wiener2(I_eq,[floor(pxscaling/tfm_init_user_conversion{ivid}) floor(pxscaling/tfm_init_user_conversion{ivid})]);
+            %I_filt=wiener2(I_eq,[floor(pxscaling/tfm_init_user_conversion{ivid}) floor(pxscaling/tfm_init_user_conversion{ivid})],noise*2);
+            %I_filt=imgaussfilt(I_filt);
+            %imshow(I_filt)
+            
+            %find edges
+            [~,threshold] = edge(I_filt,'canny');
+            BW = edge(I_filt,'canny',[0.001 0.5]);%[.02,.3]);
+            %imshow(BW)
+            
+            %dilate and fill holes
+            BW2=imdilate(BW,strel('disk',floor(1.5/tfm_init_user_conversion{ivid})));
+            imshow(BW2)
+            BW3=imfill(BW2,'holes');
+            %imshow(BW3)
+            
+            %smoothen
+            seD = strel('diamond',ceil(0.5/tfm_init_user_conversion{ivid}));
+            BW4 = imerode(BW3,seD);
+            BW4 = imerode(BW4,seD);
+            %BW4=imerode(BW3,strel('disk',ceil(1.4/tfm_init_user_conversion{ivid})));
+            %imshow(BW4)
+            
+            %filter regions by area keeping only large objects
+            BW4=bwareaopen(BW4,1000);
+            %imshow(BW4)
+            
+            %Filling the convex shape to capture running edge in  low
+            %contract area
+            BW4=bwconvhull(BW4,'objects');
+            imshow(BW4)
+            
+            %define centerline to automate cell selection in the center of
+            %the image
+            %c=ones(1,51);
+            %c=(size(tfm_init_user_bf_preview_frame1{ivid},2)/2)*c;
+            %r=(size(tfm_init_user_bf_preview_frame1{ivid},1)/2-25):(size(tfm_init_user_bf_preview_frame1{ivid},1)/2+25);
+            %select center cell
+            %BW=bwselect(BW,c,r,8);
+            
+            %Select cell to outline manually
+            axes(h_init.axes_curr) %#ok<LAXES> 
+            enableDisableFig(h_init.axes_curr,1);
+            statusbar(h_init.fig,'Select shape(s) for the cell location mask; Double-click to end');
+            fprintf(1,'  Select shape(s) for the cell location mask; Double-click to end\n')
+            drawnow;
+            BW5=bwselect(BW4,8); % this requires the user to double-click on the image
+            enableDisableFig(h_init.axes_curr,0);
+            
+            
+%             % MH These steps seem to be counter-productive (DEC2022)
+%             %  They are disabled
+%             %refine edges again using Chan-Vese method
+%             BW6=activecontour(I_eq,BW5,100,'Chan-Vese','SmoothFactor',3);%,'ContractionBias',-.3);
+%             %BW8=activecontour(I_filt,BW7,10,'edge','SmoothFactor',3,'ContractionBias',-.1);
+%             %imshow(BW6)
+%             
+%             %smooth edges
+%             BW7=imerode(BW6,strel('disk',floor(2.0/tfm_init_user_conversion{ivid})));
+%             %imshow(BW7)
+%             BW8=imdilate(BW7,strel('disk',floor(1.8/tfm_init_user_conversion{ivid})));
+%             %imshow(BW8)
+%             
+%             BWCC = bwconncomp(BW8);
+%             if BWCC.NumObjects >1
+%                 BW8=bwconvhull(BW8);
+%                 imshow(BW8)
+%             end
+%             if BWCC.NumObjects == 0
+%                 BW8(ceil(end/2),ceil(end/2))=1;
+%                 imshow(BW8)
+%             end
+            
+            %save mask + outline
+            tfm_init_user_binary1{ivid}=BW5; % BW8 if using methods above
+            BWoutline=bwboundaries(BW5); % BW8
+            
+            if ~isempty(BWoutline)
+                tfm_init_user_outline1x{ivid}=BWoutline{1}(:,2);
+                tfm_init_user_outline1y{ivid}=BWoutline{1}(:,1);
+            else
+                tfm_init_user_outline1x{ivid}=[];
+                tfm_init_user_outline1y{ivid}=[];
+            end
+            
+            axes(h_init.axes_bf); %#ok<LAXES> 
+            plot(tfm_init_user_outline1x{ivid},tfm_init_user_outline1y{ivid},'r','LineWidth',2);
+            hold off;
+            
+        end
+    end % end loop for auto-draw on each file
+    
+    
+    sb=statusbar(h_init.fig,'Done !');
+    sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
+    
+    %calculate cell dimensions
+    for ivid=1:tfm_init_user_Nfiles
+        
+        sb = statusbar(h_init.fig,sprintf('Calculating cell dimensions... %d/%d',ivid,tfm_init_user_Nfiles));
+        sb.getComponent(0).setForeground(java.awt.Color.red);
+        
+        %check if outline exists
+        if ~isempty(tfm_init_user_outline1x{ivid})
+            s = regionprops(tfm_init_user_binary1{ivid}, 'Orientation', 'MajorAxisLength', ...
+                'MinorAxisLength', 'Eccentricity', 'Centroid','Area');
+            phi = linspace(0,2*pi,50);
+            cosphi = cos(phi);
+            sinphi = sin(phi);
+            xbar = s(1).Centroid(1);
+            ybar = s(1).Centroid(2);
+            a = s(1).MajorAxisLength/2;
+            b = s(1).MinorAxisLength/2;
+            theta = pi*s(1).Orientation/180;
+            R = [ cos(theta)   sin(theta)
+                -sin(theta)   cos(theta)];
+            xy = [a*cosphi; b*sinphi];
+            xy = R*xy;
+            x = xy(1,:) + xbar;
+            y = xy(2,:) + ybar;
+            
+            %calculate new ellipse
+            an=tfm_init_user_scale_factor{ivid}*sqrt(tfm_init_user_area_factor)*a;
+            bn=1/tfm_init_user_scale_factor{ivid}*sqrt(tfm_init_user_area_factor)*b;
+            xyn = [an*cosphi; bn*sinphi];
+            xyn = R*xyn;
+            xn = xyn(1,:) + xbar;
+            yn = xyn(2,:) + ybar;
+            
+            %calculate crop mask
+            image=tfm_init_user_binary1{ivid};
+            if tfm_init_user_cropcheck == 1
+                am=tfm_init_user_croplength/(2*tfm_init_user_conversion{ivid});
+                bm=tfm_init_user_cropwidth/(2*tfm_init_user_conversion{ivid});
+                x1=xbar-am*cos(theta)+bm*sin(theta);
+                x2=xbar-am*cos(theta)-bm*sin(theta);
+                x3=xbar+am*cos(theta)-bm*sin(theta);
+                x4=xbar+am*cos(theta)+bm*sin(theta);
+                y1=ybar+am*sin(theta)+bm*cos(theta);
+                y2=ybar+am*sin(theta)-bm*cos(theta);
+                y3=ybar-am*sin(theta)-bm*cos(theta);
+                y4=ybar-am*sin(theta)+bm*cos(theta);
+                x_mask=[x1 x2 x3 x4 x1];
+                y_mask=[y1 y2 y3 y4 y1];
+                mask=poly2mask(x_mask,y_mask,size(image,1),size(image,2));
+                tfm_init_user_binary3{ivid}=mask;
+                tfm_init_user_outline3x{ivid}=x_mask;
+                tfm_init_user_outline3y{ivid}=y_mask;
+            else
+                tfm_init_user_binary3{ivid}=true(size(image,1),size(image,2));
+                tfm_init_user_outline3x{ivid}=[];
+                tfm_init_user_outline3y{ivid}=[];
+            end
+            
+            %save dimensions
+            tfm_init_user_major(ivid)=2*a;
+            tfm_init_user_minor(ivid)=2*b;
+            tfm_init_user_angle(ivid)=s(1).Orientation;
+            tfm_init_user_ratio(ivid)=a/(b+eps);
+            tfm_init_user_area(ivid)=s(1).Area;
+            tfm_init_user_area_ellipse(ivid)=an*bn*pi;
+            
+            %save outlines
+            tfm_init_user_outline2x{ivid}=xn;
+            tfm_init_user_outline2y{ivid}=yn;
+            
+        end
+        
+    end % end calculate cell dimensions
+    
+    sb=statusbar(h_init.fig,'Done !');
+    sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
+    
+    %display tfm preview w/ outlines
+    cla(h_init.axes_curr)
+    axes(h_init.axes_curr)
+    imshow(tfm_init_user_preview_frame1{tfm_init_user_counter});hold on;
+    plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
+    plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
+    plot(tfm_init_user_outline3x{tfm_init_user_counter},tfm_init_user_outline3y{tfm_init_user_counter},'g','LineWidth',2);
+    hold off;
+    
+    %display bf preview w/ outlines
+    cla(h_init.axes_bf)
+    axes(h_init.axes_bf)
+    imshow(tfm_init_user_bf_preview_frame1{tfm_init_user_counter});hold on;
+    plot(tfm_init_user_outline1x{tfm_init_user_counter},tfm_init_user_outline1y{tfm_init_user_counter},'r','LineWidth',2);
+    plot(tfm_init_user_outline2x{tfm_init_user_counter},tfm_init_user_outline2y{tfm_init_user_counter},'b','LineWidth',2);
+    plot(tfm_init_user_outline3x{tfm_init_user_counter},tfm_init_user_outline3y{tfm_init_user_counter},'g','LineWidth',2);
+    hold off;
+
+    % update display text
+    set(h_init.text_whichvid,'String',sprintf('%d/%d',tfm_init_user_counter,tfm_init_user_Nfiles) );
+    set(h_init.text_bf_whichvidname,'string',[tfm_init_user_bf_filenamestack{tfm_init_user_counter}]);
+    set(h_init.text_whichvidname,'String',[tfm_init_user_filenamestack{tfm_init_user_counter}]);
+        
+    %end
     
     %save things
     setappdata(0,'tfm_init_user_binary1',tfm_init_user_binary1)
@@ -3287,7 +3315,8 @@ end
 %profile viewer
 
 
-function init_push_update(hObject, eventdata, h_init)
+%% redraws the overlays on the video images ("Update outlines")
+function init_push_update(hObject, eventdata, h_init) %#ok<INUSL> 
 %disable figure during calculation
 enableDisableFig(h_init.fig,0);
 
@@ -3319,6 +3348,7 @@ try
     tfm_init_user_nu=getappdata(0,'tfm_init_user_nu');
     tfm_init_user_cropcheck=get(h_init.checkbox_cropmask,'Value');
     %read mask parameters
+    % MH should be able to read these from appdata
     tfm_init_user_conversion{tfm_init_user_counter}=str2double(get(h_init.edit_conversion,'String'));
     tfm_init_user_croplength=str2double(get(h_init.edit_croplength,'String'));
     tfm_init_user_cropwidth=str2double(get(h_init.edit_cropwidth,'String'));
@@ -3387,7 +3417,7 @@ try
                 tfm_init_user_outline3x{ivid}=x_mask;
                 tfm_init_user_outline3y{ivid}=y_mask;
             else
-                tfm_init_user_binary3{ivid}=logical(ones(size(image,1),size(image,2)));
+                tfm_init_user_binary3{ivid}=true(size(image,1),size(image,2));
                 tfm_init_user_outline3x{ivid}=[];
                 tfm_init_user_outline3y{ivid}=[];
             end
@@ -3398,7 +3428,7 @@ try
         end
     end
     
-    %display preview w. outlines
+    %display preview w/ outlines
     cla(h_init.axes_curr)
     axes(h_init.axes_curr)
     imshow(tfm_init_user_preview_frame1{tfm_init_user_counter});hold on;
@@ -3443,7 +3473,7 @@ end
 
 
 %% callback for all edit fields
-function init_update_field(hObject, eventdata, h_init, field)
+function init_update_field(hObject, eventdata, h_init, field) %#ok<INUSL> 
 %disable fig
 enableDisableFig(h_init.fig,0);
 
@@ -3496,12 +3526,17 @@ try
         setappdata(0, 'tfm_init_user_rotate', tfm_init_user_rotate)
     end
     fprintf(1,'CXS-TFM: Updated analysis info.\n')
+
+    % update the displayed masks
+    init_push_update(hObject, eventdata, h_init)
     
 catch errorObj
     % If there is a problem, we display the error message
     errordlg(getReport(errorObj,'extended','hyperlinks','off'));
 end
 
+
+% callback for the Bin checkbox
 function init_update_bin(~, ~, h_init)
 
 %if checkbox is true, warn that no sarcomere analysis is possible
@@ -3708,7 +3743,7 @@ try
 
             fprintf(1,' %d Video images of %d x %d pixels\n',N,m,n);
 
-            fprintf(1,'CXS-TFM: Normalise video images...\n');
+            fprintf(1,' Normalise video images...\n');
             tstartMH = tic;
 
             if ndims(images{1,1}) == 3
@@ -3732,9 +3767,13 @@ try
                 %save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,j},'/image',num2str(i),'.mat'],'imagei','-v7.3')
             end
 
-            fprintf(1,'CXS-TFM: Normalising completed in %.1f seconds\n',toc(tstartMH));
+            fprintf(1,' Normalising completed in %.1f seconds\n',toc(tstartMH));
             %save to mat
+            fprintf(1,' Saving image data to disk... '); tstartSave = tic;
             save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,j},'/image_stack.mat'],'image_stack','-v7.3')
+            fprintf(1,'completed in %.1f seconds\n',toc(tstartSave));
+
+            tfm_init_user_Nframes{j} = size(image_stack,3);
             
             % Load BF frames if they are also in the same file
             BFChannel = getappdata(0, 'BFChannel');
@@ -3776,7 +3815,10 @@ try
                 fprintf(1,'CXS-TFM: Normalising completed in %.1f seconds\n',toc(tstartMH));
 
                 %save to mat
+                fprintf(1,' Saving image data to disk... '); tstartSave = tic;
                 save(['vars_DO_NOT_DELETE/',tfm_init_user_bf_filenamestack{1,j},'/image_stack_bf.mat'],'image_stack','-v7.3');
+                fprintf(1,'completed in %.1f seconds\n',toc(tstartSave));
+
                 tfm_init_user_Nframes_bf{j} = size(image_stack,3);
             end
             
@@ -3792,15 +3834,13 @@ try
             imagei = TifLink.read();
             m = size(imagei,1);
             n = size(imagei,2);
-            image_stack = zeros(m,n,N,'uint8');
-            end_frame = N;
+            trim_frame = 0;
             if get(h_init.checkbox_trim, 'value')
-                end_frame = N-1;
-                TifLink.read(); %read past first frame
-                image_stack = zeros(m,n,N-1,'uint8');
+                trim_frame = 1;
             end
-            for i=1:end_frame
-                TifLink.setDirectory(i);
+            image_stack = zeros(m,n,N-trim_frame,'uint8');
+            for i=1:N-trim_frame
+                TifLink.setDirectory(i+trim_frame);
                 imagei=TifLink.read();
                 %convert to grey
                 if ndims(imagei) == 3
@@ -3813,13 +3853,18 @@ try
                 %save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,j},'/image',num2str(i),'.mat'],'imagei','-v7.3')
             end
             TifLink.close();
+
             %save to mat
+            fprintf(1,' Saving image data to disk... '); tstartSave = tic;
             save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,j},'/image_stack.mat'],'image_stack','-v7.3');
+            fprintf(1,'completed in %.1f seconds\n',toc(tstartSave));
+
+            tfm_init_user_Nframes{j} = size(image_stack,3);
             
         elseif strcmp(tfm_init_user_vidext{1,j},'.avi')
             fprintf('CXS-TFM: Importing TFM AVI file...\n');
 
-            videoObj = VideoReader([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]);
+            videoObj = VideoReader([tfm_init_user_pathnamestack{1,j},tfm_init_user_filenamestack{1,j},tfm_init_user_vidext{1,j}]); %#ok<TNMLP> 
             N = videoObj.NumFrames;
             
             %initialize image stack
@@ -3828,38 +3873,37 @@ try
             n = size(imagei,2);
             image_stack = zeros(m,n,N,'uint8');
             num_frames = N;
+            trim_frame = 0;
             if get(h_init.checkbox_trim, 'value')
-                num_frames = N-1;
-                image_stack = zeros(m,n,N-1,'uint8');
+                trim_frame = 1;
             end
+            image_stack = zeros(m,n,N-trim_frame,'uint8');
 
-            fprintf(1,'CXS-TFM: Normalise video images...\n'); tstartMH = tic;
-            parfor (i=1:num_frames,tfm_init_use_parallel)
-                if get(h_init.checkbox_trim, 'value')
-                    imagei=read(videoObj, i+1);
-                else
-                    imagei=read(videoObj, i);
-                end
+            fprintf(1,' Normalise video images...\n'); tstartMH = tic;
+            parfor (i=1:N-trim_frame, tfm_init_use_parallel)
+                imagei=read(videoObj, i+trim_frame);
                 %convert to grey
                 if ndims(imagei) == 3
                     imagei=rgb2gray(imagei);
                 end
                 imagei=rescale(imagei);
                 imagei=im2uint8(imagei);
-                image_stack(:,:,i) = imagei; %#ok<PFOUS> % var is saved to file
+                image_stack(:,:,i) = imagei; % var is saved to file
             end
-            fprintf(1,'CXS-TFM: Normalising completed in %.1f seconds\n',toc(tstartMH));
+            fprintf(1,' Normalising completed in %.1f seconds\n',toc(tstartMH));
 
             %save to mat
-            save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,j},'/image_stack.mat'],'image_stack','-v7.3')
+            fprintf(1,' Saving image data to disk... '); tstartSave = tic;
+            save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,j},'/image_stack.mat'],'image_stack','-v7.3');
+            fprintf(1,'completed in %.1f seconds\n',toc(tstartSave));
 
         end
-        
 
-        tfm_init_user_Nframes{j} = N;
-        if get(h_init.checkbox_trim, 'value')
-            tfm_init_user_Nframes{j} = N - 1;
-        end
+        tfm_init_user_Nframes{j} = size(image_stack,3);
+%         tfm_init_user_Nframes{j} = N;
+%         if get(h_init.checkbox_trim, 'value')
+%             tfm_init_user_Nframes{j} = N - 1;
+%         end
     end
     
     %save settings for current frame
@@ -3898,7 +3942,7 @@ try
         
     end
     
-    % crop videos
+    %% Crop videos
     if get(h_init.checkbox_crop,'Value')
         fprintf(1,'CXS-TFM: Cropping video images...\n'); tstartMH = tic;
         %read crop parameters
@@ -4005,12 +4049,14 @@ try
                 crop_length = mask_info.BoundingBox(1,3);
                 crop_width = mask_info.BoundingBox(1,4);
             end
+
             % crop bead/bf frames and mask
             crop_out_w = size(imcrop(bead_vid(:,:,1),[xmin ymin crop_length crop_width]),2);
             crop_out_h = size(imcrop(bead_vid(:,:,1),[xmin ymin crop_length crop_width]),1);
             crop_vid = zeros(crop_out_h,crop_out_w,N_frames);
             crop_vid = im2uint8(crop_vid);
-            for i = 1:N_frames
+            %for i = 1:N_frames
+            parfor (i = 1:N_frames, tfm_init_use_parallel)
                 crop_vid(:,:,i) = imcrop(bead_vid(:,:,i),[xmin ymin crop_length crop_width]);
             end
             bead_vid_crop{ivid} = crop_vid;
@@ -4019,7 +4065,7 @@ try
             crop_out_h = size(imcrop(bf_vid(:,:,1),[xmin ymin crop_length crop_width]),1);
             crop_vid = zeros(crop_out_h,crop_out_w,N_frames);
             crop_vid = im2uint8(crop_vid);
-            parfor (i = 1:bf_N_frames,tfm_init_use_parallel)
+            parfor (i = 1:bf_N_frames, tfm_init_use_parallel)
                 crop_vid(:,:,i) = imcrop(bf_vid(:,:,i),[xmin ymin crop_length crop_width]);
             end
             bf_vid_crop{ivid} = crop_vid;
@@ -4060,8 +4106,9 @@ try
             crop_vid = bead_vid_crop{ivid};
             parfor (i = 1:N_frames, tfm_init_use_parallel)
                 %imagei = normalise(bead_vid_crop{ivid}(:,:,i));
-                imagei = rescale(crop_vid(:,:,i));
-                image_stack(:,:,i) = imagei; %#ok<PFOUS> % var is saved to file
+                %imagei = rescale(crop_vid(:,:,i));
+                %image_stack(:,:,i) = imagei; 
+                image_stack(:,:,i) = rescale(crop_vid(:,:,i)); %#ok<PFOUS> % var is saved to file
                 % save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{ivid},'_cropped','/image',num2str(i),'.mat'],'imagei','-v7.3')
             end
             save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{ivid},'_cropped','/image_stack.mat'],'image_stack','-v7.3')
@@ -4070,8 +4117,9 @@ try
             crop_vid = bf_vid_crop{ivid};
             parfor (i = 1:bf_N_frames, tfm_init_use_parallel)
                 %imagei = normalise(bf_vid_crop{ivid}(:,:,i));
-                imagei = rescale(crop_vid(:,:,i));
-                image_stack(:,:,i) = imagei; %#ok<PFOUS> % var is saved to file
+                %imagei = rescale(crop_vid(:,:,i));
+                %image_stack(:,:,i) = imagei;
+                image_stack(:,:,i) = rescale(crop_vid(:,:,i)); %#ok<PFOUS> % var is saved to file
                 % save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{ivid},'_cropped','/image',num2str(i),'.mat'],'imagei','-v7.3')
             end
             save(['vars_DO_NOT_DELETE/',tfm_init_user_bf_filenamestack{ivid},'_cropped','/image_stack_bf.mat'],'image_stack','-v7.3')
@@ -4090,7 +4138,7 @@ try
         fprintf(1,'CXS-TFM: Cropping completed in %.1f seconds\n',toc(tstartMH));
         
         %update statusbar
-        sb=statusbar(h_init.fig,'Saving cropped videos...');
+        sb=statusbar(h_init.fig,'Updating cropped videos...');
         sb.getComponent(0).setForeground(java.awt.Color.red);
         
         % for loop for saving/overwriting
@@ -4111,7 +4159,7 @@ try
             tfm_init_user_preview_frame1{ivid} = [];
             tfm_init_user_preview_frame1{ivid} = normalise(bead_vid_crop{ivid}(:,:,1));
             
-            % do same forall bf videos (ensure no indexing errors)
+            % do same for all bf videos (ensure no indexing errors)
             tfm_init_user_bf_filenamestack{ivid} = [tfm_init_user_bf_filenamestack{ivid},'_cropped'];
             if ivid <= size(tfm_init_user_bf_filenamestack)
                 tfm_init_user_bf_preview_frame1{ivid} = [];
@@ -4160,7 +4208,7 @@ try
         end
     end
     
-    % bin videos
+    %% Bin videos
     if get(h_init.checkbox_bin,'Value')
         
         % get bin parameters
@@ -4191,26 +4239,22 @@ try
             %             N_frames = numel(info);
             %             info = imfinfo([tfm_init_user_bf_pathnamestack{ivid},tfm_init_user_bf_filenamestack{ivid},'.tif']);
             %             bf_N_frames = numel(info);
-            height = tfm_init_user_imsize_m{ivid};%info(1).Width;
-            width = tfm_init_user_imsize_n{ivid};%info(1).Height;
-            N_frames = tfm_init_user_Nframes{ivid};%numel(info);
-            %info = imfinfo([tfm_init_user_bf_pathnamestack{ivid},tfm_init_user_bf_filenamestack{ivid},'.tif']);
-            bf_N_frames = tfm_init_user_Nframes_bf{ivid};%numel(info);
+%             height = tfm_init_user_imsize_m{ivid};%info(1).Width;
+%             width = tfm_init_user_imsize_n{ivid};%info(1).Height;
+%             N_frames = tfm_init_user_Nframes{ivid};%numel(info);
+%             bf_N_frames = tfm_init_user_Nframes_bf{ivid};%numel(info);
             
-            % initialize movie stacks bead and bf
-            init_frame = zeros(height,width);
-            new_frame = imresize(init_frame,bin_scale);
-            [height, width] = size(new_frame);
-            %             bead_vid = zeros(height,width,N_frames);
-            %             bead_vid = im2uint8(bead_vid);
-            %             bf_vid = zeros(height,width,bf_N_frames);
-            %             bf_vid = im2uint8(bf_vid);
-            bead_vid = zeros(height,width,N_frames);
-            bead_vid = im2uint8(bead_vid);
-            bf_vid = zeros(height,width,bf_N_frames);
-            bf_vid = im2uint8(bf_vid);
+%             % initialize movie stacks bead and bf
+%             init_frame = zeros(height,width);
+%             new_frame = imresize(init_frame,bin_scale);
+%             [height, width] = size(new_frame);
+%             bead_vid = zeros(height,width,N_frames);
+%             bead_vid = im2uint8(bead_vid);
+%             bf_vid = zeros(height,width,bf_N_frames);
+%             bf_vid = im2uint8(bf_vid);
             
-            
+            fprintf(1,'  Binning all frames and mask... '); tstartBin = tic;
+
             % load frames and resize
             bead_frameN = load(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,ivid},'/image_stack.mat'],'image_stack');
             %for i = 1:N_frames
@@ -4232,11 +4276,16 @@ try
             %                 end
             bf_vid = imresize(bf_frameN.image_stack,bin_scale,'bilinear');
             %end
-            
+            mask_bin{ivid} = imresize(tfm_init_user_binary1{ivid},bin_scale,'bilinear');
             % save binned stacks
             bead_vid_bin{ivid} = bead_vid;
+            N_frames = size(bead_vid_bin{ivid},3);
             bf_vid_bin{ivid} = bf_vid;
-            mask_bin{ivid} = imresize(tfm_init_user_binary1{ivid},bin_scale,'bilinear');
+            bf_N_frames = size(bf_vid_bin{ivid},3);
+
+            fprintf(1,'completed in %.1f seconds\n',toc(tstartBin));
+
+            fprintf(1,'  Saving binned data to disk...  '); tstartSave = tic;
             
             % create new directory
             if isequal(exist(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{ivid},'_binned'], 'dir'),7)
@@ -4250,6 +4299,7 @@ try
                 end
                 mkdir(['vars_DO_NOT_DELETE/',tfm_init_user_bf_filenamestack{ivid},'_binned'])
             end
+
             % check for old binned files and delete
             if exist([tfm_init_user_pathnamestack{ivid},tfm_init_user_filenamestack{ivid},'_binned',tfm_init_user_vidext{ivid}],'file') == 2
                 delete([tfm_init_user_pathnamestack{ivid},tfm_init_user_filenamestack{ivid},'_binned',tfm_init_user_vidext{ivid}])
@@ -4266,37 +4316,50 @@ try
                 imwrite(bf_vid_bin{ivid}(:,:,i),[tfm_init_user_bf_pathnamestack{ivid},tfm_init_user_bf_filenamestack{ivid},'_binned_bf.tif'],'writemode','append');
             end
             
-            % save new .mat files
+            % save normalised .mat files
             image_stack = zeros(size(bead_vid_bin{ivid}));
-            parfor (i = 1:N_frames,tfm_init_use_parallel)
-                imagei = normalise(bead_vid_bin{ivid}(:,:,i));
-                image_stack(:,:,i) = imagei;
-                % save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{ivid},'_cropped','/image',num2str(i),'.mat'],'imagei','-v7.3')
+            parfor (i = 1:N_frames, tfm_init_use_parallel)
+                %imagei = rescale(bead_vid_bin{ivid}(:,:,i));
+                %image_stack(:,:,i) = imagei;
+                image_stack(:,:,i) = rescale(bead_vid_bin{ivid}(:,:,i)); %#ok<PFOUS> % file is saved to disk after loop
             end
             save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{ivid},'_binned','/image_stack.mat'],'image_stack','-v7.3')
-            % save new bf .mat files
+
+            % save normalised bf .mat files
             image_stack = zeros(size(bf_vid_bin{ivid}));
-            parfor (i = 1:bf_N_frames,tfm_init_use_parallel)
-                imagei = normalise(bf_vid_bin{ivid}(:,:,i));
-                image_stack(:,:,i) = imagei;
-                % save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{ivid},'_cropped','/image',num2str(i),'.mat'],'imagei','-v7.3')
+            parfor (i = 1:bf_N_frames, tfm_init_use_parallel)
+                %imagei = rescale(bf_vid_bin{ivid}(:,:,i));
+                %image_stack(:,:,i) = imagei;
+                image_stack(:,:,i) = rescale(bf_vid_bin{ivid}(:,:,i)); %#ok<PFOUS> % file is saved to disk after loop
             end
             save(['vars_DO_NOT_DELETE/',tfm_init_user_bf_filenamestack{ivid},'_binned','/image_stack_bf.mat'],'image_stack','-v7.3')
             
+%             % save binned stacks
+%             bead_vid_bin{ivid} = bead_vid;
+%             bf_vid_bin{ivid} = bf_vid;
+            
+
             % clear temp vids
-            bead_vid = [];
-            bf_vid = [];
-            image_stack = [];
+            clear bead_vid;
+            clear bf_vid;
+            clear image_stack;
             % include bf_frameN?
-		end
-		
-		fprintf(1,'CXS-TFM: Downsampling complete in %.1f s\n',toc(tstartMH));
+
+            fprintf(1,'completed in %.1f seconds\n',toc(tstartSave));
+
+        end	% end binning files loop
         
         %update statusbar
-        sb=statusbar(h_init.fig,'Saving binned videos...');
+        sb=statusbar(h_init.fig,'Updating binned videos...');
         sb.getComponent(0).setForeground(java.awt.Color.red);
-        
+
+        fprintf(1,'  Updating binned videos... '); tstartBin = tic;
+
+        % overwrite mask
+        tfm_init_user_binary1 = mask_bin;
+    
         % for loop for saving/overwriting
+        % MH why is this loop separate from the previous loop?
         for ivid = 1:tfm_init_user_Nfiles
             
             % remove old vars directory
@@ -4311,17 +4374,17 @@ try
             tfm_init_user_filenamestack{ivid} = [tfm_init_user_filenamestack{ivid},'_binned'];
             
             % overwrite preview frames
-            tfm_init_user_preview_frame1{ivid} = [];
-            tfm_init_user_preview_frame1{ivid} = normalise(bead_vid_bin{ivid}(:,:,1));
+            %tfm_init_user_preview_frame1{ivid} = [];
+            tfm_init_user_preview_frame1{ivid} = rescale(bead_vid_bin{ivid}(:,:,1));
             
             tfm_init_user_bf_filenamestack{ivid} = [tfm_init_user_bf_filenamestack{ivid},'_binned'];
             if ivid <= size(tfm_init_user_bf_filenamestack)
-                tfm_init_user_bf_preview_frame1{ivid} = [];
-                tfm_init_user_bf_preview_frame1{ivid} = normalise(bf_vid_bin{ivid}(:,:,1));
+                %tfm_init_user_bf_preview_frame1{ivid} = [];
+                tfm_init_user_bf_preview_frame1{ivid} = rescale(bf_vid_bin{ivid}(:,:,1));
             end
             
             
-            % overwrite mask
+%             % overwrite mask
             tfm_init_user_binary1{ivid} = mask_bin{ivid};
             % tfm_binary2?
             tfm_init_user_binary3{ivid} = [];
@@ -4364,12 +4427,16 @@ try
         end
         
         % reset conversion and ncorr parameters
-        for ivid = 1:tfm_init_user_Nfiles
+        for ivid = 1:tfm_init_user_Nfiles % why this loop?
             tfm_init_user_conversion{ivid} = tfm_init_user_conversion{ivid}/bin_scale;
         end
         tfm_init_user_subset_rad = tfm_init_user_subset_rad*bin_scale;
         tfm_init_user_spacing_coeff = ceil(tfm_init_user_spacing_coeff*bin_scale);
-    end
+
+        fprintf(1,'complete in %.1f s\n',toc(tstartBin));
+
+        fprintf(1,'CXS-TFM: Downsampling complete in %.1f s\n',toc(tstartMH));
+    end % end binning
     
     %bleaching correction
     if get(h_init.checkbox_bleach, 'Value')
@@ -4429,7 +4496,8 @@ try
             %clear java stuff; memory issue on OSX ! java garbage collector
             java.lang.System.gc();
         end
-    end
+    end % end bleaching
+    
     
     %kalman denoising
     if get(h_init.checkbox_denoise, 'Value')
@@ -4520,16 +4588,16 @@ try
     
     %generate masks for further analysis based on outline 2
     tfm_init_user_binary2=cell(1,tfm_init_user_Nfiles);
-    sb=statusbar(h_init.fig,['Calculating ellipse areas... ']);%,num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '%% done']);
+    sb=statusbar(h_init.fig,'Calculating ellipse areas... ');%,num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '%% done']);
     sb.getComponent(0).setForeground(java.awt.Color.red);
-    parfor (ivid=1:tfm_init_user_Nfiles,tfm_init_use_parallel)
+    parfor (ivid=1:tfm_init_user_Nfiles, tfm_init_use_parallel)
         %             sb=statusbar(h_init.fig,['Calculating ellipse areas... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)), '%% done']);
         %             sb.getComponent(0).setForeground(java.awt.Color.red);
         image=tfm_init_user_preview_frame1{ivid};
         if isempty(tfm_init_user_binary1{ivid})
-            tfm_init_user_binary1{ivid}=logical(ones(size(image,1),size(image,2)));
+            tfm_init_user_binary1{ivid}=true(size(image,1),size(image,2));
             tfm_init_user_binary2{ivid}=true(size(image,1),size(image,2));
-            tfm_init_user_binary3{ivid}=logical(ones(size(image,1),size(image,2)));
+            tfm_init_user_binary3{ivid}=true(size(image,1),size(image,2));
         else
             mask=poly2mask(tfm_init_user_outline2x{ivid},tfm_init_user_outline2y{ivid},size(image,1),size(image,2));
             tfm_init_user_binary2{ivid}=mask;

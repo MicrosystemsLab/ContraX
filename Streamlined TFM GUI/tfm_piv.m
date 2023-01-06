@@ -306,7 +306,7 @@ end
 waitfor(h_piv.fig)
 
 
-%% piv_push_calcncorr
+%% The 'Calculate all' button callback
 function piv_push_calcncorr(hObject, eventdata, h_piv)
 %disable figure during calculation
 enableDisableFig(h_piv.fig,0);
@@ -401,10 +401,11 @@ try
         
         %s=load(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,ivid},'/image',num2str(1),'.mat'],'imagei');
         im_ref=s.image_stack(:,:,1);
+        fprintf(1,'  Video has %d frames, %d x %d pixels\n',size(s.image_stack,3),size(im_ref,1),size(im_ref,2));
         
         %set reference
         ref = ncorr_class_img;
-        ref.set_img('load',struct('img',s.image_stack(:,:,1),...
+        ref.set_img('load',struct('img',im_ref,...
             'name',[tfm_init_user_filenamestack{ivid},tfm_init_user_vidext{ivid}],...
             'path',tfm_init_user_pathnamestack{ivid}));
         % ref.set_img('lazy',struct('name','image1.png','path',['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,ivid}]));
@@ -414,7 +415,7 @@ try
         
 		fprintf(1,'CXS-TFM: Start ncorr init at %.02f s\n',toc(tstartMH));
         for ifr=1:Num
-            cur(end+1) = ncorr_class_img;
+            cur(end+1) = ncorr_class_img; %#ok<AGROW> 
             cur(end).set_img('load',struct('img',s.image_stack(:,:,ifr),...
                 'name',[tfm_init_user_filenamestack{ivid},tfm_init_user_vidext{ivid}],...
                 'path',tfm_init_user_pathnamestack{ivid}));
@@ -422,8 +423,8 @@ try
         end
 		fprintf(1,'CXS-TFM: End ncorr init at %.02f s\n',toc(tstartMH));
 
-        statusbar(h_piv.fig,sprintf('Analyzing Video %d/%d (%d frames)...',ivid,tfm_init_user_Nfiles,length(cur)));
-        fprintf(1,'  Video has %d frames\n',length(cur));
+        statusbar(h_piv.fig,sprintf('Analyzing Video %d/%d (%d frames)...',ivid,tfm_init_user_Nfiles,Num));
+        
         
         %set roi
         mask = true([ref.height ref.width]);
@@ -511,8 +512,10 @@ try
 		fprintf(1,'CXS-TFM: Start frame processing at %.02f s\n ',toc(tstartMH));
 		tstartFRAME = tic;
         %h_pf = h_piv.fig;
-		
-        parfor (frame = 1:length(cur), use_parallel)
+        post_proc = get(h_piv.checkbox,'Value'); % this is the 'Post-processing' checkbox
+		Ncur = length(cur);
+
+        parfor (frame = 1:Ncur, use_parallel)
 %        for frame = 1:length(cur)
 			%timeperframe = toc(tstartFRAME)/frame;
             if rem(frame,20)==0
@@ -521,7 +524,7 @@ try
             end
             %disp([' Calculating frame #',num2str(frame)])
             
-            [seedinfo(frame), convergeinfo, success_seeds] = ncorr_alg_calcseeds(ref.formatted(), ...
+            [seedinfo(frame), convergeinfo, ~] = ncorr_alg_calcseeds(ref.formatted(), ...
                 cur(frame).formatted(), ...
                 roi.formatted, ...
                 int32(num_region), ...
@@ -530,7 +533,7 @@ try
                 cutoff_diffnorm, ...
                 int32(cutoff_iteration), ...
                 enabled_stepanalysis, ...
-                subsettrunc);
+                subsettrunc); %#ok<PFBNS> 
             %         end
             
             %         %% DIC analysis
@@ -549,7 +552,7 @@ try
             seedinfo(frame).num_thread = int32(seedinfo(frame).num_thread);
             seedinfo(frame).computepoints = int32(sum(roi_reduced.mask(:))); % Used for waitbar
             
-            [dicinfo(frame), success_dic] = ncorr_alg_rgdic(ref.formatted(), ...
+            [dicinfo, ~] = ncorr_alg_rgdic(ref.formatted(), ...
                 cur(frame).formatted(), ...
                 roi.formatted(), ...
                 seedinfo(frame), ...
@@ -560,15 +563,15 @@ try
                 int32(cutoff_iteration), ...
                 subsettrunc, ...
                 int32(frame-1), ...
-                int32(length(cur)));
+                int32(Ncur));
             
             %             %s=load(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,ivid},'/image',num2str(1),'.mat'],'imagei');
             %             im_ref=s.image_stack(:,:,1);
             
             
             
-            u=dicinfo(frame).plot_u;
-            v=dicinfo(frame).plot_v;
+            u=dicinfo.plot_u;
+            v=dicinfo.plot_v;
             
             %format: filter out everything under correlation coeff
             %threshold
@@ -607,8 +610,8 @@ try
             u_filtered=u(1:end-1,:);
             v_filtered=v(1:end-1,:);
             
-            %check if user wants filter
-            if get(h_piv.checkbox,'Value')
+            %check if user wants filter (MH aka 'Post-Processing')
+            if post_proc % get(h_piv.checkbox,'Value')
                 %vellimit check
                 u_filtered(u_filtered<umin)=NaN;
                 u_filtered(u_filtered>umax)=NaN;
@@ -683,7 +686,7 @@ try
             set(gca,'xtick',[],'ytick',[])
             set(gca,'linewidth',2);
             axis image;
-            saveas(p,[tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Displacement Heatmaps/heatmap',int2str(frame),'.png']);
+            saveas(p,[tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Displacement Heatmaps/heatmap',int2str(frame),'.png']); %#ok<PFBNS> 
             %export_fig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Displacement Heatmaps/heatmap',int2str(frame)],...
             %    '-png','-painters','-m1.5',p);
             close(p)
@@ -814,12 +817,13 @@ try
     tfm_init_user_binary1=getappdata(0,'tfm_init_user_binary1');
     tfm_init_user_binary2=getappdata(0,'tfm_init_user_binary2');
     tfm_gui_call_piv_flag=getappdata(0,'tfm_gui_call_piv_flag');
+    use_parallel = getappdata(0,'use_parallel');
         
-    sb=statusbar(h_piv.fig,['Looking for reference frame...']);
+    sb=statusbar(h_piv.fig,'Looking for reference frame...');
     sb.getComponent(0).setForeground(java.awt.Color.red);
     
     
-    parfor current_vid=1:tfm_init_user_Nfiles
+    parfor (current_vid=1:tfm_init_user_Nfiles, use_parallel)
         %waitbar
         %         sb=statusbar(h_piv.fig,['Looking for reference frame... ',num2str(floor(100*(current_vid-1)/tfm_init_user_Nfiles)), '%% done']);
         %         sb.getComponent(0).setForeground(java.awt.Color.red);

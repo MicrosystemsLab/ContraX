@@ -181,7 +181,6 @@ disp(compile_cmd);
 eval(compile_cmd);
 
 toc
-beep; pause(0.1); beep; pause(0.2); beep; pause(0.3); beep;
 fprintf(1,'%s compilation complete at %s.\n\n',progname,datestr(clock));
 
 
@@ -282,4 +281,5 @@ if updateRepo
     fprintf(1,'\n');
 end
 
+beep; pause(0.1); beep; pause(0.2); beep; pause(0.3); beep;
 fprintf(1,'Compile complete.\n\n');
