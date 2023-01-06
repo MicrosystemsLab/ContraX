@@ -156,7 +156,7 @@ h_piv.edit_post_eps = uicontrol('Parent',h_piv.panel_post,'style','edit','positi
 %post settings: edit: thresh
 h_piv.edit_post_thresh = uicontrol('Parent',h_piv.panel_post,'style','edit','position',[170,5,50,15],'string','3','HorizontalAlignment','center');
 %button: calculate all
-h_piv.button_calcncorr = uicontrol('Parent',h_piv.panel_ncorr,'style','pushbutton','position',[5,5,240,30],'string','Calculate all','FontSize',fontsizeA);
+h_piv.button_calcncorr = uicontrol('Parent',h_piv.panel_ncorr,'style','pushbutton','position',[5,5,240,30],'string','Calculate all','FontSize',fontsizeA,'FontWeight','bold');
 %checkbox: delete extra files after ncorr
 h_piv.checkbox_delete = uicontrol('Parent',h_piv.panel_ncorr,'style','checkbox','position',[100,150,150,15],'string','Delete extra files after ncorr','value',0);
 h_piv.checkbox_delete.ForegroundColor = ptcolor;
@@ -888,6 +888,10 @@ try
     % statusbar
     sb=statusbar(h_piv.fig,'Calculation - Done !');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
+
+    % highlight next step
+    set(h_piv.button_calcncorr,'FontWeight','normal');
+    set(h_piv.button_calcref,'FontWeight','bold');
     
     %set the counter back to 1
     tfm_piv_user_counter=1;
@@ -1243,7 +1247,7 @@ setappdata(0,'tfm_piv_user_d',tfm_piv_user_d);
 setappdata(0,'tfm_piv_user_counter',tfm_piv_user_counter);
 
 
-%% piv_push_calcref
+%% piv_push_calcref The "Calc displacements" button
 function piv_push_calcref(hObject, eventdata, h_piv)
 
 %profile on
@@ -1501,6 +1505,9 @@ try
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
 
     fprintf(1,'CXS-TFM: Displacements calculated.\n');
+
+    % highlight next step
+    set(h_piv.button_calcref,'FontWeight','normal');
 
     %enable ok button & checkbox
     set(h_piv.button_ok,'Visible','on')

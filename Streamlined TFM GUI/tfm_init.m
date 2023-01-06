@@ -3614,6 +3614,12 @@ end
 %% Callback for the "OK" button
 function init_push_ok(hObject, eventdata, h_init, h_main) %#ok<INUSL> 
 fprintf('CXS-TFM: Processing video files...\n');
+
+% start the parallel computing pool before doing timing estimates
+try %#ok<TRYNC> 
+if getappdata(0,'use_parallel') > 0, gcp; end
+end
+
 %profile on
 %userTiming= getappdata(0,'userTiming');
 %userTiming.init{2} = toc(userTiming.init{1});

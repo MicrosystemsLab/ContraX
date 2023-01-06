@@ -291,7 +291,7 @@ function main_push_para(hObject, eventdata, h_main) %#ok<INUSL>
 tfm_para(h_main);
 
 function figure1_KeyPressFcn(hObject, eventdata, h_main)
-% enable keyboard control for the butoons in the Main gui window
+% enable keyboard control for the buttons in the Main gui window
 
 % Ignore system & menu keyboard commands (e.g. command/control-S for Save)
 for k=1:length(eventdata.Modifier)

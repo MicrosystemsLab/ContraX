@@ -167,7 +167,7 @@ h_tfm.checkbox_matrix = uicontrol('Parent',h_tfm.fig,'style','checkbox','positio
 h_tfm.checkbox_matrix.ForegroundColor = ptcolor;
 h_tfm.checkbox_matrix.BackgroundColor = pcolor;
 %create heatmaps save checkbox
-h_tfm.checkbox_heatmaps = uicontrol('Parent',h_tfm.fig,'style','checkbox','position',[630,355,160,15],'string','Save heatmaps','HorizontalAlignment','left');
+h_tfm.checkbox_heatmaps = uicontrol('Parent',h_tfm.fig,'style','checkbox','position',[630,355,160,15],'string','Save heatmaps','HorizontalAlignment','left','value',1);
 h_tfm.checkbox_heatmaps.ForegroundColor = ptcolor;
 h_tfm.checkbox_heatmaps.BackgroundColor = pcolor;
 
@@ -220,7 +220,7 @@ tfm_push_guess(h_tfm.button_guess, h_tfm, h_tfm, h_main)
 
 
 
-
+%% SmartGuessing the regularization parameter
 function tfm_push_guess(hObject, eventdata, h_tfm, h_main)
 
 %profile on
@@ -336,8 +336,14 @@ try
     if 1==tfm_init_user_Nfiles
         set(h_tfm.button_forwards,'Enable','off');
     end
+    % labels for video
+    set(h_tfm.text_whichvidname,'String',tfm_init_user_filenamestack{1,tfm_tfm_user_counter});
+    set(h_tfm.text_whichvid,'String',[num2str(tfm_tfm_user_counter),'/',num2str(tfm_init_user_Nfiles)]);
     %disable regularization edit
     set(h_tfm.edit_regul,'Enable','off');
+
+    % highlight the next step (calc all)
+    set(h_tfm.button_calc,'FontWeight','bold');
     
     %store everything for shared use
     setappdata(0,'tfm_init_user_E',tfm_init_user_E)
@@ -773,7 +779,7 @@ try
             %             %close(p)
             %+++++++++
 
-        % save heatmap with colorbar
+        % save heatmap with colorbar (MH restored Jan2023)
         p=figure('visible','on');
         imagesc(V(:,:,frame)); colormap parula; hold on;
         plot(tfm_init_user_outline2x{ivid},tfm_init_user_outline2y{ivid},'g','LineWidth',1);
