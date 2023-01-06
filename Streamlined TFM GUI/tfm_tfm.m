@@ -161,13 +161,13 @@ h_tfm.axes_tfm = axes('Parent',h_tfm.panel_tfm,'Units', 'pixels','Position',[10,
 % h_tfm.axes_tfm_gif = axes('Parent',h_tfm.panel_tfm_gif,'Units', 'pixels','Position',[0,0,287,160]);%737,285]);
 
 %create ok button
-h_tfm.button_ok = uicontrol('Parent',h_tfm.fig,'style','pushbutton','position',[735,30,45,20],'string','OK','visible','on','FontWeight','bold'); % [735,413,45,20]
+h_tfm.button_ok = uicontrol('Parent',h_tfm.fig,'style','pushbutton','position',[735,300,45,20],'string','OK','visible','on','FontWeight','bold'); % [735,413,45,20]
 %create matrix save checkbox
 h_tfm.checkbox_matrix = uicontrol('Parent',h_tfm.fig,'style','checkbox','position',[630,335,160,15],'string','Save traction matrices','HorizontalAlignment','left','value',1);
 h_tfm.checkbox_matrix.ForegroundColor = ptcolor;
 h_tfm.checkbox_matrix.BackgroundColor = pcolor;
 %create heatmaps save checkbox
-h_tfm.checkbox_heatmaps = uicontrol('Parent',h_tfm.fig,'style','checkbox','position',[630,355,160,15],'string','Save heatmaps','HorizontalAlignment','left','value',1);
+h_tfm.checkbox_heatmaps = uicontrol('Parent',h_tfm.fig,'style','checkbox','position',[630,355,160,15],'string','Save traction heatmaps','HorizontalAlignment','left','value',1);
 h_tfm.checkbox_heatmaps.ForegroundColor = ptcolor;
 h_tfm.checkbox_heatmaps.BackgroundColor = pcolor;
 
@@ -181,7 +181,7 @@ set(h_tfm.button_ok,'callback',{@tfm_push_ok,h_tfm,h_main})
 set(h_tfm.buttongroup_constrain,'SelectionChangeFcn',{@tfm_buttongroup_constrain,h_tfm})
 
 %upon window openeing: make elements visible?unvisible
-set(h_tfm.panel_settings,'visible','off')
+set(h_tfm.panel_settings,'visible','on')
 set(h_tfm.panel_tfm,'visible','off')
 %set(h_tfm.panel_tfm_gif,'visible','off')
 set(h_tfm.button_ok,'visible','off')
@@ -214,6 +214,8 @@ set(h_main.fig,'Position',[fp(1)-ap(3) fp(2)+fp(4)-ap(4) ap(3) ap(4)]);
 % initialize status bar
 sb=statusbar(h_tfm.fig,'Ready');
 sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));
+
+drawnow;
 
 % automatically trigger guess all
 tfm_push_guess(h_tfm.button_guess, h_tfm, h_tfm, h_main)
@@ -265,6 +267,7 @@ try
     %hf = waitbar(0,'SmartGuessing. Please wait...');
     sb=statusbar(h_tfm.fig,'Calculating regularization...');
     sb.getComponent(0).setForeground(java.awt.Color.red);
+
     
     parfor (current_vid=1:tfm_init_user_Nfiles, use_parallel)
 %    for current_vid=1:tfm_init_user_Nfiles

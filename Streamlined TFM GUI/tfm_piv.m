@@ -106,9 +106,13 @@ h_piv.edit_analysis_cutnorm = uicontrol('Parent',h_piv.panel_analysis,'style','e
 %analysis settings: edit: iter
 h_piv.edit_analysis_cutiter = uicontrol('Parent',h_piv.panel_analysis,'style','edit','position',[120,5,110,15],'string','20','HorizontalAlignment','center');
 %checkbox: post processing
-h_piv.checkbox = uicontrol('Parent',h_piv.panel_ncorr,'style','checkbox','position',[5,150,100,15],'string','Post-processing','HorizontalAlignment','left');
+h_piv.checkbox = uicontrol('Parent',h_piv.panel_ncorr,'style','checkbox','position',[5,150,200,15],'string','Post-processing','HorizontalAlignment','left');
 h_piv.checkbox.ForegroundColor = ptcolor;
 h_piv.checkbox.BackgroundColor = pcolor;
+%checkbox: delete extra files after ncorr
+h_piv.checkbox_delete = uicontrol('Parent',h_piv.panel_ncorr,'style','checkbox','position',[5,130,200,15],'string','Delete extra files after ncorr','value',0);
+h_piv.checkbox_delete.ForegroundColor = ptcolor;
+h_piv.checkbox_delete.BackgroundColor = pcolor;
 %uipanel: post settings
 h_piv.panel_post = uipanel('Parent',h_piv.panel_ncorr,'Title','Postprocess Settings','units','pixels','Position',[5,40,240,105]);
 h_piv.panel_post.ForegroundColor = ptcolor;
@@ -157,10 +161,7 @@ h_piv.edit_post_eps = uicontrol('Parent',h_piv.panel_post,'style','edit','positi
 h_piv.edit_post_thresh = uicontrol('Parent',h_piv.panel_post,'style','edit','position',[170,5,50,15],'string','3','HorizontalAlignment','center');
 %button: calculate all
 h_piv.button_calcncorr = uicontrol('Parent',h_piv.panel_ncorr,'style','pushbutton','position',[5,5,240,30],'string','Calculate all','FontSize',fontsizeA,'FontWeight','bold');
-%checkbox: delete extra files after ncorr
-h_piv.checkbox_delete = uicontrol('Parent',h_piv.panel_ncorr,'style','checkbox','position',[100,150,150,15],'string','Delete extra files after ncorr','value',0);
-h_piv.checkbox_delete.ForegroundColor = ptcolor;
-h_piv.checkbox_delete.BackgroundColor = pcolor;
+
 
 %create uipanel for smartguess
 %uipanel
@@ -217,7 +218,7 @@ h_piv.checkbox_matrix = uicontrol('Parent',h_piv.fig,'style','checkbox','positio
 h_piv.checkbox_matrix.ForegroundColor = ptcolor;
 h_piv.checkbox_matrix.BackgroundColor = pcolor;
 %create heatmaps save checkbox
-h_piv.checkbox_heatmaps = uicontrol('Parent',h_piv.fig,'style','checkbox','position',[550,50,160,15],'string','Save heatmaps','HorizontalAlignment','left');
+h_piv.checkbox_heatmaps = uicontrol('Parent',h_piv.fig,'style','checkbox','position',[550,50,160,15],'string','Save displacement heatmaps','HorizontalAlignment','left');
 h_piv.checkbox_heatmaps.ForegroundColor = ptcolor;
 h_piv.checkbox_heatmaps.BackgroundColor = pcolor;
 

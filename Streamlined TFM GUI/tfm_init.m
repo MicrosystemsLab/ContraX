@@ -3572,7 +3572,7 @@ end
 
 
 %% Callback for the "OK (streamlined)" button
-function init_push_ok_strln(hObject, eventdata, h_init,h_main)
+function init_push_ok_strln(hObject, eventdata, h_init, h_main)
 
 % figuresize=[80,500];
 % screensize=get(0,'ScreenSize');
@@ -3602,8 +3602,8 @@ switch rspns
     case 'OK'
         tfm_init_user_strln = true;
         setappdata(0,'tfm_init_user_strln',tfm_init_user_strln);
-        init_push_ok(hObject, eventdata, h_init,h_main);
         fprintf(1,'CXS-TFM: Streamlined analysis selected.\n')
+        init_push_ok(hObject, eventdata, h_init,h_main);
 
     case 'Cancel'
         fprintf(1,'CXS-TFM: Streamlined analysis cancelled.\n')
