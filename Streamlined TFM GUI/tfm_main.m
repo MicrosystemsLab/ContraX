@@ -245,13 +245,15 @@ set(h_main.button_tfm,'callback',{@main_push_tfm,h_main})
 set(h_main.button_para,'callback',{@main_push_para,h_main})
 
 % save some mouse clicks
-if ~isdeployed, set(h_main.fig,'KeyPressFcn',{@main_push_init,h_main}); end
+%if ~isdeployed, set(h_main.fig,'KeyPressFcn',{@main_push_init,h_main}); end
+set(h_main.fig,'KeyPressFcn',{@figure1_KeyPressFcn, h_main});
 
 
 %JFM
 notif.on = false; %set to true if notification are desired
 notif.url={}; %input the ifttt trigger url to implement a notification during computing
 setappdata(0,'notif',notif);
+%
 
 setappdata(0,'path_to_templates',path_to_templates);
 
@@ -287,6 +289,28 @@ function main_push_para(hObject, eventdata, h_main) %#ok<INUSL>
 %launch the results window
 %profile resume
 tfm_para(h_main);
+
+function figure1_KeyPressFcn(hObject, eventdata, h_main)
+% enable keyboard control for the butoons in the Main gui window
+
+% Ignore system & menu keyboard commands (e.g. command/control-S for Save)
+for k=1:length(eventdata.Modifier)
+    %disp(eventdata.Modifier)
+    if any(strcmp(eventdata.Modifier{k},{'command','control','ctrl'}))
+        return
+    end
+end
+
+switch eventdata.Key 
+    case 'i' % Initialize: load images
+        main_push_init(hObject, eventdata, h_main)
+    case 'd' % Calculate displacements
+        main_push_piv(hObject, eventdata, h_main)
+    case 't' % Calculate traction forces
+        main_push_tfm(hObject, eventdata, h_main)
+    case 'r' % Display Results
+        main_push_para(hObject, eventdata, h_main)
+end
 
 function tfmCloseFcn(hObject, eventdata, h_main)
 % executed when the main window is closed by the user

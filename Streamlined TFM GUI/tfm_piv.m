@@ -158,7 +158,7 @@ h_piv.edit_post_thresh = uicontrol('Parent',h_piv.panel_post,'style','edit','pos
 %button: calculate all
 h_piv.button_calcncorr = uicontrol('Parent',h_piv.panel_ncorr,'style','pushbutton','position',[5,5,240,30],'string','Calculate all','FontSize',fontsizeA);
 %checkbox: delete extra files after ncorr
-h_piv.checkbox_delete = uicontrol('Parent',h_piv.panel_ncorr,'style','checkbox','position',[100,150,150,15],'string','Delete extra files after ncorr','value',1);
+h_piv.checkbox_delete = uicontrol('Parent',h_piv.panel_ncorr,'style','checkbox','position',[100,150,150,15],'string','Delete extra files after ncorr','value',0);
 h_piv.checkbox_delete.ForegroundColor = ptcolor;
 h_piv.checkbox_delete.BackgroundColor = pcolor;
 

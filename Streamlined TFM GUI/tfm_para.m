@@ -6544,6 +6544,7 @@ try
     
     %preview traction animation
     set(h_para.button_traction_anim,'string',['<html><img src="file:',tfm_init_user_pathnamestack{1,tfm_para_user_counter},tfm_init_user_filenamestack{1,tfm_para_user_counter},filesep,'heatmap_anim.gif"/></html>']);
+    disp([tfm_init_user_pathnamestack{1,tfm_para_user_counter},tfm_init_user_filenamestack{1,tfm_para_user_counter},filesep,'heatmap_anim.gif']) % DEBUG
     
     %forces
     if get(h_para.radiobutton_forcetot,'Value') %ftot

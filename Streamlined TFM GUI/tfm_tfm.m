@@ -244,6 +244,7 @@ try
     tfm_piv_user_contr=getappdata(0,'tfm_piv_user_contr');
     tfm_init_user_E=getappdata(0,'tfm_init_user_E');
     tfm_init_user_nu=getappdata(0,'tfm_init_user_nu');
+    use_parallel=getappdata(0,'use_parallel');
     
     %initial values
     %E=str2double(get(h_tfm.edit_youngs,'String'));
@@ -265,7 +266,7 @@ try
     sb=statusbar(h_tfm.fig,'Calculating regularization...');
     sb.getComponent(0).setForeground(java.awt.Color.red);
     
-    parfor current_vid=1:tfm_init_user_Nfiles
+    parfor (current_vid=1:tfm_init_user_Nfiles, use_parallel)
 %    for current_vid=1:tfm_init_user_Nfiles
         %hf=waitbar(current_vid/tfm_init_user_Nfiles,hf);
         %statusbar
@@ -501,6 +502,7 @@ end
 
 %profile viewer
 
+%% The 'Calculate all' button callback
 function tfm_push_calc(hObject, eventdata, h_tfm, h_main)
 
 %profile on
@@ -539,6 +541,7 @@ try
     tfm_init_user_pathnamestack=getappdata(0,'tfm_init_user_pathnamestack');
     tfm_init_user_outline2x=getappdata(0,'tfm_init_user_outline2x');
     tfm_init_user_outline2y=getappdata(0,'tfm_init_user_outline2y');
+    use_parallel = getappdata(0,'use_parallel');
     
     % overwrite current values
     tfm_init_user_E{tfm_tfm_user_counter}=str2double(get(h_tfm.edit_youngs,'String'));
@@ -559,11 +562,10 @@ try
     end
 
     %w_i=0;
-    parfor ivid=1:tfm_init_user_Nfiles
+    fprintf(1,'CXS-TFM: TF Calculations...\n');
+    parfor (ivid=1:tfm_init_user_Nfiles, use_parallel)
     %for ivid=1:tfm_init_user_Nfiles
 		tstartTFM = tic;
-        
-        fprintf(1,'CXS-TFM: Calculating traction stress for video #%d\n',ivid);
         
         %create folder to save disp.
         [mf,mf2] = mkdir([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots']);  %#ok<ASGLU> 
@@ -650,7 +652,7 @@ try
         vr = zeros(rows,cols,Num);
         u1_0 = zeros(rows,cols,Num);
         v1_0 = zeros(rows,cols,Num);
-        %V = zeros(size(Xqu,1),size(Xqu,2),Num); %MH: this is set above at line at line 608
+        V = zeros(size(Xqu,1),size(Xqu,2),Num);
         absd = zeros(rows,cols,Num);
         Fx = zeros(rows,cols,Num);
         Fy = zeros(rows,cols,Num);
@@ -660,6 +662,7 @@ try
         v = zeros(rows,cols,Num);
         M = zeros(2,2,Num);
        
+        % perform TFM calcs on each pair of frames in video #ivid
         for frame=1:Num %does not work well and fills the RAM...
 %        for frame=1:Num
             %disp(frame)
@@ -770,18 +773,22 @@ try
             %             %close(p)
             %+++++++++
 
-        end
+        % save heatmap with colorbar
+        p=figure('visible','on');
+        imagesc(V(:,:,frame)); colormap parula; hold on;
+        plot(tfm_init_user_outline2x{ivid},tfm_init_user_outline2y{ivid},'g','LineWidth',1);
+        set(gca,'xtick',[],'ytick',[])
+        axis image;
+        colorbar;
+        saveas(p,[tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Traction Heatmaps/heatmap',int2str(frame),'.png']);
+        %export_fig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Traction Heatmaps/heatmap',int2str(frame)],'-png','-m1.5',p);
+        close(p)
+
+
+        end % End frame-to-frame TFM calcs
         %save to mat
         save2disk(theta2,xr,yr,ur,vr,absd,Fx,Fy,F,Trx,Try,v,V,u1_0,v1_0,M,tfm_init_user_filenamestack{1,ivid})
-        % save heatmap with colorbar
-        %         p=figure('visible','off');
-        %         imagesc(V,clims); colormap parula; hold on;
-        %         plot(tfm_init_user_outline2x{ivid},tfm_init_user_outline2y{ivid},'g','LineWidth',1);
-        %         set(gca,'xtick',[],'ytick',[])
-        %         axis image;
-        %         colorbar;
-        %         export_fig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Traction Heatmaps/heatmap',int2str(frame)],'-png','-m1.5',p);
-        %         close(p)
+
    
         % write gif
         delay = 1/tfm_init_user_framerate{ivid};
@@ -805,16 +812,15 @@ try
 %             export_fig([tfm_init_user_pathnamestack{1,ivid},tfm_init_user_filenamestack{1,ivid},'/Plots/Difference Heatmaps/heatmap',int2str(frame)],'-png','-m1.5',p);
 %             close(p);
 %         end
-        
-        
-        
+
         
         % reset gif ims
         hmap_im = [];
         im_gif = [];
 		
-		fprintf(1,' complete in %.02f s\n',toc(tstartTFM));
+		fprintf(1,' Traction stress calculation for video #%d completed in %.02f s\n',ivid,toc(tstartTFM));
     end
+
     %statusbar
     sb=statusbar(h_tfm.fig,'Calculation - Done !');
     sb.getComponent(0).setForeground(java.awt.Color(0,.5,0));

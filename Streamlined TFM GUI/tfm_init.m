@@ -3684,7 +3684,7 @@ try
     end
 
 
-    %loop over vids, and extract data
+    %loop over vids and load data
     for j=1:tfm_init_user_Nfiles
         %update statusbar
         sb=statusbar(h_init.fig,sprintf('Importing %d/%d video files...',j,tfm_init_user_Nfiles));
@@ -3762,7 +3762,7 @@ try
                 %imagei=normalise(imagei); % MH change "normalise" to "rescale"
                 imagei=rescale(imagei);
                 imagei=im2uint8(imagei);
-                image_stack(:,:,i) = imagei; %#ok<PFOUS> % this is saved to file
+                image_stack(:,:,i) = imagei; % this is saved to file
                 %save to mat
                 %save(['vars_DO_NOT_DELETE/',tfm_init_user_filenamestack{1,j},'/image',num2str(i),'.mat'],'imagei','-v7.3')
             end
@@ -3904,7 +3904,7 @@ try
 %         if get(h_init.checkbox_trim, 'value')
 %             tfm_init_user_Nframes{j} = N - 1;
 %         end
-    end
+    end % load data from files
     
     %save settings for current frame
     tfm_init_user_framerate{tfm_init_user_counter}=str2double(get(h_init.edit_fps,'String'));
@@ -3957,7 +3957,7 @@ try
         
         % for loop over videos
         for ivid = 1:tfm_init_user_Nfiles
-            fprintf(1,' File %d/%d\n',ivid,tfm_init_user_Nfiles);
+            fprintf(1,' File %d/%d... ',ivid,tfm_init_user_Nfiles); tstartCrop = tic;
             
             % status bar
             sb = statusbar(h_init.fig,['Cropping videos... ',num2str(floor(100*(ivid-1)/tfm_init_user_Nfiles)),'%% done']);
@@ -4133,7 +4133,9 @@ try
             crop_vid = []; %#ok<NASGU> 
             % bead_vid_crop{ivid} = [];
             % bf_vid_crop{ivid} = [];
-        end
+
+            fprintf(1,' done (%.1f s)\n',toc(tstartCrop));
+        end % end crop loop
 
         fprintf(1,'CXS-TFM: Cropping completed in %.1f seconds\n',toc(tstartMH));
         
