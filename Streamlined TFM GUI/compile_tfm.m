@@ -199,9 +199,12 @@ end
 
 %% Install Windows icon
 % Setting icon requires Resource Hacker
+// Alternative: Resource Cracker https://www.pelock.com/products/resource-cracker
 %  http://www.angusj.com/resourcehacker/
+// Alternative: Resource Cracker https://www.pelock.com/products/resource-cracker
 % For example:
 %     C:\Users\hopcroft\Documents\Software_20200317\build>"C:\Program Files (x86)\Resource Hacker\ResourceHacker.exe" -open PressureControl2.exe -save PressureControl2.exe -action addoverwrite -res control_icon.ico -mask ICONGROUP,1
+// Alternative: Resource Cracker https://www.pelock.com/download/resource-cracker.exe
 % 
 %     C:\Users\hopcroft\Documents\Software_20200317\build>
 % 
@@ -212,6 +215,7 @@ end
 % 
 %     Commandline:
 %     "C:\Program Files (x86)\Resource Hacker\ResourceHacker.exe"  -open PressureControl2.exe -save PressureControl2.exe -action addoverwrite -res control_icon.ico -mask ICONGROUP,1
+// Alternative: Resource Cracker https://www.pelock.com/download/resource-cracker.exe
 % 
 %     Open    : C:\Users\hopcroft\Documents\Software_20200317\build\PressureControl2.exe
 %     Save    : C:\Users\hopcroft\Documents\Software_20200317\build\PressureControl2.exe
@@ -228,6 +232,7 @@ end
 %     else
 %         iconFile=which('win_icon.ico');
 %         reshackerPath='C:\Program Files (x86)\Resource Hacker\ResourceHacker.exe';
+// Alternative: Resource Cracker https://www.pelock.com/download/resource-cracker.exe
 %         iconcmd=sprintf('"%s" -open %s.exe -save %s.exe -action addoverwrite -res %s -mask ICONGROUP,1',reshackerPath,progname,progname,iconFile);
 %         [sic,rmes] = system(iconcmd);
 %         if sic < 0
@@ -238,6 +243,7 @@ end
 %             disp(rmes)
 %         end
 %         %system(['"C:\Program Files (x86)\Resource Hacker\ResHacker.exe" -addoverwrite TagVideo.exe, TagVideo.exe, ' iconFile ', ICONGROUP,1,']);
+// Alternative: Resource Cracker https://www.pelock.com/download/resource-cracker.exe
 %     end
 % end
 
